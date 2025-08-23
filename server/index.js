@@ -1,18 +1,18 @@
 const express = require("express");
 const dotenv = require("dotenv");
-const connectDB = require("./config/db");
-const { chats } = require("./data/data");
+const connectDB = require("./config/db.js");
+const { chats } = require("./data/data.js");
 const colors = require("colors");
-const chatRoutes = require("./routes/chatRoutes");
-const userRoutes = require("./routes/userRoutes");
-const messageRoutes = require("./routes/messageRoutes");
+const chatRoutes = require("./routes/chatRoutes.js");
+const userRoutes = require("./routes/userRoutes.js");
+const messageRoutes = require("./routes/messageRoutes.js");
 const cors = require("cors");
 const helmet = require("helmet");
 
 const { socket } = require("socket.io");
 
-const { notFound, errorHandler } = require("./middleware/errorMiddleware");
-const { PORT, CLIENT_ACCESS_URL } = require("./config/keys");
+const { notFound, errorHandler } = require("./middleware/errorMiddleware.js");
+const { PORT, CLIENT_ACCESS_URL } = require("./config/keys.js");
 
 dotenv.config();
 const app = express();

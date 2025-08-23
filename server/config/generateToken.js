@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const { JWT_SECRET } = require("./keys");
+const { JWT_SECRET } = require("./keys.js");
 
 const generateToken = (id, tokenValidity = "30d") => {
   // console.log(tokenValidity);

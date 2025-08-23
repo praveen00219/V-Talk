@@ -1,12 +1,12 @@
 const asyncHandler = require("express-async-handler");
-const User = require("../models/userModel");
-const generateToken = require("../config/generateToken");
+const User = require("../models/userModel.js");
+const generateToken = require("../config/generateToken.js");
 const jwt = require("jsonwebtoken");
 
-const cloudinary = require("../utils/cloudinary");
-const sendEmail = require("../utils/sendEmail");
+const cloudinary = require("../utils/cloudinary.js");
+const sendEmail = require("../utils/sendEmail.js");
 
-const { JWT_SECRET, CLIENT_ACCESS_URL } = require("../config/keys");
+const { JWT_SECRET, CLIENT_ACCESS_URL } = require("../config/keys.js");
 
 // signup new user
 const registerUser = asyncHandler(async (req, res) => {

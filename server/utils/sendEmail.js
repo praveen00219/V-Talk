@@ -5,7 +5,7 @@ const {
   SMPT_SERVICES,
   SMPT_MAIL,
   SMPT_PASSWORD,
-} = require("../config/keys");
+} = require("../config/keys.js");
 
 const sendEmail = async (options) => {
   const transporter = nodeMailer.createTransport({

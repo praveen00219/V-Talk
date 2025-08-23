@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
-const dotenv = require("dotenv");
-const { MONGO_URL } = require("./keys");
+const { MONGO_URL } = require("./keys.js");
 
+const dotenv = require("dotenv");
 dotenv.config();
 
 const connectDB = async () => {
