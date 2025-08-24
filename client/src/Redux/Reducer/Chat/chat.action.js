@@ -8,7 +8,8 @@ import {
 } from "./chat.type";
 
 const SERVER_ACCESS_BASE_URL =
-  process.env.REACT_APP_SERVER_ACCESS_BASE_URL || "http://localhost:5000";
+  process.env.REACT_APP_SERVER_ACCESS_BASE_URL ||
+  "https://v-talk-backend.onrender.com";
 
 export const loadingUserAction = (state) => {
   return {

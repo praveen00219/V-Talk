@@ -2,7 +2,8 @@ import axios from "axios";
 import { CLEAR_USER, INVITE_FRIENDS, SELF, UPDATE_PROFILE } from "./user.type";
 
 const SERVER_ACCESS_BASE_URL =
-  process.env.REACT_APP_SERVER_ACCESS_BASE_URL || "http://localhost:5000";
+  process.env.REACT_APP_SERVER_ACCESS_BASE_URL ||
+  "https://v-talk-backend.onrender.com";
 
 export const getMySelf = () => async (dispatch) => {
   try {
