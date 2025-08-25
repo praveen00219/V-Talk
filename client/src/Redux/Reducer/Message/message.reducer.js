@@ -6,6 +6,8 @@ import {
   SHOW_NETWORK_ERROR,
   SHOW_TOOGLE_LOADING,
   UPDATE_GET_ALL_MESSAGE,
+  UPDATE_MESSAGE,
+  REMOVE_MESSAGE,
 } from "./message.type";
 const initialState = {
   allMessages: [],
@@ -36,6 +38,26 @@ const messageReducer = (state = initialState, action) => {
         allMessages: [...state.allMessages, action.payload],
 
       };
+
+    case UPDATE_MESSAGE: {
+      const updated = action.payload;
+      const exists = state.allMessages.find((m) => m._id === updated._id);
+      const newList = exists
+        ? state.allMessages.map((m) => (m._id === updated._id ? updated : m))
+        : [...state.allMessages, updated];
+      return {
+        ...state,
+        allMessages: newList,
+      };
+    }
+
+    case REMOVE_MESSAGE: {
+      const id = action.payload;
+      return {
+        ...state,
+        allMessages: state.allMessages.filter((m) => m._id !== id),
+      };
+    }
 
     case CLEAR_ALL_MESSAGE:
       return {

@@ -5,6 +5,8 @@ import {
   UPDATE_GET_ALL_MESSAGE,
   SHOW_TOOGLE_LOADING,
   SHOW_NETWORK_ERROR,
+  UPDATE_MESSAGE,
+  REMOVE_MESSAGE,
 } from "./message.type";
 
 const SERVER_ACCESS_BASE_URL =
@@ -88,4 +90,66 @@ export const showNetworkError = (state) => {
     type: SHOW_NETWORK_ERROR,
     payload: state,
   };
+};
+
+// NEW: update a single message in store (from socket or API)
+export const setUpdatedMessage = (message) => async (dispatch) => {
+  try {
+    return dispatch({ type: UPDATE_MESSAGE, payload: message });
+  } catch (error) {
+    return dispatch({ type: "ERROR", payload: error });
+  }
+};
+
+// NEW: remove a message from local store
+export const removeMessageLocal = (messageId) => async (dispatch) => {
+  try {
+    return dispatch({ type: REMOVE_MESSAGE, payload: messageId });
+  } catch (error) {
+    return dispatch({ type: "ERROR", payload: error });
+  }
+};
+
+// NEW: toggle reaction
+export const reactToMessage = (messageId, emoji) => async (dispatch) => {
+  try {
+    const res = await axios({
+      method: "PUT",
+      url: `${SERVER_ACCESS_BASE_URL}/api/message/${messageId}/react`,
+      data: { emoji },
+    });
+    dispatch({ type: UPDATE_MESSAGE, payload: res.data });
+    return res.data;
+  } catch (error) {
+    return dispatch({ type: "ERROR", payload: error });
+  }
+};
+
+// NEW: delete for me
+export const deleteMessageForMe = (messageId) => async (dispatch) => {
+  try {
+    await axios({
+      method: "PUT",
+      url: `${SERVER_ACCESS_BASE_URL}/api/message/${messageId}/deleteForMe`,
+    });
+    // remove locally
+    dispatch({ type: REMOVE_MESSAGE, payload: messageId });
+    return messageId;
+  } catch (error) {
+    return dispatch({ type: "ERROR", payload: error });
+  }
+};
+
+// NEW: delete for everyone (sender)
+export const deleteMessageForEveryone = (messageId) => async (dispatch) => {
+  try {
+    const res = await axios({
+      method: "DELETE",
+      url: `${SERVER_ACCESS_BASE_URL}/api/message/${messageId}`,
+    });
+    dispatch({ type: UPDATE_MESSAGE, payload: res.data });
+    return res.data;
+  } catch (error) {
+    return dispatch({ type: "ERROR", payload: error });
+  }
 };

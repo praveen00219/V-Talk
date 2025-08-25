@@ -105,4 +105,14 @@ io.on("connection", (socket) => {
       socket.in(user._id).emit("message recieved", newMessageRecieved);
     });
   });
+
+  // forward updates like reactions and deletions
+  socket.on("message updated", (updatedMessage) => {
+    const chat = updatedMessage.chat;
+    if (!chat) return;
+    chat.users.forEach((user) => {
+      if (user._id == updatedMessage.sender._id) return;
+      socket.in(user._id).emit("message updated", updatedMessage);
+    });
+  });
 });
