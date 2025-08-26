@@ -15,13 +15,16 @@ const Toggler = (props) => {
   const togglerTheme = () => {
     dispatch({ type: TOGGLE_DARKTHEME });
     setToggle(!darkThemeEnabled);
+    if (props && typeof props.setMenuIcon === "function") {
+      props.setMenuIcon(false);
+    }
   };
   return (
-    <Wrapper onClick={togglerTheme}>
+    <Wrapper onClick={togglerTheme} className={props?.className}>
       {toggle === false ? (
-        <RiMoonLine onClick={() => props.setMenuIcon(false)} className="icon" />
+        <RiMoonLine className="icon" />
       ) : (
-        <RiSunLine onClick={() => props.setMenuIcon(false)} className="icon" />
+        <RiSunLine className="icon" />
       )}
     </Wrapper>
   );

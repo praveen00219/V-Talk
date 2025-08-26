@@ -21,13 +21,13 @@ const registerUser = asyncHandler(async (req, res) => {
   const contactExists = await User.findOne({ contact });
   if (userExists) {
     return res.status(400).json({
-      message: "Your E-Mail Id is already Registered with E-Talk",
+      message: "Your E-Mail Id is already Registered with V-Talk",
       success: false,
     });
   }
   if (contactExists) {
     return res.status(400).json({
-      message: "Your Mobile is already Registered with E-Talk",
+      message: "Your Mobile is already Registered with V-Talk",
       success: false,
     });
   }
@@ -52,7 +52,7 @@ const registerUser = asyncHandler(async (req, res) => {
       message_Content:
         "<p> Hi " +
         user.name +
-        ",<br /> Please verify your E-Talk Account by clicking on the verification link. This Verification link is valid for 2:00 minutes <br /> <a href =" +
+        ",<br /> Please verify your V-Talk Account by clicking on the verification link. This Verification link is valid for 2:00 minutes <br /> <a href =" +
         url +
         " >Verify</a></p> ",
     };
@@ -96,7 +96,7 @@ const resendVerificationLink = asyncHandler(async (req, res) => {
       message_Content:
         "<p> Hi " +
         user.name +
-        ",<br /> Please verify your E-Talk Account by clicking on the verification link. This Verification link is valid for 2:00 minutes <br /> <a href =" +
+        ",<br /> Please verify your V-Talk Account by clicking on the verification link. This Verification link is valid for 2:00 minutes <br /> <a href =" +
         url +
         " >Verify</a></p> ",
     };
@@ -182,7 +182,7 @@ const authUser = asyncHandler(async (req, res) => {
       message_Content:
         "<p> Hi " +
         user.name +
-        ",<br /> Please verify your E-Talk Account by clicking on the verification link. This Verification link is valid for 2:00 minutes <br /> <a href =" +
+        ",<br /> Please verify your V-Talk Account by clicking on the verification link. This Verification link is valid for 2:00 minutes <br /> <a href =" +
         url +
         " >Verify</a></p> ",
     };
@@ -350,14 +350,14 @@ const invitingUser = asyncHandler(async (req, res) => {
     const options = {
       // name: InvitedUser.name,
       email: email,
-      subject: "E-Talk Invitation",
+      subject: "V-Talk Invitation",
       // verification_Link: url,
       message_Content:
         "<p> Hi " +
         email +
         ",<br /> Your Friend " +
         senderUser.name +
-        " is available on the E-Talk. " +
+        " is available on the V-Talk. " +
         senderUser.name +
         " is Waitng for you. Please Register yourself and start chatting with " +
         senderUser.name +

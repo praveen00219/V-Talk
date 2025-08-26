@@ -16,7 +16,7 @@ const Login = () => {
         <div className="h-full py-6">
           <div className="px-8 flex flex-col justify-center items-center">
             <div className="logo" style={{ width: "auto" }}>
-              <img src="/images/logo.png" alt="E-Talk logo" />
+              <img src="/images/logo.png" alt="V-Talk logo" />
             </div>
             <LoginForm />
             <div className="mt-4 text-center">

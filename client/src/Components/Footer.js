@@ -62,7 +62,7 @@ const Footer = () => {
           <div className="footer-bottom text-center">
             <p>
               © {new Date().getFullYear()}. All rights reserved | Made with 💙
-              by E-Talk
+              by V-Talk
             </p>
           </div>
         </div>

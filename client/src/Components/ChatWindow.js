@@ -322,7 +322,7 @@ const ChatWindow = () => {
                   <div className="avatar mx-auto mb-4">
                     <div className=" rounded-full">
                       <img
-                        src="./images/logo2.png"
+                        src="./images/logo.png"
                         alt="logo"
                         className="w-10"
                       />

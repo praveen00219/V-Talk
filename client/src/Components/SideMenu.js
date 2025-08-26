@@ -77,7 +77,7 @@ const SideMenu = () => {
           <div className="sideMenu-brand-logo mb-5">
             <NavLink to="/" className="logo">
               <span>
-                <img src="images/logo2.png" alt="logo" />
+                <img src="images/logo.png" alt="logo" />
               </span>
             </NavLink>
           </div>
@@ -99,7 +99,7 @@ const SideMenu = () => {
           <div className="sideMenu-brand-box mb-5">
             <NavLink to="/" className="logo">
               <span>
-                <img src="images/logo2.png" alt="logo" />
+                <img src="images/logo.png" alt="logo" />
               </span>
             </NavLink>
           </div>
