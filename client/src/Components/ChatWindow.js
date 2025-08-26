@@ -52,20 +52,51 @@ const ChatWindow = () => {
       const key = r.emoji;
       map.set(key, (map.get(key) || 0) + 1);
     });
-    return Array.from(map.entries()).map(([emoji, count]) => ({ emoji, count }));
+    return Array.from(map.entries()).map(([emoji, count]) => ({
+      emoji,
+      count,
+    }));
+  };
+
+  // Map a reaction's user id to a display name from the selected chat users
+  const getUserNameById = (id) => {
+    const uid = typeof id === "string" ? id : id?._id;
+    const users = senderUser?.users || [];
+    const found = users.find((u) => u._id === uid);
+    return found?.name || "Unknown";
+  };
+
+  // Group reactions by emoji and collect the list of user display names who reacted with that emoji
+  const groupReactionUsers = (reactions = []) => {
+    const map = new Map();
+    reactions.forEach((r) => {
+      const emoji = r.emoji;
+      const name = getUserNameById(r.user);
+      if (!map.has(emoji)) map.set(emoji, []);
+      map.get(emoji).push(name);
+    });
+    return Array.from(map.entries()).map(([emoji, users]) => ({
+      emoji,
+      users,
+    }));
+  };
+
+  // check if the logged-in user has reacted to this message with a given emoji
+  const hasMyReaction = (reactions = [], emoji) => {
+    const myId = loggedUser?._id;
+    return reactions?.some((r) => {
+      const uid = typeof r.user === "string" ? r.user : r.user?._id;
+      return uid === myId && r.emoji === emoji;
+    });
   };
 
   const onReact = (messageId, emoji) => {
     return dispatch(reactToMessage(messageId, emoji));
   };
 
-  const onDeleteForMe = (messageId) => {
-    return dispatch(deleteMessageForMe(messageId));
-  };
-
-  const onDeleteForEveryone = (messageId) => {
-    return dispatch(deleteMessageForEveryone(messageId));
-  };
+  const onDeleteForMe = (messageId) => dispatch(deleteMessageForMe(messageId));
+  const onDeleteForEveryone = (messageId) =>
+    dispatch(deleteMessageForEveryone(messageId));
   // all the message for a particular chat
   const [message, setMessage] = useState([]);
   // message data require for sending data
@@ -323,7 +354,7 @@ const ChatWindow = () => {
                         className="flex items-center cursor-pointer"
                         onClick={openModal}
                       >
-                        <div className="chat-avatar mr-4">
+                        <div className="chat-avatar mr-2 ml-0">
                           <img
                             // src="https://themes.pixelstrap.com/chitchat/assets/images/avtar/2.jpg"
                             src={
@@ -390,7 +421,7 @@ const ChatWindow = () => {
                             <>
                               <li key={index} className="chat-list right">
                                 <div className="conversation-list">
-                                  <div className="chat-avatar mr-4">
+                                  <div className="chat-avatar mr-2">
                                     <img
                                       src={item.sender.pic}
                                       alt=""
@@ -402,23 +433,98 @@ const ChatWindow = () => {
                                       <div className="chat-wrap-content pb-5">
                                         <span className="mb-0 chat-content text-sm font-medium text-left">
                                           {item.isDeletedForEveryone ? (
-                                            <em className="opacity-80">You deleted this message</em>
+                                            <em className="opacity-80">
+                                              You deleted this message
+                                            </em>
                                           ) : (
                                             item.content
                                           )}
                                         </span>
-                                        {item.reactions && item.reactions.length > 0 && (
-                                          <div className="absolute -bottom-3 right-3 flex gap-1">
-                                            {groupReactions(item.reactions).map((r) => (
-                                              <span
-                                                key={r.emoji}
-                                                className="px-2 py-0.5 rounded-full text-xs bg-white text-slate-700 border border-slate-200 shadow-sm"
+                                        {item.reactions &&
+                                          item.reactions.length > 0 && (
+                                            <Menu as="div" className="relative">
+                                              <Menu.Button className="absolute -bottom-6 right-3 flex gap-1">
+                                                {groupReactions(
+                                                  item.reactions
+                                                ).map((r) => (
+                                                  <span
+                                                    key={r.emoji}
+                                                    className="px-2 py-0.5 rounded-full text-xs bg-white text-slate-700 border border-slate-200 shadow-sm"
+                                                  >
+                                                    {r.emoji}{" "}
+                                                    {r.count > 1 ? r.count : ""}
+                                                  </span>
+                                                ))}
+                                              </Menu.Button>
+                                              <Transition
+                                                as={Fragment}
+                                                enter="transition ease-out duration-100"
+                                                enterFrom="transform opacity-0 scale-95"
+                                                enterTo="transform opacity-100 scale-100"
+                                                leave="transition ease-in duration-75"
+                                                leaveFrom="transform opacity-100 scale-100"
+                                                leaveTo="transform opacity-0 scale-95"
                                               >
-                                                {r.emoji} {r.count > 1 ? r.count : ""}
-                                              </span>
-                                            ))}
-                                          </div>
-                                        )}
+                                                <Menu.Items className="absolute z-50 bottom-8 right-0 w-64 origin-bottom-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none p-3">
+                                                  {groupReactionUsers(
+                                                    item.reactions
+                                                  ).map((grp) => (
+                                                    <div
+                                                      key={grp.emoji}
+                                                      className="mb-2"
+                                                    >
+                                                      <div className="flex items-center gap-2 mb-1">
+                                                        <Menu.Item>
+                                                          {({ active }) => (
+                                                            <button
+                                                              type="button"
+                                                              onClick={() =>
+                                                                hasMyReaction(item.reactions, grp.emoji) &&
+                                                                onReact(item._id, grp.emoji)
+                                                              }
+                                                              title={
+                                                                hasMyReaction(item.reactions, grp.emoji)
+                                                                  ? "Remove my reaction"
+                                                                  : "Only your own reaction can be removed"
+                                                              }
+                                                              className={`px-2 py-0.5 rounded-full text-xs border border-slate-200 ${
+                                                                hasMyReaction(item.reactions, grp.emoji)
+                                                                  ? `${active ? "bg-red-100" : "bg-red-50"} cursor-pointer`
+                                                                  : `${active ? "bg-slate-200" : "bg-slate-100"} cursor-not-allowed opacity-60`
+                                                              }`}
+                                                            >
+                                                              {grp.emoji}{" "}
+                                                              {grp.users.length > 1 ? grp.users.length : ""}
+                                                            </button>
+                                                          )}
+                                                        </Menu.Item>
+                                                      </div>
+                                                      <ul className="pl-4 list-disc text-sm text-slate-700">
+                                                        {grp.users.map(
+                                                          (name, i) => (
+                                                            <li key={i}>
+                                                              {name}
+                                                            </li>
+                                                          )
+                                                        )}
+                                                      </ul>
+                                                    </div>
+                                                  ))}
+                                                </Menu.Items>
+                                              </Transition>
+                                            </Menu>
+                                          )}
+                                        <div className="conversation-name ">
+                                          <small className=" mb-0 text-gray-500">
+                                            {moment(item.createdAt)
+                                              .format("DD/MMM/YYYY , h:mm a")
+                                              .toUpperCase()}
+                                          </small>
+
+                                          {/* <span className="ml-2 text-xs user-name">
+                                            you
+                                          </span> */}
+                                        </div>
                                       </div>
                                       {/* per-message menu */}
                                       <Menu
@@ -440,7 +546,13 @@ const ChatWindow = () => {
                                           <Menu.Items className="absolute z-50 right-0 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none p-2">
                                             <div className="flex gap-2 px-2 py-1 border-b">
                                               {quickEmojis.map((emo) => (
-                                                <button key={emo} onClick={() => onReact(item._id, emo)} className="text-xl">
+                                                <button
+                                                  key={emo}
+                                                  onClick={() =>
+                                                    onReact(item._id, emo)
+                                                  }
+                                                  className="text-xl"
+                                                >
                                                   {emo}
                                                 </button>
                                               ))}
@@ -449,32 +561,47 @@ const ChatWindow = () => {
                                               <Menu.Item>
                                                 {({ active }) => (
                                                   <button
-                                                    onClick={() => onDeleteForMe(item._id)}
-                                                    className={`${active ? "bg-gray-100" : ""} block w-full text-left px-4 py-2 text-sm`}
+                                                    onClick={() =>
+                                                      onDeleteForMe(item._id)
+                                                    }
+                                                    className={`${
+                                                      active
+                                                        ? "bg-gray-100"
+                                                        : ""
+                                                    } block w-full text-left px-4 py-2 text-sm`}
                                                   >
                                                     Delete for me
                                                   </button>
                                                 )}
                                               </Menu.Item>
-                                              {isMyMessage(loggedUser, item) && !item.isDeletedForEveryone && (
-                                                <Menu.Item>
-                                                  {({ active }) => (
-                                                    <button
-                                                      onClick={() => onDeleteForEveryone(item._id)}
-                                                      className={`${active ? "bg-gray-100" : ""} block w-full text-left px-4 py-2 text-sm text-red-600`}
-                                                    >
-                                                      Delete for everyone
-                                                    </button>
-                                                  )}
-                                                </Menu.Item>
-                                              )}
+                                              {isMyMessage(loggedUser, item) &&
+                                                !item.isDeletedForEveryone && (
+                                                  <Menu.Item>
+                                                    {({ active }) => (
+                                                      <button
+                                                        onClick={() =>
+                                                          onDeleteForEveryone(
+                                                            item._id
+                                                          )
+                                                        }
+                                                        className={`${
+                                                          active
+                                                            ? "bg-gray-100"
+                                                            : ""
+                                                        } block w-full text-left px-4 py-2 text-sm text-red-600`}
+                                                      >
+                                                        Delete for everyone
+                                                      </button>
+                                                    )}
+                                                  </Menu.Item>
+                                                )}
                                             </div>
                                           </Menu.Items>
                                         </Transition>
                                       </Menu>
                                     </div>
                                     {/* reactions summary */}
-                                    {item.reactions &&
+                                    {/* {item.reactions &&
                                       item.reactions.length > 0 && (
                                         <div className="flex justify-end mt-1 gap-1">
                                           {groupReactions(item.reactions).map(
@@ -489,16 +616,7 @@ const ChatWindow = () => {
                                             )
                                           )}
                                         </div>
-                                      )}
-                                    <div className="conversation-name ">
-                                      <small className=" mb-0">
-                                        {moment(item.createdAt).format("DD/MMM/YYYY , h:mm a").toUpperCase()}
-                                      </small>
-                                      
-                                      <span className="ml-2 text-xs user-name">
-                                        you
-                                      </span>
-                                    </div>
+                                      )} */}
                                   </div>
                                 </div>
                               </li>
@@ -507,7 +625,7 @@ const ChatWindow = () => {
                             <>
                               <li key={index} className="chat-list">
                                 <div className="conversation-list">
-                                  <div className="chat-avatar mr-4">
+                                  <div className="chat-avatar mr-2">
                                     <img
                                       src={item.sender.pic}
                                       alt=""
@@ -536,7 +654,13 @@ const ChatWindow = () => {
                                           <Menu.Items className="absolute z-50 left-0 mt-2 w-56 origin-top-left rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none p-2">
                                             <div className="flex gap-2 px-2 py-1 border-b">
                                               {quickEmojis.map((emo) => (
-                                                <button key={emo} onClick={() => onReact(item._id, emo)} className="text-xl">
+                                                <button
+                                                  key={emo}
+                                                  onClick={() =>
+                                                    onReact(item._id, emo)
+                                                  }
+                                                  className="text-xl"
+                                                >
                                                   {emo}
                                                 </button>
                                               ))}
@@ -545,8 +669,14 @@ const ChatWindow = () => {
                                               <Menu.Item>
                                                 {({ active }) => (
                                                   <button
-                                                    onClick={() => onDeleteForMe(item._id)}
-                                                    className={`${active ? "bg-gray-100" : ""} block w-full text-left px-4 py-2 text-sm`}
+                                                    onClick={() =>
+                                                      onDeleteForMe(item._id)
+                                                    }
+                                                    className={`${
+                                                      active
+                                                        ? "bg-gray-100"
+                                                        : ""
+                                                    } block w-full text-left px-4 py-2 text-sm`}
                                                   >
                                                     Delete for me
                                                   </button>
@@ -556,26 +686,100 @@ const ChatWindow = () => {
                                           </Menu.Items>
                                         </Transition>
                                       </Menu>
-                                      <div className="chat-wrap-content pb-5">
+                                      <div className="chat-wrap-content-left pb-5">
                                         <span className="mb-0  text-sm font-medium text-left">
                                           {item.isDeletedForEveryone ? (
-                                            <em className="opacity-80">This message was deleted</em>
+                                            <em className="opacity-80">
+                                              This message was deleted
+                                            </em>
                                           ) : (
                                             item.content
                                           )}
                                         </span>
-                                        {item.reactions && item.reactions.length > 0 && (
-                                          <div className="absolute -bottom-3 left-3 flex gap-1">
-                                            {groupReactions(item.reactions).map((r) => (
-                                              <span
-                                                key={r.emoji}
-                                                className="px-2 py-0.5 rounded-full text-xs bg-white text-slate-700 border border-slate-200 shadow-sm"
+                                        {item.reactions &&
+                                          item.reactions.length > 0 && (
+                                            <Menu as="div" className="relative">
+                                              <Menu.Button className="absolute -bottom-6 left-3 flex gap-1">
+                                                {groupReactions(
+                                                  item.reactions
+                                                ).map((r) => (
+                                                  <span
+                                                    key={r.emoji}
+                                                    className="px-2 py-0.5 rounded-full text-xs bg-white text-slate-700 border border-slate-200 shadow-sm"
+                                                  >
+                                                    {r.emoji}{" "}
+                                                    {r.count > 1 ? r.count : ""}
+                                                  </span>
+                                                ))}
+                                              </Menu.Button>
+                                              <Transition
+                                                as={Fragment}
+                                                enter="transition ease-out duration-100"
+                                                enterFrom="transform opacity-0 scale-95"
+                                                enterTo="transform opacity-100 scale-100"
+                                                leave="transition ease-in duration-75"
+                                                leaveFrom="transform opacity-100 scale-100"
+                                                leaveTo="transform opacity-0 scale-95"
                                               >
-                                                {r.emoji} {r.count > 1 ? r.count : ""}
-                                              </span>
-                                            ))}
-                                          </div>
-                                        )}
+                                                <Menu.Items className="absolute z-50 bottom-8 left-0 w-64 origin-bottom-left rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none p-3">
+                                                  {groupReactionUsers(
+                                                    item.reactions
+                                                  ).map((grp) => (
+                                                    <div
+                                                      key={grp.emoji}
+                                                      className="mb-2"
+                                                    >
+                                                      <div className="flex items-center gap-2 mb-1">
+                                                        <Menu.Item>
+                                                          {({ active }) => (
+                                                            <button
+                                                              type="button"
+                                                              onClick={() =>
+                                                                hasMyReaction(item.reactions, grp.emoji) &&
+                                                                onReact(item._id, grp.emoji)
+                                                              }
+                                                              title={
+                                                                hasMyReaction(item.reactions, grp.emoji)
+                                                                  ? "Remove my reaction"
+                                                                  : "Only your own reaction can be removed"
+                                                              }
+                                                              className={`px-2 py-0.5 rounded-full text-xs border border-slate-200 ${
+                                                                hasMyReaction(item.reactions, grp.emoji)
+                                                                  ? `${active ? "bg-red-100" : "bg-red-50"} cursor-pointer`
+                                                                  : `${active ? "bg-slate-200" : "bg-slate-100"} cursor-not-allowed opacity-60`
+                                                              }`}
+                                                            >
+                                                              {grp.emoji}{" "}
+                                                              {grp.users.length > 1 ? grp.users.length : ""}
+                                                            </button>
+                                                          )}
+                                                        </Menu.Item>
+                                                      </div>
+                                                      <ul className="pl-4 list-disc text-sm text-slate-700">
+                                                        {grp.users.map(
+                                                          (name, i) => (
+                                                            <li key={i}>
+                                                              {name}
+                                                            </li>
+                                                          )
+                                                        )}
+                                                      </ul>
+                                                    </div>
+                                                  ))}
+                                                </Menu.Items>
+                                              </Transition>
+                                            </Menu>
+                                          )}
+
+                                        <div className="conversation-name ">
+                                          <small className=" mb-0 text-gray-400">
+                                            {moment(item.createdAt)
+                                              .format("DD/MMM/YYYY , h:mm a")
+                                              .toUpperCase()}
+                                          </small>
+
+                                          <span className="ml-2 text-xs user-name"></span>
+                                        </div>
                                       </div>
                                     </div>
                                   </div>
@@ -667,7 +871,7 @@ const ChatWindow = () => {
                         ref={inputRef}
                       />
                     </div>
-                    {/* submit button */}
+
                     <div
                       className="chat-input-links ml-2"
                       onClick={handleClick}
@@ -870,8 +1074,8 @@ const Wrapper = styled.section`
               position: relative;
               overflow: hidden;
               border-radius: 100%;
-              width: 3rem;
-              height: 3rem;
+              width: 2.2rem;
+              height: 2.2rem;
             }
             .chat-wrap-content {
               padding: 12px 20px;
@@ -881,8 +1085,16 @@ const Wrapper = styled.section`
               box-shadow: 0 2px 4px rgb(15 34 58 / 12%);
               color: ${({ theme }) => theme.colors.heading};
             }
+            .chat-wrap-content-left {
+              padding: 12px 20px;
+              background-color: ${({ theme }) => theme.colors.bg.primary};
+              position: relative;
+              border-radius: 0 30px 25px 30px;
+              box-shadow: 0 2px 4px rgb(15 34 58 / 12%);
+              color: ${({ theme }) => theme.colors.heading};
+            }
             .conversation-name {
-              font-size: 14px;
+              font-size: 12px;
               font-weight: 500;
               color: ${({ theme }) => theme.colors.text.secondary};
             }
@@ -895,7 +1107,6 @@ const Wrapper = styled.section`
             flex-direction: row-reverse;
             .chat-avatar {
               margin-right: 0;
-              margin-left: 16px;
             }
             .chat-wrap-content {
               color: ${({ theme }) => theme.colors.white};
