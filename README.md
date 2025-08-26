@@ -10,16 +10,16 @@ V-Talk is a modern chat Application that is build using the MERN Stack stands fo
 
 ## Features
 
-- Secure authentication with JWT: Sign up/sign in, email verification, and forgot/reset password flows
-- Real-time messaging with Socket.IO supporting one-to-one and group chats
-- Group chat management: Create groups (minimum 3 users), rename groups, add/remove members, and group admin controls
-- Message interactions: Emoji reactions, delete for me, and delete for everyone (sender-only)
-- Typing indicators and live message updates across participants
-- User discovery: Search users by name or email and start chats instantly
-- Profile management: Update avatar (Cloudinary) and profile details; view others' profiles
-- Theming and personalization: Global dark/light mode and per-chat chat themes
-- Email invitations: Invite friends via email to join the platform
-- Fully responsive UI for mobile, tablet, and desktop
+- **Secure authentication with JWT**: Sign up/sign in, email verification, and forgot/reset password flows
+- Real-time messaging with **Socket.IO supporting** one-to-one and group chats
+- **Group chat management**: Create groups (minimum 3 users), rename groups, add/remove members, and group admin controls
+- **Message interactions**: Emoji reactions, delete for me, and delete for everyone (sender-only)
+- **Typing indicators and live message updates** across participants
+- **User discovery**: Search users by name or email and start chats instantly
+- **Profile management**: Update avatar (Cloudinary) and profile details; view others' profiles
+- **Theming and personalization**: Global dark/light mode and per-chat chat themes
+- **Email invitations**: Invite friends via email to join the platform
+- **Fully responsive UI** for mobile, tablet, and desktop
 
 ## Tech Stack
 
