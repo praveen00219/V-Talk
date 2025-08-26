@@ -28,7 +28,7 @@ app.use(express.json()); //to accept json data
 app.use(express.json());
 app.get("/", (req, res) => {
   res.json({
-    message: "Welcome to E-Talk Server",
+    message: "Welcome to V-Talk Server",
   });
 });
 app.get("/api/chat", (req, res) => {

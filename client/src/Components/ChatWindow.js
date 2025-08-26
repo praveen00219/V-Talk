@@ -328,7 +328,7 @@ const ChatWindow = () => {
                       />
                     </div>
                   </div>
-                  <h4>Welcome to E-Talk Chat App</h4>
+                  <h4>Welcome to V-Talk Chat App</h4>
                   <p>Click on user to start chat.</p>
                   {/* <Button>Get Started</Button> */}
                 </div>
@@ -430,7 +430,7 @@ const ChatWindow = () => {
                                   </div>
                                   <div className="user-chat-content">
                                     <div className="flex mb-1 justify-end items-start gap-2">
-                                      <div className="chat-wrap-content pb-5">
+                                      <div className="chat-wrap-content relative pb-5">
                                         <span className="mb-0 chat-content text-sm font-medium text-left">
                                           {item.isDeletedForEveryone ? (
                                             <em className="opacity-80">
@@ -442,8 +442,8 @@ const ChatWindow = () => {
                                         </span>
                                         {item.reactions &&
                                           item.reactions.length > 0 && (
-                                            <Menu as="div" className="relative">
-                                              <Menu.Button className="absolute -bottom-6 right-3 flex gap-1">
+                                            <Menu as="div" className="">
+                                              <Menu.Button className="absolute -bottom-7 right-3 flex gap-1">
                                                 {groupReactions(
                                                   item.reactions
                                                 ).map((r) => (
@@ -465,36 +465,60 @@ const ChatWindow = () => {
                                                 leaveFrom="transform opacity-100 scale-100"
                                                 leaveTo="transform opacity-0 scale-95"
                                               >
-                                                <Menu.Items className="absolute z-50 bottom-8 right-0 w-64 origin-bottom-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none p-3">
+                                                <Menu.Items className="absolute z-50 bottom-8 right-0 w-64 origin-bottom-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none p-2">
                                                   {groupReactionUsers(
                                                     item.reactions
                                                   ).map((grp) => (
                                                     <div
                                                       key={grp.emoji}
-                                                      className="mb-2"
+                                                      className="mb-1 flex gap-1"
                                                     >
-                                                      <div className="flex items-center gap-2 mb-1">
+                                                      <div className="flex items-center gap-1 mb-1">
                                                         <Menu.Item>
                                                           {({ active }) => (
                                                             <button
                                                               type="button"
                                                               onClick={() =>
-                                                                hasMyReaction(item.reactions, grp.emoji) &&
-                                                                onReact(item._id, grp.emoji)
+                                                                hasMyReaction(
+                                                                  item.reactions,
+                                                                  grp.emoji
+                                                                ) &&
+                                                                onReact(
+                                                                  item._id,
+                                                                  grp.emoji
+                                                                )
                                                               }
                                                               title={
-                                                                hasMyReaction(item.reactions, grp.emoji)
+                                                                hasMyReaction(
+                                                                  item.reactions,
+                                                                  grp.emoji
+                                                                )
                                                                   ? "Remove my reaction"
                                                                   : "Only your own reaction can be removed"
                                                               }
                                                               className={`px-2 py-0.5 rounded-full text-xs border border-slate-200 ${
-                                                                hasMyReaction(item.reactions, grp.emoji)
-                                                                  ? `${active ? "bg-red-100" : "bg-red-50"} cursor-pointer`
-                                                                  : `${active ? "bg-slate-200" : "bg-slate-100"} cursor-not-allowed opacity-60`
+                                                                hasMyReaction(
+                                                                  item.reactions,
+                                                                  grp.emoji
+                                                                )
+                                                                  ? `${
+                                                                      active
+                                                                        ? "bg-red-100"
+                                                                        : "bg-red-50"
+                                                                    } cursor-pointer`
+                                                                  : `${
+                                                                      active
+                                                                        ? "bg-slate-200"
+                                                                        : "bg-slate-100"
+                                                                    } cursor-not-allowed opacity-60`
                                                               }`}
                                                             >
                                                               {grp.emoji}{" "}
-                                                              {grp.users.length > 1 ? grp.users.length : ""}
+                                                              {grp.users
+                                                                .length > 1
+                                                                ? grp.users
+                                                                    .length
+                                                                : ""}
                                                             </button>
                                                           )}
                                                         </Menu.Item>
@@ -503,7 +527,12 @@ const ChatWindow = () => {
                                                         {grp.users.map(
                                                           (name, i) => (
                                                             <li key={i}>
-                                                              {name}
+                                                              {hasMyReaction(
+                                                                item.reactions,
+                                                                grp.emoji
+                                                              )
+                                                                ? "You"
+                                                                : name}
                                                             </li>
                                                           )
                                                         )}
@@ -686,7 +715,7 @@ const ChatWindow = () => {
                                           </Menu.Items>
                                         </Transition>
                                       </Menu>
-                                      <div className="chat-wrap-content-left pb-5">
+                                      <div className="chat-wrap-content-left relative pb-5">
                                         <span className="mb-0  text-sm font-medium text-left">
                                           {item.isDeletedForEveryone ? (
                                             <em className="opacity-80">
@@ -698,8 +727,8 @@ const ChatWindow = () => {
                                         </span>
                                         {item.reactions &&
                                           item.reactions.length > 0 && (
-                                            <Menu as="div" className="relative">
-                                              <Menu.Button className="absolute -bottom-6 left-3 flex gap-1">
+                                            <Menu as="div" className="">
+                                              <Menu.Button className="absolute -bottom-7 left-3 flex gap-1">
                                                 {groupReactions(
                                                   item.reactions
                                                 ).map((r) => (
@@ -735,22 +764,46 @@ const ChatWindow = () => {
                                                             <button
                                                               type="button"
                                                               onClick={() =>
-                                                                hasMyReaction(item.reactions, grp.emoji) &&
-                                                                onReact(item._id, grp.emoji)
+                                                                hasMyReaction(
+                                                                  item.reactions,
+                                                                  grp.emoji
+                                                                ) &&
+                                                                onReact(
+                                                                  item._id,
+                                                                  grp.emoji
+                                                                )
                                                               }
                                                               title={
-                                                                hasMyReaction(item.reactions, grp.emoji)
+                                                                hasMyReaction(
+                                                                  item.reactions,
+                                                                  grp.emoji
+                                                                )
                                                                   ? "Remove my reaction"
                                                                   : "Only your own reaction can be removed"
                                                               }
                                                               className={`px-2 py-0.5 rounded-full text-xs border border-slate-200 ${
-                                                                hasMyReaction(item.reactions, grp.emoji)
-                                                                  ? `${active ? "bg-red-100" : "bg-red-50"} cursor-pointer`
-                                                                  : `${active ? "bg-slate-200" : "bg-slate-100"} cursor-not-allowed opacity-60`
+                                                                hasMyReaction(
+                                                                  item.reactions,
+                                                                  grp.emoji
+                                                                )
+                                                                  ? `${
+                                                                      active
+                                                                        ? "bg-red-100"
+                                                                        : "bg-red-50"
+                                                                    } cursor-pointer`
+                                                                  : `${
+                                                                      active
+                                                                        ? "bg-slate-200"
+                                                                        : "bg-slate-100"
+                                                                    } cursor-not-allowed opacity-60`
                                                               }`}
                                                             >
                                                               {grp.emoji}{" "}
-                                                              {grp.users.length > 1 ? grp.users.length : ""}
+                                                              {grp.users
+                                                                .length > 1
+                                                                ? grp.users
+                                                                    .length
+                                                                : ""}
                                                             </button>
                                                           )}
                                                         </Menu.Item>
