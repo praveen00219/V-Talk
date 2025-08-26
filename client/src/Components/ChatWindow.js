@@ -399,16 +399,26 @@ const ChatWindow = () => {
                                   </div>
                                   <div className="user-chat-content">
                                     <div className="flex mb-1 justify-end items-start gap-2">
-                                      <div className="chat-wrap-content">
+                                      <div className="chat-wrap-content pb-5">
                                         <span className="mb-0 chat-content text-sm font-medium text-left">
                                           {item.isDeletedForEveryone ? (
-                                            <em className="opacity-80">
-                                              You deleted this message
-                                            </em>
+                                            <em className="opacity-80">You deleted this message</em>
                                           ) : (
                                             item.content
                                           )}
                                         </span>
+                                        {item.reactions && item.reactions.length > 0 && (
+                                          <div className="absolute -bottom-3 right-3 flex gap-1">
+                                            {groupReactions(item.reactions).map((r) => (
+                                              <span
+                                                key={r.emoji}
+                                                className="px-2 py-0.5 rounded-full text-xs bg-white text-slate-700 border border-slate-200 shadow-sm"
+                                              >
+                                                {r.emoji} {r.count > 1 ? r.count : ""}
+                                              </span>
+                                            ))}
+                                          </div>
+                                        )}
                                       </div>
                                       {/* per-message menu */}
                                       <Menu
@@ -430,13 +440,7 @@ const ChatWindow = () => {
                                           <Menu.Items className="absolute z-50 right-0 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none p-2">
                                             <div className="flex gap-2 px-2 py-1 border-b">
                                               {quickEmojis.map((emo) => (
-                                                <button
-                                                  key={emo}
-                                                  onClick={() =>
-                                                    onReact(item._id, emo)
-                                                  }
-                                                  className="text-xl"
-                                                >
+                                                <button key={emo} onClick={() => onReact(item._id, emo)} className="text-xl">
                                                   {emo}
                                                 </button>
                                               ))}
@@ -445,40 +449,25 @@ const ChatWindow = () => {
                                               <Menu.Item>
                                                 {({ active }) => (
                                                   <button
-                                                    onClick={() =>
-                                                      onDeleteForMe(item._id)
-                                                    }
-                                                    className={`${
-                                                      active
-                                                        ? "bg-gray-100"
-                                                        : ""
-                                                    } block w-full text-left px-4 py-2 text-sm`}
+                                                    onClick={() => onDeleteForMe(item._id)}
+                                                    className={`${active ? "bg-gray-100" : ""} block w-full text-left px-4 py-2 text-sm`}
                                                   >
                                                     Delete for me
                                                   </button>
                                                 )}
                                               </Menu.Item>
-                                              {isMyMessage(loggedUser, item) &&
-                                                !item.isDeletedForEveryone && (
-                                                  <Menu.Item>
-                                                    {({ active }) => (
-                                                      <button
-                                                        onClick={() =>
-                                                          onDeleteForEveryone(
-                                                            item._id
-                                                          )
-                                                        }
-                                                        className={`${
-                                                          active
-                                                            ? "bg-gray-100"
-                                                            : ""
-                                                        } block w-full text-left px-4 py-2 text-sm text-red-600`}
-                                                      >
-                                                        Delete for everyone
-                                                      </button>
-                                                    )}
-                                                  </Menu.Item>
-                                                )}
+                                              {isMyMessage(loggedUser, item) && !item.isDeletedForEveryone && (
+                                                <Menu.Item>
+                                                  {({ active }) => (
+                                                    <button
+                                                      onClick={() => onDeleteForEveryone(item._id)}
+                                                      className={`${active ? "bg-gray-100" : ""} block w-full text-left px-4 py-2 text-sm text-red-600`}
+                                                    >
+                                                      Delete for everyone
+                                                    </button>
+                                                  )}
+                                                </Menu.Item>
+                                              )}
                                             </div>
                                           </Menu.Items>
                                         </Transition>
@@ -503,11 +492,9 @@ const ChatWindow = () => {
                                       )}
                                     <div className="conversation-name ">
                                       <small className=" mb-0">
-                                        {moment(item.createdAt)
-                                          .format("DD/MMM/YYYY , h:mm a")
-                                          .toUpperCase()}
+                                        {moment(item.createdAt).format("DD/MMM/YYYY , h:mm a").toUpperCase()}
                                       </small>
-
+                                      
                                       <span className="ml-2 text-xs user-name">
                                         you
                                       </span>
@@ -549,13 +536,7 @@ const ChatWindow = () => {
                                           <Menu.Items className="absolute z-50 left-0 mt-2 w-56 origin-top-left rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none p-2">
                                             <div className="flex gap-2 px-2 py-1 border-b">
                                               {quickEmojis.map((emo) => (
-                                                <button
-                                                  key={emo}
-                                                  onClick={() =>
-                                                    onReact(item._id, emo)
-                                                  }
-                                                  className="text-xl"
-                                                >
+                                                <button key={emo} onClick={() => onReact(item._id, emo)} className="text-xl">
                                                   {emo}
                                                 </button>
                                               ))}
@@ -564,14 +545,8 @@ const ChatWindow = () => {
                                               <Menu.Item>
                                                 {({ active }) => (
                                                   <button
-                                                    onClick={() =>
-                                                      onDeleteForMe(item._id)
-                                                    }
-                                                    className={`${
-                                                      active
-                                                        ? "bg-gray-100"
-                                                        : ""
-                                                    } block w-full text-left px-4 py-2 text-sm`}
+                                                    onClick={() => onDeleteForMe(item._id)}
+                                                    className={`${active ? "bg-gray-100" : ""} block w-full text-left px-4 py-2 text-sm`}
                                                   >
                                                     Delete for me
                                                   </button>
@@ -581,44 +556,27 @@ const ChatWindow = () => {
                                           </Menu.Items>
                                         </Transition>
                                       </Menu>
-                                      <div className="chat-wrap-content">
+                                      <div className="chat-wrap-content pb-5">
                                         <span className="mb-0  text-sm font-medium text-left">
                                           {item.isDeletedForEveryone ? (
-                                            <em className="opacity-80">
-                                              This message was deleted
-                                            </em>
+                                            <em className="opacity-80">This message was deleted</em>
                                           ) : (
                                             item.content
                                           )}
                                         </span>
-                                      </div>
-                                    </div>
-                                    {/* reactions summary */}
-                                    {item.reactions &&
-                                      item.reactions.length > 0 && (
-                                        <div className="flex justify-start mt-1 gap-1">
-                                          {groupReactions(item.reactions).map(
-                                            (r) => (
+                                        {item.reactions && item.reactions.length > 0 && (
+                                          <div className="absolute -bottom-3 left-3 flex gap-1">
+                                            {groupReactions(item.reactions).map((r) => (
                                               <span
                                                 key={r.emoji}
-                                                className="px-2 py-0.5 rounded-full text-xs bg-slate-200 text-slate-700 border border-slate-300"
+                                                className="px-2 py-0.5 rounded-full text-xs bg-white text-slate-700 border border-slate-200 shadow-sm"
                                               >
-                                                {r.emoji}{" "}
-                                                {r.count > 1 ? r.count : ""}
+                                                {r.emoji} {r.count > 1 ? r.count : ""}
                                               </span>
-                                            )
-                                          )}
-                                        </div>
-                                      )}
-                                    <div className="conversation-name">
-                                      <span className="ml-2 text-xs user-name">
-                                        {item.sender.name}
-                                      </span>
-                                      <small className="ml-2 mb-0">
-                                        {moment(item.createdAt)
-                                          .format("DD/MMM/YYYY , h:mm a")
-                                          .toUpperCase()}
-                                      </small>
+                                            ))}
+                                          </div>
+                                        )}
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
