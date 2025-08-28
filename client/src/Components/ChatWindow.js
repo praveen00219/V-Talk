@@ -1416,49 +1416,48 @@ const Wrapper = styled.section`
             }
           }
         }
-
-        .chat-input-section {
-          position: fixed;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background-color: ${({ theme }) => theme.colors.bg.primary};
-          border-top: 1px solid rgba(${({ theme }) => theme.colors.border}, 0.3);
-          box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-          z-index: 10;
-          input {
-            color: ${({ theme }) => theme.colors.heading};
-            background-color: ${({ theme }) => theme.colors.bg.secondary};
-            &:focus {
-              background-color: ${({ theme }) => theme.colors.bg.secondary};
-            }
+      }
+    }
+    .chat-input-section {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: ${({ theme }) => theme.colors.bg.primary};
+      border-top: 1px solid rgba(${({ theme }) => theme.colors.border}, 0.3);
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      z-index: 10;
+      input {
+        color: ${({ theme }) => theme.colors.heading};
+        background-color: ${({ theme }) => theme.colors.bg.secondary};
+        &:focus {
+          background-color: ${({ theme }) => theme.colors.bg.secondary};
+        }
+      }
+      .dot-btn,
+      .emoji-btn {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 3rem;
+        height: 3rem;
+        &:hover {
+          color: ${({ theme }) => theme.colors.primaryRgb};
+          background-color: ${({ theme }) => theme.colors.bg.secondary};
+        }
+        border-radius: 100%;
+      }
+      .links-list-items {
+        .btn {
+          color: #fff;
+          background-color: ${({ theme }) => theme.colors.primaryRgb};
+          &:hover {
+            background-color: rgb(
+              ${({ theme }) => theme.colors.rgb.primary},
+              0.8
+            );
           }
-          .dot-btn,
-          .emoji-btn {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 3rem;
-            height: 3rem;
-            &:hover {
-              color: ${({ theme }) => theme.colors.primaryRgb};
-              background-color: ${({ theme }) => theme.colors.bg.secondary};
-            }
-            border-radius: 100%;
-          }
-          .links-list-items {
-            .btn {
-              color: #fff;
-              background-color: ${({ theme }) => theme.colors.primaryRgb};
-              &:hover {
-                background-color: rgb(
-                  ${({ theme }) => theme.colors.rgb.primary},
-                  0.8
-                );
-              }
-              border-color: ${({ theme }) => theme.colors.primaryRgb};
-            }
-          }
+          border-color: ${({ theme }) => theme.colors.primaryRgb};
         }
       }
     }
