@@ -7,9 +7,7 @@ import {
   SHOW_USER_LOADING,
 } from "./chat.type";
 
-const SERVER_ACCESS_BASE_URL =
-  process.env.REACT_APP_SERVER_ACCESS_BASE_URL ||
-  "https://v-talk-backend.onrender.com";
+const SERVER_ACCESS_BASE_URL =  process.env.REACT_APP_SERVER_ACCESS_BASE_URL || "http://localhost:4000";
 
 export const loadingUserAction = (state) => {
   return {

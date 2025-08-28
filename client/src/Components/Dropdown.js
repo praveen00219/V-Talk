@@ -75,6 +75,11 @@ const Dropdown = (props) => {
             <Menu.Item>
               {({ active }) => (
                 <button
+                  style={{
+                    fontSize: "13px",
+                    fontWeight: "400",
+                    marginBottom: "0",
+                  }}
                   className={`${
                     active
                       ? "active flex items-center justify-between"
@@ -83,15 +88,28 @@ const Dropdown = (props) => {
                   onClick={props.openModal}
                 >
                   <div className="icon-btn btn-outline-primary mr-4">
-                    <CgProfile className="icon inline" />
+                    <CgProfile
+                      className="icon inline"
+                      style={{ fontSize: "14px" }}
+                    />
                   </div>{" "}
-                  <h5 className="relative w-full text-left">view contact</h5>
+                  <h6
+                    style={{ fontSize: "13px", fontWeight: "400" }}
+                    className=" relative w-full text-left"
+                  >
+                    view contact
+                  </h6>
                 </button>
               )}
             </Menu.Item>
             <Menu.Item>
               {({ active }) => (
                 <button
+                  style={{
+                    fontSize: "13px",
+                    fontWeight: "400",
+                    marginBottom: "0",
+                  }}
                   className={`${
                     active
                       ? "active flex items-center justify-between"
@@ -100,17 +118,28 @@ const Dropdown = (props) => {
                   onClick={handleClickMarkAsFavourites}
                 >
                   <div className="icon-btn btn-outline-danger mr-4">
-                    <MdFavorite className="icon inline" />
+                    <MdFavorite
+                      className="icon inline"
+                      style={{ fontSize: "14px" }}
+                    />
                   </div>{" "}
-                  <h5 className="relative w-full text-left">
+                  <h6
+                    style={{ fontSize: "13px", fontWeight: "400" }}
+                    className=" relative w-full text-left"
+                  >
                     Mark As Favourites
-                  </h5>
+                  </h6>
                 </button>
               )}
             </Menu.Item>
             <Menu.Item>
               {({ active }) => (
                 <button
+                  style={{
+                    fontSize: "13px",
+                    fontWeight: "400",
+                    marginBottom: "0",
+                  }}
                   className={`${
                     active
                       ? "active flex items-center justify-between"
@@ -119,15 +148,28 @@ const Dropdown = (props) => {
                   onClick={handleClickDeleteChat}
                 >
                   <div className="icon-btn btn-outline-danger mr-4">
-                    <RiDeleteBin6Line className="icon inline" />
+                    <RiDeleteBin6Line
+                      className="icon inline"
+                      style={{ fontSize: "14px" }}
+                    />
                   </div>{" "}
-                  <h5 className="relative w-full text-left">Delete Chat</h5>
+                  <h6
+                    style={{ fontSize: "13px", fontWeight: "400" }}
+                    className=" relative w-full text-left"
+                  >
+                    Delete Chat
+                  </h6>
                 </button>
               )}
             </Menu.Item>
             <Menu.Item>
               {({ active }) => (
                 <button
+                  style={{
+                    fontSize: "13px",
+                    fontWeight: "400",
+                    marginBottom: "0",
+                  }}
                   className={`${
                     active
                       ? "active flex items-center justify-between"
@@ -136,16 +178,25 @@ const Dropdown = (props) => {
                   onClick={handleClickLeaveGroup}
                 >
                   <div className="icon-btn btn-outline-light mr-4">
-                    {/* <ImBlocked className="icon inline" /> */}
+                    {/* <ImBlocked className="icon inline" style={{fontSize:"14px"}} /> */}
                     {sender.isGroupChat ? (
-                      <ImExit className="icon inline" />
+                      <ImExit
+                        className="icon inline"
+                        style={{ fontSize: "14px" }}
+                      />
                     ) : (
-                      <ImBlocked className="icon inline" />
+                      <ImBlocked
+                        className="icon inline"
+                        style={{ fontSize: "14px" }}
+                      />
                     )}
                   </div>{" "}
-                  <h5 className="relative w-full text-left">
+                  <h6
+                    style={{ fontSize: "13px", fontWeight: "400" }}
+                    className=" relative w-full text-left"
+                  >
                     {sender.isGroupChat ? "Leave Group " : "Block"}
-                  </h5>
+                  </h6>
                 </button>
               )}
             </Menu.Item>

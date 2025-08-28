@@ -32,6 +32,7 @@ import { useRef } from "react";
 // import { clearSelectChatAction } from "../Redux/Reducer/Chat/chat.action";
 // import { clearSelectChatAction } from "../Redux/Reducer/Chat/chat.action";
 import Spinner from "../Styles/Spinner";
+import { FiPaperclip, FiX } from "react-icons/fi";
 const SERVER_ACCESS_BASE_URL = process.env.REACT_APP_SERVER_ACCESS_BASE_URL;
 
 const ENDPOINT = SERVER_ACCESS_BASE_URL;
@@ -45,6 +46,47 @@ const ChatWindow = () => {
 
   // Added: quick emoji list, reaction grouper, and handlers to fix no-undef
   const quickEmojis = ["👍", "❤️", "😂", "😮", "😢", "🙏"];
+
+  // NEW: attachment state
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [previewItems, setPreviewItems] = useState([]);
+
+  const handleFilesChange = (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+
+    // limit to 10 like server
+    const limited = files.slice(0, 10);
+    setSelectedFiles(limited);
+
+    // build previews for images/videos and generic for others
+    const previews = limited.map((file) => {
+      const url = URL.createObjectURL(file);
+      const type = file.type;
+      let kind = "file";
+      if (type.startsWith("image/")) kind = "image";
+      else if (type.startsWith("video/")) kind = "video";
+      return { url, kind, name: file.name, size: file.size, type };
+    });
+    setPreviewItems(previews);
+  };
+
+  const clearSelectedFiles = () => {
+    // revoke object URLs
+    previewItems.forEach((p) => p.url && URL.revokeObjectURL(p.url));
+    setSelectedFiles([]);
+    setPreviewItems([]);
+    const input = document.getElementById("chat-attachments-input");
+    if (input) input.value = "";
+  };
+
+  // remove a single selected file
+  const removeSelectedFile = (index) => {
+    const toRemove = previewItems[index];
+    if (toRemove?.url) URL.revokeObjectURL(toRemove.url);
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+    setPreviewItems((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const groupReactions = (reactions = []) => {
     const map = new Map();
@@ -104,7 +146,13 @@ const ChatWindow = () => {
   const [sender, setSender] = useState();
   const [cursorPosition, setCursorPosition] = useState(0);
   const [socketConnected, setSocketConnected] = useState(false);
-  let [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [loggedUserData, setLoggedUserData] = useState(null);
+  const [attachmentModal, setAttachmentModal] = useState({
+    open: false,
+    attachment: null,
+  });
+
   const [count, setCount] = useState(0);
   const [typing, setTyping] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
@@ -204,16 +252,21 @@ const ChatWindow = () => {
   const handleClick = async () => {
     // console.log(newMessage, sender._id);
     // alert("Hello");
-    if (!newMessage) {
+    const hasText = newMessage && newMessage.trim().length > 0;
+    const hasFiles = selectedFiles && selectedFiles.length > 0;
+
+    if (!hasText && !hasFiles) {
       socket.emit("stop typing", user[0]._id);
-      alert("Empty Message can't be send");
+      alert("Please type a message or attach at least one file");
       return;
     }
     const messageData = {
       chatId: sender._id,
       content: newMessage,
+      ...(hasFiles ? { attachments: selectedFiles } : {}),
     };
     setNewMessage("");
+    clearSelectedFiles();
     await dispatch(sendMessge(messageData));
   };
   useEffect(() => {
@@ -431,15 +484,50 @@ const ChatWindow = () => {
                                   <div className="user-chat-content">
                                     <div className="flex mb-1 justify-end items-start gap-2">
                                       <div className="chat-wrap-content relative pb-5">
-                                        <span className="mb-0 chat-content text-sm font-medium text-left">
+                                        <span className="mb-0  text-sm font-medium text-left">
                                           {item.isDeletedForEveryone ? (
                                             <em className="opacity-80">
-                                              You deleted this message
+                                              This message was deleted
                                             </em>
                                           ) : (
                                             item.content
                                           )}
                                         </span>
+                                        
+                                        {/* Attachments Display */}
+                                        {item.attachments && item.attachments.length > 0 && (
+                                          <div className="mt-2 flex flex-wrap gap-2">
+                                            {item.attachments.map((attachment, idx) => (
+                                              <div
+                                                key={idx}
+                                                className="cursor-pointer border rounded-lg bg-white/70 backdrop-blur p-2 hover:bg-white/90 transition-colors"
+                                                onClick={() => setAttachmentModal({ open: true, attachment })}
+                                              >
+                                                {attachment.resourceType === 'image' ? (
+                                                  <img
+                                                    src={attachment.url}
+                                                    alt={attachment.originalFilename}
+                                                    className="w-20 h-20 object-cover rounded"
+                                                  />
+                                                ) : attachment.resourceType === 'video' ? (
+                                                  <video
+                                                    src={attachment.url}
+                                                    className="w-20 h-20 object-cover rounded"
+                                                    muted
+                                                    playsInline
+                                                  />
+                                                ) : (
+                                                  <div className="w-20 h-20 flex flex-col items-center justify-center bg-slate-100 rounded text-xs text-slate-600">
+                                                    <div className="font-medium">FILE</div>
+                                                    <div className="truncate w-full text-center px-1" title={attachment.originalFilename}>
+                                                      {attachment.originalFilename}
+                                                    </div>
+                                                  </div>
+                                                )}
+                                              </div>
+                                            ))}
+                                          </div>
+                                        )}
                                         {item.reactions &&
                                           item.reactions.length > 0 && (
                                             <Menu as="div" className="">
@@ -567,10 +655,10 @@ const ChatWindow = () => {
                                           as={Fragment}
                                           enter="transition ease-out duration-100"
                                           enterFrom="transform opacity-0 scale-95"
-                                          enterTo="transform opacity-100 scale-100"
+                                          enterTo="transition opacity-100 scale-100"
                                           leave="transition ease-in duration-75"
                                           leaveFrom="transform opacity-100 scale-100"
-                                          leaveTo="transform opacity-0 scale-95"
+                                          leaveTo="transition opacity-0 scale-95"
                                         >
                                           <Menu.Items className="absolute z-50 right-0 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none p-2">
                                             <div className="flex gap-2 px-2 py-1 border-b">
@@ -675,10 +763,10 @@ const ChatWindow = () => {
                                           as={Fragment}
                                           enter="transition ease-out duration-100"
                                           enterFrom="transform opacity-0 scale-95"
-                                          enterTo="transform opacity-100 scale-100"
+                                          enterTo="transition opacity-100 scale-100"
                                           leave="transition ease-in duration-75"
                                           leaveFrom="transform opacity-100 scale-100"
-                                          leaveTo="transform opacity-0 scale-95"
+                                          leaveTo="transition opacity-0 scale-95"
                                         >
                                           <Menu.Items className="absolute z-50 left-0 mt-2 w-56 origin-top-left rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none p-2">
                                             <div className="flex gap-2 px-2 py-1 border-b">
@@ -745,10 +833,10 @@ const ChatWindow = () => {
                                                 as={Fragment}
                                                 enter="transition ease-out duration-100"
                                                 enterFrom="transform opacity-0 scale-95"
-                                                enterTo="transform opacity-100 scale-100"
+                                                enterTo="transition opacity-100 scale-100"
                                                 leave="transition ease-in duration-75"
                                                 leaveFrom="transform opacity-100 scale-100"
-                                                leaveTo="transform opacity-0 scale-95"
+                                                leaveTo="transition opacity-0 scale-95"
                                               >
                                                 <Menu.Items className="absolute z-50 bottom-8 left-0 w-64 origin-bottom-left rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none p-3">
                                                   {groupReactionUsers(
@@ -878,7 +966,69 @@ const ChatWindow = () => {
                   </ul>
                 </div>
 
+                {/* chat input section */}
+
                 <div className="chat-input-section p-5 p-lg-6">
+                  {/* attachments preview */}
+                  {previewItems.length > 0 && (
+                    <div className="mb-3">
+                      <div className="flex gap-3 overflow-x-auto pb-2">
+                        {previewItems.map((p, idx) => (
+                          <div
+                            key={idx}
+                            className="relative border rounded-lg bg-white/70 backdrop-blur p-2 flex items-center gap-2 min-w-[160px]"
+                          >
+                            {p.kind === "image" ? (
+                              <img
+                                src={p.url}
+                                alt={p.name}
+                                className="w-16 h-16 object-cover rounded"
+                              />
+                            ) : p.kind === "video" ? (
+                              <video
+                                src={p.url}
+                                className="w-16 h-16 object-cover rounded"
+                                muted
+                                playsInline
+                              />
+                            ) : (
+                              <div className="w-16 h-16 flex items-center justify-center bg-slate-100 rounded text-xs text-slate-600">
+                                File
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <div
+                                className="text-xs font-medium truncate"
+                                title={p.name}
+                              >
+                                {p.name}
+                              </div>
+                              <div className="text-[10px] text-slate-500 truncate">
+                                {(p.size / 1024).toFixed(1)} KB
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => removeSelectedFile(idx)}
+                              className="p-1 rounded hover:bg-red-100 text-red-500"
+                              title="Remove"
+                            >
+                              <FiX />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={clearSelectedFiles}
+                        className="mt-2 flex items-center gap-1 text-xs text-red-600 hover:underline"
+                        title="Clear all attachments"
+                      >
+                        <FiX /> Clear all
+                      </button>
+                    </div>
+                  )}
+
                   <div className="flex justify-between items-center">
                     <div className="chat-input flex">
                       {/* 3 dot button button */}
@@ -887,6 +1037,23 @@ const ChatWindow = () => {
                         <BiDotsHorizontalRounded />
                       </div>
                     </div> */}
+                      {/* attachment button */}
+                      <div className="links-list-item">
+                        <input
+                          id="chat-attachments-input"
+                          type="file"
+                          multiple
+                          className="hidden"
+                          onChange={handleFilesChange}
+                        />
+                        <label
+                          htmlFor="chat-attachments-input"
+                          className="flex justify-center items-center btn emoji-btn mr-2"
+                          title="Attach files"
+                        >
+                          <FiPaperclip />
+                        </label>
+                      </div>
                       {/* emoji button */}
                       <div className="links-list-item">
                         <Menu>
@@ -897,10 +1064,10 @@ const ChatWindow = () => {
                             as={Fragment}
                             enter="transition ease-out duration-100"
                             enterFrom="transform opacity-0 scale-95"
-                            enterTo="transform opacity-100 scale-100"
+                            enterTo="transition opacity-100 scale-100"
                             leave="transition ease-in duration-75"
-                            leaveFrom="transform opacity-100 scale-100"
-                            leaveTo="transform opacity-0 scale-95"
+                            leaveFrom="transition opacity-100 scale-100"
+                            leaveTo="transition opacity-0 scale-95"
                           >
                             <Menu.Items className="emoji-picker">
                               <Picker
@@ -971,6 +1138,85 @@ const ChatWindow = () => {
             </Transition>
           </div>
         </div>
+
+        {/* Attachment Modal */}
+        <div className="absolute">
+          <div className="flex items-center justify-center">
+            <Transition appear show={attachmentModal.open} as={Fragment}>
+              <Dialog
+                as="div"
+                className="attachment-modal absolute z-50"
+                onClose={() => setAttachmentModal({ open: false, attachment: null })}
+              >
+                <div className="dialog-wrapper z-50 fixed inset-0 bg-black/80">
+                  <div className="dialog-container flex min-h-full items-center justify-center text-center p-4">
+                    <Transition.Child
+                      as={Fragment}
+                      enter="ease-out duration-300 transform"
+                      enterFrom="opacity-0 scale-95"
+                      enterTo="opacity-100 scale-100"
+                      leave="ease-in duration-200 transform"
+                      leaveFrom="opacity-100 scale-100"
+                      leaveTo="opacity-0 scale-95"
+                    >
+                      <Dialog.Panel className="dialog-panel z-50 max-w-4xl w-full transform bg-white rounded-lg text-left shadow-xl transition-all">
+                        <div className="p-4">
+                          <div className="flex justify-between items-center mb-4">
+                            <Dialog.Title className="text-lg font-medium">
+                              {attachmentModal.attachment?.originalFilename || 'Attachment'}
+                            </Dialog.Title>
+                            <button
+                              onClick={() => setAttachmentModal({ open: false, attachment: null })}
+                              className="p-2 rounded-full hover:bg-gray-100"
+                            >
+                              <FiX className="w-6 h-6" />
+                            </button>
+                          </div>
+                          
+                          {attachmentModal.attachment && (
+                            <div className="flex justify-center">
+                              {attachmentModal.attachment.resourceType === 'image' ? (
+                                <img
+                                  src={attachmentModal.attachment.url}
+                                  alt={attachmentModal.attachment.originalFilename}
+                                  className="max-w-full max-h-[70vh] object-contain rounded"
+                                />
+                              ) : attachmentModal.attachment.resourceType === 'video' ? (
+                                <video
+                                  src={attachmentModal.attachment.url}
+                                  controls
+                                  className="max-w-full max-h-[70vh] object-contain rounded"
+                                />
+                              ) : (
+                                <div className="flex flex-col items-center justify-center p-8 bg-slate-50 rounded">
+                                  <div className="text-6xl mb-4">📄</div>
+                                  <div className="text-lg font-medium mb-2">
+                                    {attachmentModal.attachment.originalFilename}
+                                  </div>
+                                  <div className="text-sm text-slate-600 mb-4">
+                                    File Type: {attachmentModal.attachment.mimeType}
+                                  </div>
+                                  <a
+                                    href={attachmentModal.attachment.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                                  >
+                                    Download File
+                                  </a>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </Dialog.Panel>
+                    </Transition.Child>
+                  </div>
+                </div>
+              </Dialog>
+            </Transition>
+          </div>
+        </div>
       </div>
     </Wrapper>
   );
@@ -1011,9 +1257,9 @@ const Wrapper = styled.section`
   }
 
   .btn {
-    width: 43px;
+    // width: 43px;
     padding: 0;
-    font-size: 1.4rem;
+    font-size: 1.5rem;
     color: #797c8c;
     cursor: pointer;
     &:hover {
@@ -1104,10 +1350,10 @@ const Wrapper = styled.section`
     }
     .chat-conversation {
       overflow-y: scroll;
-      height: calc(100vh - 130px);
+      height: calc(100vh - 200px);
       .chat-conversation-list {
-        margin-top: 90px;
-        padding-bottom: 24px;
+        margin-top: 40px;
+        padding-bottom: 50px;
         margin-bottom: 0;
         animation: fadeInLeft 0.5s;
         li {
@@ -1170,46 +1416,49 @@ const Wrapper = styled.section`
             }
           }
         }
-      }
-    }
-    .chat-input-section {
-      position: sticky;
-      left: 0;
-      top: 100vh;
-      background-color: ${({ theme }) => theme.colors.bg.primary};
-      border-top: 1px solid rgba(${({ theme }) => theme.colors.border}, 0.3);
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      input {
-        color: ${({ theme }) => theme.colors.heading};
-        background-color: ${({ theme }) => theme.colors.bg.secondary};
-        &:focus {
-          background-color: ${({ theme }) => theme.colors.bg.secondary};
-        }
-      }
-      .dot-btn,
-      .emoji-btn {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 3rem;
-        height: 3rem;
-        &:hover {
-          color: ${({ theme }) => theme.colors.primaryRgb};
-          background-color: ${({ theme }) => theme.colors.bg.secondary};
-        }
-        border-radius: 100%;
-      }
-      .links-list-items {
-        .btn {
-          color: #fff;
-          background-color: ${({ theme }) => theme.colors.primaryRgb};
-          &:hover {
-            background-color: rgb(
-              ${({ theme }) => theme.colors.rgb.primary},
-              0.8
-            );
+
+        .chat-input-section {
+          position: fixed;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: ${({ theme }) => theme.colors.bg.primary};
+          border-top: 1px solid rgba(${({ theme }) => theme.colors.border}, 0.3);
+          box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+          z-index: 10;
+          input {
+            color: ${({ theme }) => theme.colors.heading};
+            background-color: ${({ theme }) => theme.colors.bg.secondary};
+            &:focus {
+              background-color: ${({ theme }) => theme.colors.bg.secondary};
+            }
           }
-          border-color: ${({ theme }) => theme.colors.primaryRgb};
+          .dot-btn,
+          .emoji-btn {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 3rem;
+            height: 3rem;
+            &:hover {
+              color: ${({ theme }) => theme.colors.primaryRgb};
+              background-color: ${({ theme }) => theme.colors.bg.secondary};
+            }
+            border-radius: 100%;
+          }
+          .links-list-items {
+            .btn {
+              color: #fff;
+              background-color: ${({ theme }) => theme.colors.primaryRgb};
+              &:hover {
+                background-color: rgb(
+                  ${({ theme }) => theme.colors.rgb.primary},
+                  0.8
+                );
+              }
+              border-color: ${({ theme }) => theme.colors.primaryRgb};
+            }
+          }
         }
       }
     }

@@ -2,6 +2,7 @@ const asyncHandler = require("express-async-handler");
 const Message = require("../models/messageModel.js");
 const User = require("../models/userModel.js");
 const Chat = require("../models/chatModel.js");
+const cloudinary = require("../utils/cloudinary.js");
 
 //@description     Get all Messages
 //@route           GET /api/Message/:chatId
@@ -24,16 +25,43 @@ const allMessages = asyncHandler(async (req, res) => {
 //@access          Protected
 const sendMessage = asyncHandler(async (req, res) => {
   const { content, chatId } = req.body;
+  const files = req.files || [];
 
-  if (!content || !chatId) {
-    // console.log("Invalid data passed into request");
+  if ((!content || content.trim() === "") && files.length === 0) {
     return res.sendStatus(400);
+  }
+
+  // prepare attachments if any
+  let attachments = [];
+  if (files && files.length > 0) {
+    // upload each file to cloudinary (auto resource type)
+    const uploads = await Promise.all(
+      files.map((file) =>
+        cloudinary.uploader.upload(file.path, {
+          resource_type: "auto",
+          folder: "e-talk/messages",
+        })
+      )
+    );
+
+    attachments = uploads.map((result, idx) => ({
+      url: result.secure_url,
+      publicId: result.public_id,
+      resourceType: result.resource_type,
+      format: result.format,
+      bytes: result.bytes,
+      width: result.width,
+      height: result.height,
+      originalFilename: result.original_filename || files[idx]?.originalname,
+      mimeType: files[idx]?.mimetype,
+    }));
   }
 
   var newMessage = {
     sender: req.user._id,
     content: content,
     chat: chatId,
+    attachments,
   };
 
   try {
@@ -127,9 +155,25 @@ const deleteForEveryone = asyncHandler(async (req, res) => {
     return res.status(403).json({ message: "Only sender can delete for everyone" });
   }
 
+  // try to cleanup cloudinary assets if any
+  if (message.attachments && message.attachments.length > 0) {
+    try {
+      await Promise.all(
+        message.attachments.map((att) =>
+          cloudinary.uploader.destroy(att.publicId, {
+            resource_type: att.resourceType === "video" ? "video" : att.resourceType || "image",
+          })
+        )
+      );
+    } catch (e) {
+      // ignore cleanup errors
+    }
+  }
+
   message.isDeletedForEveryone = true;
   message.deletedAt = new Date();
   message.content = ""; // optional: keep empty content
+  message.attachments = [];
 
   await message.save();
   message = await Message.findById(messageId)

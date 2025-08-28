@@ -17,6 +17,20 @@ const messageModel = mongoose.Schema(
     // if sender deletes for everyone
     isDeletedForEveryone: { type: Boolean, default: false },
     deletedAt: { type: Date },
+    // attachments: files/photos sent with the message
+    attachments: [
+      {
+        url: { type: String },
+        publicId: { type: String },
+        resourceType: { type: String },
+        format: { type: String },
+        bytes: { type: Number },
+        width: { type: Number },
+        height: { type: Number },
+        originalFilename: { type: String },
+        mimeType: { type: String },
+      },
+    ],
   },
   {
     timestamps: true,

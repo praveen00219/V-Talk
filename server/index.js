@@ -14,6 +14,20 @@ const { socket } = require("socket.io");
 const { notFound, errorHandler } = require("./middleware/errorMiddleware.js");
 const { PORT, CLIENT_ACCESS_URL } = require("./config/keys.js");
 
+// Use a safe default port in development when PORT is not provided
+
+const UNSAFE_PORTS = new Set([
+  6000, 6665, 6666, 6667, 6668, 6669, 6697, 10080, 1719, 1720, 1723, 2049, 3659,
+  4045,
+]);
+let port = Number(PORT) || 4000;
+if (UNSAFE_PORTS.has(port)) {
+  console.warn(
+    `Configured port ${port} is browser-unsafe. Falling back to 4000.`
+  );
+  port = 4000;
+}
+
 dotenv.config();
 const app = express();
 connectDB();
@@ -49,9 +63,9 @@ app.use(errorHandler);
 // PORT
 // const PORT = PORT || 4000;
 
-server.listen(PORT, () => {
+server.listen(port, () => {
   console.log(
-    `Server is Running on PORT: http://localhost:${PORT}`.yellow.bold
+    `Server is Running on PORT: http://localhost:${port}`.yellow.bold
   );
 });
 

@@ -147,9 +147,9 @@ export const GlobalStyle = createGlobalStyle`
   h5,
   h6 {
     margin-top: 0;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.1rem;
     font-weight: 700;
-    line-height: 1.2;
+    // line-height: 1.2;
     color: ${({ theme }) => theme.colors.heading};
   }
   

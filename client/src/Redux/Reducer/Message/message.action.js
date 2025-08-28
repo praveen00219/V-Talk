@@ -10,8 +10,7 @@ import {
 } from "./message.type";
 
 const SERVER_ACCESS_BASE_URL =
-  process.env.REACT_APP_SERVER_ACCESS_BASE_URL ||
-  "https://v-talk-backend.onrender.com";
+ process.env.REACT_APP_SERVER_ACCESS_BASE_URL || "http://localhost:4000";
 
 // get all messages
 export const getAllChats = (selectedChat) => async (dispatch) => {
@@ -49,13 +48,35 @@ export const updateGetAllChats = (messageRecived) => async (dispatch) => {
   }
 };
 
-// send message
+// send message (supports attachments)
 export const sendMessge = (messageData) => async (dispatch) => {
   try {
+    // messageData can include: chatId (required), content (optional), attachments (FileList or Array<File>)
+    const { chatId, content, attachments } = messageData || {};
+    const hasFiles = attachments && (attachments.length || attachments.size);
+
+    let data;
+    let headers = {};
+
+    if (hasFiles) {
+      const form = new FormData();
+      form.append("chatId", chatId);
+      if (content !== undefined && content !== null)
+        form.append("content", content);
+      // attachments may be FileList or array
+      const filesArray = Array.from(attachments);
+      filesArray.forEach((file) => form.append("attachments", file));
+      data = form;
+      // Do NOT set Content-Type manually; let axios set the multipart boundary automatically
+    } else {
+      data = { chatId, content };
+    }
+
     const newMessage = await axios({
-      method: "POSt",
+      method: "POST",
       url: `${SERVER_ACCESS_BASE_URL}/api/message`,
-      data: { ...messageData },
+      data,
+      headers,
     });
 
     return dispatch({ type: SEND_MESSAGE, payload: newMessage.data });
@@ -150,6 +171,8 @@ export const deleteMessageForEveryone = (messageId) => async (dispatch) => {
     dispatch({ type: UPDATE_MESSAGE, payload: res.data });
     return res.data;
   } catch (error) {
-    return dispatch({ type: "ERROR", payload: error });
+    dispatch(showNetworkError(true));
+    const payload = error?.response?.data || { message: error.message || "Network error" };
+    return dispatch({ type: "ERROR", payload: payload });
   }
 };

@@ -8,23 +8,20 @@ import { BsChatSquareDots } from "react-icons/bs";
 import { CgClose, CgMenu } from "react-icons/cg";
 import Toggler from "./Toggler";
 
-
 import { IoLogOutOutline } from "react-icons/io5";
-
 
 // redux
 import { useDispatch, useSelector } from "react-redux";
 import { signOut } from "../Redux/Reducer/Auth/auth.action";
 import { toggleTab } from "../Redux/Reducer/Tab/tabAction";
 
-
 const SideMenu = () => {
   const [menuIcon, setMenuIcon] = useState();
 
-  const tabIndex = useSelector((state)=> state.tabReducer);
+  const tabIndex = useSelector((state) => state.tabReducer);
 
   const activeTab = (index) => {
-    dispatch(toggleTab(index))
+    dispatch(toggleTab(index));
   };
 
   const sideIconsList = [
@@ -52,20 +49,16 @@ const SideMenu = () => {
       id: 5,
       icon: AiOutlineSetting,
       title: "Setting",
-
     },
   ];
   const dispatch = useDispatch();
 
   const handleLogout = () => {
     dispatch(signOut());
-
   };
-
 
   return (
     <Wrapper>
-     
       <div
         className={
           menuIcon
@@ -74,7 +67,7 @@ const SideMenu = () => {
         }
       >
         <div className=" mobile-navbar overflow-y-auto">
-          <div className="sideMenu-brand-logo mb-5">
+          <div className="sideMenu-brand-logo">
             <NavLink to="/" className="logo">
               <span>
                 <img src="images/logo.png" alt="logo" />
@@ -96,7 +89,7 @@ const SideMenu = () => {
         </div>
 
         <div className="side-menu-bar overflow-y-auto">
-          <div className="sideMenu-brand-box mb-5">
+          <div className="sideMenu-brand-box">
             <NavLink to="/" className="logo">
               <span>
                 <img src="images/logo.png" alt="logo" />
@@ -107,19 +100,25 @@ const SideMenu = () => {
             <ul className="flex flex-col justify-between gap-4">
               {sideIconsList.map((items, index) => (
                 <li
-
                   key={index}
                   className="side-menu-item"
                   title={items.title}
-                  onClick={() => activeTab(index+1)}
+                  onClick={() => activeTab(index + 1)}
                 >
-
-                  <div to={items.title} className={index === 2 && tabIndex === 0 ? "nav-link active" : (tabIndex === (index + 1) ? "nav-link active" : "nav-link")} onClick={() => setMenuIcon(false)}>
-
+                  <div
+                    to={items.title}
+                    className={
+                      index === 2 && tabIndex === 0
+                        ? "nav-link active"
+                        : tabIndex === index + 1
+                        ? "nav-link active"
+                        : "nav-link"
+                    }
+                    onClick={() => setMenuIcon(false)}
+                  >
                     <items.icon className="icon" />
                   </div>
                 </li>
-
               ))}
 
               {/* Theme mode */}
@@ -143,7 +142,6 @@ const SideMenu = () => {
           </div>
         </div>
       </div>
-     
     </Wrapper>
   );
 };
@@ -264,7 +262,7 @@ const Wrapper = styled.section`
       .logo {
         img {
           vertical-align: middle;
-          height: 50px;
+          height: 40px;
         }
       }
     }
@@ -288,13 +286,13 @@ const Wrapper = styled.section`
       z-index: 20;
       border: ${({ theme }) => theme.colors.heading};
       .mobile-nav-icon {
-        font-size: 4.2rem;
+        font-size: 2.2rem;
         color: ${({ theme }) => theme.colors.heading};
       }
     }
     .active .mobile-navbar .mobile-nav-icon {
       display: none;
-      font-size: 4.2rem;
+      font-size: 2.2rem;
       color: ${({ theme }) => theme.colors.heading};
       z-index: 20;
     }
