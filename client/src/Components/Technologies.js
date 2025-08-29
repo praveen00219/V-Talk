@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { motion } from "framer-motion";
 import { technologiesImg } from "../config.js/data";
+import { FiChevronDown, FiChevronUp, FiSettings, FiWifi, FiUpload, FiLock, FiShield, FiMail, FiDatabase, FiBox, FiBell, FiTerminal, FiCpu, FiZap, FiEye, FiLink, FiType, FiHexagon, FiPackage, FiClock, FiCloud } from "react-icons/fi";
+import { SiRedux, SiReactrouter, SiFramer, SiStyledcomponents, SiSocketdotio, SiExpress, SiMongodb } from "react-icons/si";
 
 const techDesc = {
   HTML5: "Semantic structure for robust, accessible pages.",
@@ -13,7 +15,50 @@ const techDesc = {
   MongoDB: "Stores users, messages and group metadata.",
 };
 
+// Icon fallback for technologies without images
+const iconMap = {
+  "React Router": <SiReactrouter size={36} />,
+  Redux: <SiRedux size={36} />,
+  "React Redux": <SiRedux size={36} />,
+  "Redux Thunk": <FiTerminal size={36} />,
+  "Redux Logger": <FiTerminal size={36} />,
+  Axios: <FiLink size={36} />,
+  "React Toastify": <FiBell size={36} />,
+  "React Icons": <FiPackage size={36} />,
+  "Framer Motion": <SiFramer size={36} />,
+  AOS: <FiZap size={36} />,
+  "Emoji Mart": <FiType size={36} />,
+  "Styled‑Components": <SiStyledcomponents size={36} />,
+  "Headless UI": <FiSettings size={36} />,
+  "React Intersection Observer": <FiEye size={36} />,
+  "React Detect Offline": <FiWifi size={36} />,
+  "React Highlight Words": <FiType size={36} />,
+  "React Scroll": <FiLink size={36} />,
+  "React Tooltip": <FiType size={36} />,
+  Swiper: <FiBox size={36} />,
+  "Web Vitals": <FiCpu size={36} />,
+  Moment: <FiClock size={36} />,
+  "Socket.io Client": <SiSocketdotio size={36} />,
+  "Socket.io": <SiSocketdotio size={36} />,
+  Express: <SiExpress size={36} />,
+  Mongoose: <FiDatabase size={36} />,
+  MongoDB: <SiMongodb size={36} />,
+  Cloudinary: <FiCloud size={36} />,
+  Nodemailer: <FiMail size={36} />,
+  JWT: <FiLock size={36} />,
+  bcryptjs: <FiShield size={36} />,
+  Helmet: <FiShield size={36} />,
+  Multer: <FiUpload size={36} />,
+  CORS: <FiLock size={36} />,
+  Dotenv: <FiHexagon size={36} />,
+  "express-async-handler": <FiTerminal size={36} />,
+  colors: <FiPackage size={36} />,
+};
+
 const Technologies = () => {
+  const [showAll, setShowAll] = useState(false);
+  const displayed = showAll ? technologiesImg : technologiesImg.slice(0, 12);
+
   return (
     <Wrapper className="technologies-section" id="technologies">
       <div className="custom-container">
@@ -30,7 +75,7 @@ const Technologies = () => {
 
         <div className="technologies-list">
           <ul>
-            {technologiesImg.map((item, index) => (
+            {displayed.map((item, index) => (
               <li
                 data-aos="fade-up"
                 data-aos-delay={(index + 1) * 100}
@@ -46,6 +91,10 @@ const Technologies = () => {
                 >
                   {item.src ? (
                     <img src={item.src} alt={`${item.name}-logo`} />
+                  ) : iconMap[item.name] ? (
+                    <div className="icon-fallback" aria-hidden>
+                      {iconMap[item.name]}
+                    </div>
                   ) : (
                     <div className="avatar" aria-hidden>
                       {item.name?.[0] || "?"}
@@ -69,6 +118,23 @@ const Technologies = () => {
               </li>
             ))}
           </ul>
+
+          <div className="more-toggle" data-aos="fade-up" data-aos-delay="200">
+            <button
+              className="more-btn"
+              type="button"
+              onClick={() => setShowAll((s) => !s)}
+              aria-expanded={showAll}
+              aria-controls="technologies"
+            >
+              <span>{showAll ? "Less" : "More"}</span>
+              {showAll ? (
+                <FiChevronUp className="chev" aria-hidden />
+              ) : (
+                <FiChevronDown className="chev" aria-hidden />
+              )}
+            </button>
+          </div>
         </div>
       </div>
       {/* shapes code */}
@@ -157,7 +223,7 @@ const Wrapper = styled.section`
             max-width: 100%;
             height: auto;
           }
-          .avatar {
+          .avatar, .icon-fallback {
             width: 56px;
             height: 56px;
             border-radius: 50%;
@@ -167,6 +233,9 @@ const Wrapper = styled.section`
             place-items: center;
             font-weight: 700;
             font-size: 1.25rem;
+          }
+          .icon-fallback {
+            font-size: 0; /* icon size controlled via component */
           }
           .overlay {
             position: absolute;
@@ -178,6 +247,36 @@ const Wrapper = styled.section`
             color: ${({ theme }) => theme.colors.white};
             text-align: left;
           }
+        }
+      }
+
+      .more-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 10px;
+        .more-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 10px 16px;
+          border-radius: 999px;
+          border: 1px solid ${({ theme }) => theme.colors.border2.primary};
+          background: rgba(255, 255, 255, 0.06);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
+          color: ${({ theme }) => theme.colors.heading};
+          cursor: pointer;
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+          box-shadow: 0 2px 12px ${({ theme }) => theme.colors.boxShadow.primary};
+        }
+        .more-btn:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 8px 24px ${({ theme }) => theme.colors.boxShadow.primary};
+        }
+        .more-btn .chev {
+          width: 20px;
+          height: 20px;
         }
       }
     }
