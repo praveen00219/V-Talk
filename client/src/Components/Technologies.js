@@ -1,7 +1,17 @@
 import React from "react";
 import styled from "styled-components";
+import { motion } from "framer-motion";
 import { technologiesImg } from "../config.js/data";
 
+const techDesc = {
+  HTML5: "Semantic structure for robust, accessible pages.",
+  CSS3: "Custom variables, gradients and responsive tweaks.",
+  "Tailwind CSS": "Utility classes for layout, spacing and responsiveness.",
+  "Google Fonts": "Crisp, brand‑aligned typography across the app.",
+  React: "Component-driven UI with hooks and state management.",
+  "Node.js": "APIs and real‑time services powering chat.",
+  MongoDB: "Stores users, messages and group metadata.",
+};
 
 const Technologies = () => {
   return (
@@ -26,10 +36,36 @@ const Technologies = () => {
                 data-aos-delay={(index + 1) * 100}
                 key={item.id}
               >
-                <div className="flex flex-col justify-center items-center p-8">
-                  <img src={item.src} alt="tech-img" />
-                  <h5 className="mt-5">{item.name}</h5>
-                </div>
+                <motion.div
+                  className="card flex flex-col justify-center items-center p-8"
+                  initial="rest"
+                  animate="rest"
+                  whileHover="hover"
+                  variants={{ rest: { scale: 1 }, hover: { scale: 1.06 } }}
+                  transition={{ type: "tween", duration: 0.25 }}
+                >
+                  {item.src ? (
+                    <img src={item.src} alt={`${item.name}-logo`} />
+                  ) : (
+                    <div className="avatar" aria-hidden>
+                      {item.name?.[0] || "?"}
+                    </div>
+                  )}
+                  <h5 className="mt-5 text-center">{item.name}</h5>
+
+                  <motion.div
+                    className="overlay"
+                    variants={{
+                      rest: { y: "100%", opacity: 0 },
+                      hover: { y: 0, opacity: 1 },
+                    }}
+                    transition={{ duration: 0.35, ease: [0.2, 0.65, 0.3, 0.9] }}
+                  >
+                    <p className="text-sm leading-snug">
+                      {item.desc || techDesc[item.name] || "Used throughout the app for a better experience."}
+                    </p>
+                  </motion.div>
+                </motion.div>
               </li>
             ))}
           </ul>
@@ -95,8 +131,11 @@ const Wrapper = styled.section`
         flex-wrap: wrap;
         justify-content: center;
         li {
-          div {
-            background-color: ${({ theme }) => theme.colors.bg2.secondary};
+          .card {
+            /* Glassmorphism */
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border-width: 1px 1px 1px 1px;
             border-color: ${({ theme }) => theme.colors.border2.primary};
             width: 10rem;
@@ -105,17 +144,39 @@ const Wrapper = styled.section`
             align-items: center;
             justify-content: center;
             margin: 0 15px 50px;
-            border-radius: 10px;
-            transition: all 0.5s;
-            &:hover {
-              box-shadow: 0px 4px 24px
-                ${({ theme }) => theme.colors.boxShadow.primary};
-              transform: scale(1.1);
-            }
+            border-radius: 16px;
+            position: relative;
+            overflow: hidden;
+            will-change: transform;
+            box-shadow: 0 2px 12px ${({ theme }) => theme.colors.boxShadow.primary};
+          }
+          .card:hover {
+            box-shadow: 0px 8px 28px ${({ theme }) => theme.colors.boxShadow.primary};
           }
           img {
             max-width: 100%;
             height: auto;
+          }
+          .avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.14);
+            color: ${({ theme }) => theme.colors.white};
+            display: grid;
+            place-items: center;
+            font-weight: 700;
+            font-size: 1.25rem;
+          }
+          .overlay {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            padding: 12px 14px;
+            background: ${({ theme }) => theme.colors.gradientStrong};
+            color: ${({ theme }) => theme.colors.white};
+            text-align: left;
           }
         }
       }

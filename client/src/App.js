@@ -98,13 +98,15 @@ function App() {
         primary: "#00000026",
       },
       boxShadow: {
-        primary: "rgba(139, 1, 1, 0.2)",
+        primary: "rgba(139, 1, 1, 0.3)",
       },
 
       hr: brand.cream,
       border: "181, 181, 181",
       img_border: "255, 255, 255",
       gradient: `linear-gradient(145deg, ${brand.red}, ${brand.maroon})`,
+      gradientStrong: `linear-gradient(145deg, ${brand.red} 0%, ${brand.maroon} 60%)`,
+      gradientSubtle: `linear-gradient(180deg, ${brand.red}1a, ${brand.maroon}14)`,
     },
     media: {
       mobile: "800px",
@@ -149,7 +151,7 @@ function App() {
         secondary: "#2a1613",
       },
       boxShadow: {
-        primary: "rgba(139, 1, 1, 0.4)",
+        primary: "rgba(139, 1, 1, 0.55)",
       },
 
       btn: {
@@ -163,6 +165,8 @@ function App() {
       border: "65, 66, 72",
       img_border: "31, 41, 55",
       gradient: `linear-gradient(145deg, ${brand.maroon}, ${brand.red})`,
+      gradientStrong: `linear-gradient(145deg, ${brand.maroon} 0%, ${brand.red} 60%)`,
+      gradientSubtle: `linear-gradient(180deg, ${brand.maroon}26, ${brand.red}14)`,
     },
     media: {
       mobile: "800px",

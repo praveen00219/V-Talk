@@ -120,12 +120,13 @@ const Wrapper = styled.section`
       align-items: center;
       width: 200px;
       border-radius: 5px;
-      background: ${({ theme }) => theme.colors.gradient};
+      background: ${({ theme }) => theme.colors.gradientStrong};
       font-weight: 600;
       padding: 18px 30px;
       transition: 0.3s;
-      box-shadow: 0 0 10px ${({ theme }) => theme.colors.boxShadow.primary};
+      box-shadow: 0 6px 18px ${({ theme }) => theme.colors.boxShadow.primary};
       &:hover {
+        transform: translateY(-1px);
         scale: 1.01;
       }
     }
