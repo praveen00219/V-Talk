@@ -13,13 +13,15 @@ const HeroSection = () => {
             className="hero-section-data flex flex-col justify-start"
             data-aos="fade-right"
           >
-            <p>Welcome to</p>
+            <p>Welcome to V‑Talk</p>
             <h1 className="font-bold">
-              Real time chat application for all your needs
+              Connect instantly with real‑time chat, groups and secure messaging
             </h1>
-            <p className="w-3/4">
-              Easy to use our chat app, Attractive and clean design, with many
-              Features Dark & light, Recent Chat And many more.......
+            <p className="">
+              V‑Talk is a modern chat platform with lightning‑fast
+              conversations, powerful group chats, seamless media sharing and
+              emoji reactions. Switch between Light and Dark themes, search your
+              recents, and stay in sync across devices.
             </p>
             <div className="login-btn">
               <NavLink to="/auth">

@@ -47,37 +47,45 @@ function App() {
   const ThemeColor = useSelector((state) => state.setColorReducer.themeColor);
   const rgb = ThemeColor.split(")")[0].split("(")[1];
 
+  // Brand palette
+  const brand = {
+    cream: "#EDE7C7",
+    red: "#8B0101",
+    maroon: "#5B0302",
+    espresso: "#200E00",
+  };
+
   const lightTheme = {
     colors: {
-      heading: "rgb(24 24 29)",
-      heading2: "rgb(255, 255, 255)",
+      heading: brand.espresso,
+      heading2: brand.cream,
       white: "#fff",
       black: " #212529",
-      cyan: "#1ca9fe",
+      cyan: brand.red,
       green: "#4eac6d",
       danger: "#ff4e2b",
-      light: "#223645",
+      light: brand.cream,
       primaryRgb: `${ThemeColor}`,
 
       text: {
-        primary: "#000000",
+        primary: brand.espresso,
         secondary: "rgba(29 ,29, 29, .8)",
       },
 
       rgb: {
         primary: `${rgb}`,
         secondary: "78,172,109",
-        cyan: "28,157,234",
-        heading: "0,0,0",
+        cyan: "139,1,1",
+        heading: "32,14,0",
       },
 
       bg: {
-        primary: "#fff",
-        secondary: "#eff7fe",
+        primary: brand.cream,
+        secondary: "#F3EDEA",
       },
       bg2: {
         primary: "#fff",
-        secondary: "rgba(28,157,234,.05)",
+        secondary: "rgba(139,1,1,.08)",
       },
 
       btn: {
@@ -90,13 +98,13 @@ function App() {
         primary: "#00000026",
       },
       boxShadow: {
-        primary: "rgba(28, 157, 234, 0.2)",
+        primary: "rgba(139, 1, 1, 0.2)",
       },
 
-      hr: "#ffffff",
+      hr: brand.cream,
       border: "181, 181, 181",
       img_border: "255, 255, 255",
-      gradient: "linear-gradient(145deg,#1ca9fe,#1c6ee9);",
+      gradient: `linear-gradient(145deg, ${brand.red}, ${brand.maroon})`,
     },
     media: {
       mobile: "800px",
@@ -105,30 +113,30 @@ function App() {
   };
   const darkTheme = {
     colors: {
-      heading: "rgb(255, 255, 255)",
-      heading2: "rgb(24 24 29)",
+      heading: brand.cream,
+      heading2: brand.espresso,
       white: "#ffffff",
       black: "#000000",
-      cyan: "#1ca9fe",
+      cyan: brand.red,
       green: "#4eac6d",
       danger: "#ff4e2b",
-      light: "#223645",
+      light: brand.maroon,
       primaryRgb: `${ThemeColor}`,
 
       text: {
-        primary: "#212529",
-        secondary: "#8f9198",
+        primary: brand.cream,
+        secondary: "#c3bfb2",
       },
 
       rgb: {
         primary: `${rgb}`,
         secondary: "78,172,109",
-        cyan: "28,157,234",
+        cyan: "139,1,1",
         heading: "255,255,255",
       },
 
       bg: {
-        black: "#000000",
+        black: brand.espresso,
         primary: "#262626",
         secondary: "#2e2e2e",
       },
@@ -137,11 +145,11 @@ function App() {
       },
 
       bg2: {
-        primary: "#0c1631",
-        secondary: "#0e1b38",
+        primary: brand.espresso,
+        secondary: "#2a1613",
       },
       boxShadow: {
-        primary: "rgba(1, 201 ,245, 0.4)",
+        primary: "rgba(139, 1, 1, 0.4)",
       },
 
       btn: {
@@ -154,7 +162,7 @@ function App() {
       hr: "#ffffff",
       border: "65, 66, 72",
       img_border: "31, 41, 55",
-      gradient: "linear-gradient(145deg,#1ca9fe,#1c6ee9);",
+      gradient: `linear-gradient(145deg, ${brand.maroon}, ${brand.red})`,
     },
     media: {
       mobile: "800px",

@@ -77,27 +77,25 @@ export const technologiesImg = [
 ]
 
 export const colors = [
+  // Palette from provided image: #8B0101, #5B0302, #200E00, #EDE7C7
   {
     "id": 1,
-    "color": "rgb(28, 157, 234)"
-
+    // Primary accent (deep red)
+    "color": "rgb(139, 1, 1)"
   },
   {
     "id": 2,
-    "color": "rgb(78, 172, 109)" 
+    // Darker accent (maroon)
+    "color": "rgb(91, 3, 2)"
   },
   {
     "id": 3,
-    "color": "rgb(232,62,140)"
+    // Deep background (espresso brown)
+    "color": "rgb(32, 14, 0)"
   },
   {
     "id": 4,
-    "color": "rgb(155, 74, 255)"
-  },
-  {
-    "id": 5,
-    "color": "rgb(255, 128, 60)"
+    // Light background (cream)
+    "color": "rgb(237, 231, 199)"
   }
-  
-
 ]
