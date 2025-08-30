@@ -1,7 +1,7 @@
 import axios from "axios";
 import { CLEAR_USER, INVITE_FRIENDS, SELF, UPDATE_PROFILE } from "./user.type";
 
-const SERVER_ACCESS_BASE_URL = process.env.REACT_APP_SERVER_ACCESS_BASE_URL || "http://localhost:4000";
+const SERVER_ACCESS_BASE_URL = "https://v-talk-backend.onrender.com";
 
 export const getMySelf = () => async (dispatch) => {
   try {
@@ -25,7 +25,9 @@ export const updateUserProfile = (userData) => async (dispatch) => {
     });
     return dispatch({ type: UPDATE_PROFILE, payload: User.data });
   } catch (error) {
-    const payload = error?.response?.data || { message: error.message || "Network error" };
+    const payload = error?.response?.data || {
+      message: error.message || "Network error",
+    };
     return dispatch({ type: "ERROR", payload: payload });
   }
 };
@@ -39,7 +41,9 @@ export const inviteNewUser = (email) => async (dispatch) => {
     });
     return dispatch({ type: INVITE_FRIENDS, payload: res.data });
   } catch (error) {
-    const payload = error?.response?.data || { message: error.message || "Network error" };
+    const payload = error?.response?.data || {
+      message: error.message || "Network error",
+    };
     return dispatch({ type: "ERROR", payload: payload });
   }
 };
@@ -48,7 +52,9 @@ export const clearUser = () => async (dispatch) => {
   try {
     return dispatch({ type: CLEAR_USER, payload: {} });
   } catch (error) {
-    const payload = error?.response?.data || { message: error.message || "Network error" };
+    const payload = error?.response?.data || {
+      message: error.message || "Network error",
+    };
     return dispatch({ type: "ERROR", payload: payload });
   }
 };

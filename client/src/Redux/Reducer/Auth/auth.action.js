@@ -13,7 +13,7 @@ import {
   CLEAR_AUTH_STORE,
 } from "./auth.type";
 
-const SERVER_ACCESS_BASE_URL =  process.env.REACT_APP_SERVER_ACCESS_BASE_URL || "http://localhost:4000";
+const SERVER_ACCESS_BASE_URL = "https://v-talk-backend.onrender.com";
 
 console.log(
   "SERVER_ACCESS_BASE_URL :",
@@ -168,7 +168,9 @@ export const signOut = () => async (dispatch) => {
 
     return dispatch({ type: SIGN_OUT, payload: {} });
   } catch (error) {
-    const payload = error?.response?.data || { message: error.message || "Network error" };
+    const payload = error?.response?.data || {
+      message: error.message || "Network error",
+    };
     return dispatch({ type: "ERROR", payload: payload });
   }
 };

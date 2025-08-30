@@ -9,8 +9,7 @@ import {
   REMOVE_MESSAGE,
 } from "./message.type";
 
-const SERVER_ACCESS_BASE_URL =
- process.env.REACT_APP_SERVER_ACCESS_BASE_URL || "http://localhost:4000";
+const SERVER_ACCESS_BASE_URL = "https://v-talk-backend.onrender.com";
 
 // get all messages
 export const getAllChats = (selectedChat) => async (dispatch) => {
@@ -172,7 +171,9 @@ export const deleteMessageForEveryone = (messageId) => async (dispatch) => {
     return res.data;
   } catch (error) {
     dispatch(showNetworkError(true));
-    const payload = error?.response?.data || { message: error.message || "Network error" };
+    const payload = error?.response?.data || {
+      message: error.message || "Network error",
+    };
     return dispatch({ type: "ERROR", payload: payload });
   }
 };
