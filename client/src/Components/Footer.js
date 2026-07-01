@@ -74,13 +74,15 @@ const Footer = () => {
 export default Footer;
 
 const Wrapper = styled.footer`
-  max-width: 100vw;
+  width: 100%;
+  max-width: 100%;
   height: 100%;
+  overflow-x: hidden;
   background-color: ${({ theme }) => theme.colors.bg2.secondary};
   .footer-container {
     padding: 3rem 0 3rem 0;
     .footer-content {
-      width: 100vw;
+      width: 100%;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -120,10 +122,13 @@ const Wrapper = styled.footer`
             padding: 1rem 0;
             font-size: 1.2rem;
             color: ${({ theme }) => theme.colors.heading};
-            transition: all 0.1s;
+            transition: color 0.2s ${({ theme }) => theme.motion.ease},
+              border-color 0.2s ${({ theme }) => theme.motion.ease};
+            border-bottom: 2px solid transparent;
             &:hover {
-              border-bottom: 2px solid ${({ theme }) => theme.colors.cyan};
-              color: ${({ theme }) => theme.colors.cyan};
+              border-bottom: 2px solid
+                ${({ theme }) => theme.colors.accent.solid};
+              color: ${({ theme }) => theme.colors.accent.solid};
             }
           }
         }
@@ -138,6 +143,13 @@ const Wrapper = styled.footer`
             color: ${({ theme }) => theme.colors.heading};
             font-size: 2rem;
             cursor: pointer;
+            display: inline-flex;
+            transition: color 0.2s ${({ theme }) => theme.motion.ease},
+              transform 0.2s ${({ theme }) => theme.motion.easeOut};
+            &:hover {
+              color: ${({ theme }) => theme.colors.accent.solid};
+              transform: translateY(-3px);
+            }
           }
         }
       }
@@ -147,7 +159,7 @@ const Wrapper = styled.footer`
   .footer-copywrite {
     background-color: rgba(0, 0, 0, 0.02);
     border-top: 1px solid ${({ theme }) => theme.colors.border2.primary};
-    width: 100vw;
+    width: 100%;
     height: 100%;
     padding: 30px 0;
     .custom-container {

@@ -68,8 +68,8 @@ const Technologies = () => {
           data-aos-delay="200"
         >
           <div className="section-header text-center">
-            <h5>POWERFUL</h5>
-            <h2 className="capitalize">Techonolgies Used</h2>
+            <h5 className="eyebrow">POWERFUL</h5>
+            <h2 className="capitalize">Technologies Used</h2>
           </div>
         </div>
 
@@ -83,9 +83,12 @@ const Technologies = () => {
               >
                 <motion.div
                   className="card flex flex-col justify-center items-center p-8"
+                  tabIndex={0}
                   initial="rest"
                   animate="rest"
                   whileHover="hover"
+                  whileFocus="hover"
+                  whileTap="hover"
                   variants={{ rest: { scale: 1 }, hover: { scale: 1.06 } }}
                   transition={{ type: "tween", duration: 0.25 }}
                 >
@@ -137,8 +140,8 @@ const Technologies = () => {
           </div>
         </div>
       </div>
-      {/* shapes code */}
-      <div className="shapes">
+      {/* decorative shapes */}
+      <div className="shapes" aria-hidden="true">
       <div className="shape-1">
          <img width="250px" src="/images/shape-1.png" alt="" />
         </div>
@@ -181,6 +184,12 @@ const Wrapper = styled.section`
 
     .section-header {
       margin: 0 0 25px;
+      .eyebrow {
+        color: ${({ theme }) => theme.colors.accent.solid};
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        font-size: 0.9rem;
+      }
       h2 {
         font-size: 2.5rem;
         font-weight: 700;
@@ -198,25 +207,30 @@ const Wrapper = styled.section`
         justify-content: center;
         li {
           .card {
-            /* Glassmorphism */
-            background: rgba(255, 255, 255, 0.08);
+            /* Subtle glass surface that stays visible in both themes */
+            background: ${({ theme }) => theme.colors.accent.softer};
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            border-width: 1px 1px 1px 1px;
+            border-width: 1px;
+            border-style: solid;
             border-color: ${({ theme }) => theme.colors.border2.primary};
             width: 10rem;
             height: 10rem;
+            max-width: 42vw;
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 15px 50px;
-            border-radius: 16px;
+            border-radius: ${({ theme }) => theme.radius.lg};
             position: relative;
             overflow: hidden;
             will-change: transform;
+            outline: none;
             box-shadow: 0 2px 12px ${({ theme }) => theme.colors.boxShadow.primary};
           }
-          .card:hover {
+          .card:hover,
+          .card:focus-visible {
+            border-color: ${({ theme }) => theme.colors.accent.solid};
             box-shadow: 0px 8px 28px ${({ theme }) => theme.colors.boxShadow.primary};
           }
           img {
@@ -227,8 +241,8 @@ const Wrapper = styled.section`
             width: 56px;
             height: 56px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.14);
-            color: ${({ theme }) => theme.colors.white};
+            background: ${({ theme }) => theme.colors.accent.soft};
+            color: ${({ theme }) => theme.colors.accent.solid};
             display: grid;
             place-items: center;
             font-weight: 700;

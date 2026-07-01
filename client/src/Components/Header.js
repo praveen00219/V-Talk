@@ -1,19 +1,19 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
 import Nav from "./Nav";
 
 const Header = () => {
   const [header, setHeader] = useState(false);
-  const changeBackground = () => {
-    if (window.scrollY >= 80) {
-      setHeader(true);
-    } else {
-      setHeader(false);
-    }
-  };
 
-  window.addEventListener("scroll", changeBackground);
+  useEffect(() => {
+    const changeBackground = () => {
+      setHeader(window.scrollY >= 80);
+    };
+    changeBackground(); // sync initial state on mount
+    window.addEventListener("scroll", changeBackground, { passive: true });
+    return () => window.removeEventListener("scroll", changeBackground);
+  }, []);
 
   return (
     <MainHeader className="w-full flex items-center">

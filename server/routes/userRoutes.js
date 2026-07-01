@@ -1,7 +1,4 @@
-const { Router } = require("express");
 const express = require("express");
-// const upload = require("../utils/multer");
-const multer = require("multer");
 const {
   registerUser,
   authUser,
@@ -16,24 +13,26 @@ const {
   invitingUser,
 } = require("../controllers/userControllers.js");
 const { protect } = require("../middleware/authMiddleware.js");
+const { imageUpload } = require("../utils/upload.js");
+const {
+  authLimiter,
+  emailLimiter,
+} = require("../middleware/rateLimiters.js");
 
 const router = express.Router();
 
-// // multer configuration
-// const storage = multer.memoryStorage();
-const storage = multer.diskStorage({});
-const upload = multer({ storage });
-
-router.route("/").post(registerUser).get(protect, allUsers);
+router.route("/").post(authLimiter, registerUser).get(protect, allUsers);
 router.route("/getmyself").get(protect, getmyself);
-router.route("/login").post(authUser);
-router.route("/resend/verificationlink").post(resendVerificationLink);
+router.route("/login").post(authLimiter, authUser);
+router
+  .route("/resend/verificationlink")
+  .post(emailLimiter, resendVerificationLink);
 router.route("/verify").put(verifyEmail);
-router.route("/forgotpassword").post(forgotPassword);
-router.route("/resetpassword").post(resetPassword);
+router.route("/forgotpassword").post(emailLimiter, forgotPassword);
+router.route("/resetpassword").post(authLimiter, resetPassword);
 router.route("/updateprofile").put(protect, updateProfile);
-router.route("/invitefriends").post(protect, invitingUser);
+router.route("/invitefriends").post(protect, emailLimiter, invitingUser);
 router
   .route("/profilepic")
-  .put(protect, upload.single("image"), uploadProfileImage);
+  .put(protect, imageUpload.single("image"), uploadProfileImage);
 module.exports = router;

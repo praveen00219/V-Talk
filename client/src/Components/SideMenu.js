@@ -98,45 +98,46 @@ const SideMenu = () => {
           </div>
           <div className="side-menu-list">
             <ul className="flex flex-col justify-between gap-4">
-              {sideIconsList.map((items, index) => (
-                <li
-                  key={index}
-                  className="side-menu-item"
-                  title={items.title}
-                  onClick={() => activeTab(index + 1)}
-                >
-                  <div
-                    to={items.title}
-                    className={
-                      index === 2 && tabIndex === 0
-                        ? "nav-link active"
-                        : tabIndex === index + 1
-                        ? "nav-link active"
-                        : "nav-link"
-                    }
-                    onClick={() => setMenuIcon(false)}
-                  >
-                    <items.icon className="icon" />
-                  </div>
-                </li>
-              ))}
+              {sideIconsList.map((items, index) => {
+                const isActive =
+                  (index === 2 && tabIndex === 0) || tabIndex === index + 1;
+                return (
+                  <li key={index} className="side-menu-item">
+                    <button
+                      type="button"
+                      aria-label={items.title}
+                      aria-current={isActive ? "page" : undefined}
+                      title={items.title}
+                      className={isActive ? "nav-link active" : "nav-link"}
+                      onClick={() => {
+                        activeTab(index + 1);
+                        setMenuIcon(false);
+                      }}
+                    >
+                      <items.icon className="icon" />
+                    </button>
+                  </li>
+                );
+              })}
 
               {/* Theme mode */}
               <li className="side-menu-item" title="Theme Mode">
-                <div className="nav-link">
+                <div className="nav-link toggler-slot">
                   <Toggler />
                 </div>
               </li>
 
               {/* logout */}
-              <li
-                className="side-menu-item"
-                title="Logout"
-                onClick={handleLogout}
-              >
-                <div to="/" className="nav-link">
+              <li className="side-menu-item">
+                <button
+                  type="button"
+                  aria-label="Logout"
+                  title="Logout"
+                  className="nav-link"
+                  onClick={handleLogout}
+                >
                   <IoLogOutOutline className="icon" />
-                </div>
+                </button>
               </li>
             </ul>
           </div>
@@ -176,21 +177,48 @@ const Wrapper = styled.section`
       margin: 7px auto;
       cursor: pointer;
       .nav-link.active {
-        background-color: ${({ theme }) => theme.colors.btn.light};
+        background-color: ${({ theme }) => theme.colors.accent.soft};
         color: ${({ theme }) => theme.colors.primaryRgb};
       }
+      /* accent indicator bar for the active tab */
+      .nav-link.active::before {
+        content: "";
+        position: absolute;
+        left: -10px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 4px;
+        height: 26px;
+        border-radius: 4px;
+        background: ${({ theme }) => theme.colors.primaryRgb};
+      }
       .nav-link {
-        display: block;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         text-align: center;
-        height: 56px;
-        line-height: 56px;
-        font-size: 2rem;
+        height: 52px;
+        font-size: 1.6rem;
         margin: 0 auto;
-        width: 56px;
+        width: 52px;
+        background: transparent;
+        border: none;
+        cursor: pointer;
         color: ${({ theme }) => theme.colors.text.secondary};
-        border-radius: 8px;
+        border-radius: ${({ theme }) => theme.radius.md};
+        transition: background-color 0.2s ${({ theme }) => theme.motion.ease},
+          color 0.2s ${({ theme }) => theme.motion.ease},
+          transform 0.15s ${({ theme }) => theme.motion.easeOut};
         &:hover {
           color: ${({ theme }) => theme.colors.primaryRgb};
+          background-color: ${({ theme }) => theme.colors.accent.softer};
+        }
+        &:active {
+          transform: scale(0.92);
+        }
+        &.toggler-slot {
+          cursor: default;
         }
         .icon {
           display: inline;
@@ -245,10 +273,10 @@ const Wrapper = styled.section`
       top: 0;
       left: 0;
       transform: translateX(-100%);
-      transition: all 0.1s linear;
+      transition: transform 0.3s ${({ theme }) => theme.motion.easeOut};
       z-index: 20;
       max-width: 100px;
-      box-shadow: 0px 0px 10px rgb(0 0 0);
+      box-shadow: 0px 0px 24px rgba(0, 0, 0, 0.35);
       height: 100vh;
       min-width: 100px;
     }
@@ -269,7 +297,7 @@ const Wrapper = styled.section`
     .active .side-menu-bar {
       transform: translateX(0%);
       transform-origin: left;
-      transition: all 0.1s linear;
+      transition: transform 0.3s ${({ theme }) => theme.motion.easeOut};
     }
     .mobile-navbar {
       position: relative;

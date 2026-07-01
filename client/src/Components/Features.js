@@ -24,7 +24,11 @@ const Features = () => {
                 <div className="features-box">
                   <div className="features-box-icon">
                     <div>
-                      <img src={item.icon} alt="" loading="lazy" />
+                      <img
+                        src={item.icon}
+                        alt={`${item.name} icon`}
+                        loading="lazy"
+                      />
                     </div>
                   </div>
                   <div className="features-box-content">
@@ -107,29 +111,35 @@ const Wrapper = styled.section`
 
     .features-box {
       background: ${({ theme }) => theme.colors.bg2.primary};
-      border-width: 1px 1px 1px 1px;
+      border-width: 1px;
+      border-style: solid;
       border-color: ${({ theme }) => theme.colors.border2.primary};
-      border-radius: 10px;
+      border-radius: ${({ theme }) => theme.radius.lg};
       text-align: center;
       padding: 30px;
-      transition: all 0.5s;
+      height: 100%;
+      transition: transform 0.35s ${({ theme }) => theme.motion.easeOut},
+        box-shadow 0.35s ${({ theme }) => theme.motion.ease},
+        border-color 0.35s ${({ theme }) => theme.motion.ease};
       &:hover {
-        box-shadow: 0px 0px 24px
+        box-shadow: 0px 16px 36px
           ${({ theme }) => theme.colors.boxShadow.primary};
-        transform: scale(1.05);
+        transform: translateY(-6px);
+        border-color: ${({ theme }) => theme.colors.accent.solid};
       }
 
       .features-box-icon {
         div {
           display: flex;
           justify-content: center;
-          width: 120px;
-          margin: 0 auto;
-          height: 120px;
+          width: 110px;
+          margin: 0 auto 8px;
+          height: 110px;
           align-items: center;
           border-radius: 50%;
+          background: ${({ theme }) => theme.colors.accent.soft};
           img {
-            max-width: 100%;
+            max-width: 62%;
             height: auto;
           }
         }

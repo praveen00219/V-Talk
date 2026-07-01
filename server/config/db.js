@@ -1,9 +1,6 @@
 const mongoose = require("mongoose");
 const { MONGO_URL } = require("./keys.js");
 
-const dotenv = require("dotenv");
-dotenv.config();
-
 const connectDB = async () => {
   try {
     // Set strictQuery to false to prepare for Mongoose 7
@@ -17,7 +14,7 @@ const connectDB = async () => {
     console.log(`MongoDB Connected: ${conn.connection.host}`.cyan.underline);
   } catch (error) {
     console.log(`Error: ${error.message}`.red.bold);
-    process.exit();
+    process.exit(1);
   }
 };
 

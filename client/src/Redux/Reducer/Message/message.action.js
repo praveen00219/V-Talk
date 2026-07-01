@@ -8,8 +8,7 @@ import {
   UPDATE_MESSAGE,
   REMOVE_MESSAGE,
 } from "./message.type";
-
-const SERVER_ACCESS_BASE_URL = "https://v-talk-backend.onrender.com";
+import SERVER_ACCESS_BASE_URL from "../../../config/serverConfig";
 
 // get all messages
 export const getAllChats = (selectedChat) => async (dispatch) => {

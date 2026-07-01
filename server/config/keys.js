@@ -1,7 +1,9 @@
 const dotenv = require("dotenv");
 dotenv.config();
 
-module.exports = {
+const keys = {
+  NODE_ENV: process.env.NODE_ENV || "development",
+
   MONGO_URL: process.env.MONGO_URL,
   JWT_SECRET: process.env.JWT_SECRET,
 
@@ -15,15 +17,19 @@ module.exports = {
   SMPT_HOST: process.env.SMPT_HOST,
   SMPT_PORT: process.env.SMPT_PORT,
 
-  SMPT_HOST: process.env.SMPT_HOST,
-  SMPT_PORT: process.env.SMPT_PORT,
-
   PORT: process.env.PORT,
-  CLIENT_ACCESS_URL: process.env.CLIENT_ACCESS_URL,
+  CLIENT_ACCESS_URL: process.env.CLIENT_ACCESS_URL || "http://localhost:3000",
 };
 
-// if (process.env.NODE_ENV == "production") {
-//   module.exports = require("./prod.js");
-// } else {
-//   module.exports = require("./dev.js");
-// }
+// Fail fast if critical secrets are missing so we never boot in an insecure state.
+const REQUIRED = ["MONGO_URL", "JWT_SECRET"];
+const missing = REQUIRED.filter((k) => !keys[k]);
+if (missing.length) {
+  throw new Error(
+    `Missing required environment variables: ${missing.join(
+      ", "
+    )}. Copy server/.env.example to server/.env and fill in the values.`
+  );
+}
+
+module.exports = keys;

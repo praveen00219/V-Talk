@@ -115,7 +115,7 @@ const Invite = () => {
                 <Dialog.Panel className="dialog-panel w-full max-w-md transform overflow-hidden rounded-2xl p-6 text-left align-middle shadow-xl transition-all">
                   <Dialog.Title
                     as="h3"
-                    className="text-lg text-center font-medium leading-6 text-gray-900"
+                    className="text-lg text-center font-medium leading-6"
                   >
                     Inviting Your Friends
                   </Dialog.Title>
@@ -127,16 +127,16 @@ const Invite = () => {
                       <div className="mb-6">
                         <label
                           htmlFor="base-input"
-                          className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                          className="block mb-2 text-sm font-medium"
                         >
                           Email
                         </label>
                         <input
-                          type="text"
+                          type="email"
                           name="email"
                           id="base-input"
-                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                          placeholder="e.g. My Group"
+                          className="input text-sm block w-full"
+                          placeholder="friend@example.com"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                         />
@@ -147,15 +147,14 @@ const Invite = () => {
                   <div className="modal-footer flex justify-end mt-3">
                     <button
                       type="button"
-                      className="close-btn mr-4 inline-flex justify-center rounded-md border border-transparent  px-4 py-2 text-sm font-medium text-cyan-500  focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                      className="close-btn mr-4 inline-flex justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium focus:outline-none"
                       onClick={closeModal}
                     >
                       Cancel
                     </button>
                     <button
                       type="button"
-                      className="btn bg-cyan-500 rounded px-4"
-                      // disabled
+                      className="btn rounded px-4"
                       onClick={() => sendInvite()}
                     >
                       {loading1 ? (

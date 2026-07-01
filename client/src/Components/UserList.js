@@ -92,32 +92,22 @@ const UserList = ({ searchOpen, query , chatList, chat, loggedUser, result, setS
                     <div className="data-status h-full avatar-group">
                       {chat[index].isGroupChat ? (
                         <div className="flex -space-x-4">
-                          <img
-                            className="w-8 h-8 border-2 bg-white  rounded-full  hover:z-10"
-                            src={chat[index].users[0].pic}
-                            alt=""
-                          />
-                          <img
-                            className="w-8 h-8 border-2 bg-white  rounded-full  hover:z-10"
-                            src={chat[index].users[1].pic}
-                            alt=""
-                          />
-                          <img
-                            className="w-8 h-8 border-2 bg-white  rounded-full  hover:z-10"
-                            src={chat[index].users[2].pic}
-                            alt=""
-                          />
+                          {chat[index].users.slice(0, 3).map((u, i) => (
+                            <img
+                              key={u?._id || i}
+                              className="avatar-chip w-8 h-8 border-2 rounded-full hover:z-10"
+                              src={u?.pic}
+                              alt={u?.name || "member"}
+                              title={u?.name}
+                            />
+                          ))}
                           {chat[index].users.length > 3 ? (
-                            <div className="flex items-center justify-center w-8 h-8 text-xs font-medium text-white bg-gray-700 border-2 border-white rounded-full hover:bg-gray-600">
+                            <div className="avatar-more flex items-center justify-center w-8 h-8 text-xs font-medium rounded-full">
                               {`+${chat[index].users.length - 3}`}
                             </div>
-                          ) : (
-                            <></>
-                          )}
+                          ) : null}
                         </div>
-                      ) : (
-                        <></>
-                      )}
+                      ) : null}
 
                       <p>
                         {item.latestMessage
@@ -127,15 +117,18 @@ const UserList = ({ searchOpen, query , chatList, chat, loggedUser, result, setS
                           : ""}
                       </p>
 
-                      {item.status === "seen" ? (
-                        <span className="status text-green-400">
+                      {item.status ? (
+                        <span
+                          className={
+                            item.status === "seen"
+                              ? "status status-seen"
+                              : "status status-unseen"
+                          }
+                        >
+                          <span className="status-dot" aria-hidden="true" />
                           {item.status}
                         </span>
-                      ) : (
-                        <span className="status text-red-500">
-                          {item.status}
-                        </span>
-                      )}
+                      ) : null}
                     </div>
                   </div>
                 </li>
@@ -201,8 +194,15 @@ const Wrapper = styled.section`
         }
       }
       .avatar-group {
-        img {
-          border-color: rgb(${({ theme }) => theme.colors.img_border});
+        img,
+        .avatar-chip {
+          border-color: ${({ theme }) => theme.colors.bg.primary};
+          background: ${({ theme }) => theme.colors.bg.secondary};
+        }
+        .avatar-more {
+          background: ${({ theme }) => theme.colors.accent.soft};
+          color: ${({ theme }) => theme.colors.primaryRgb};
+          border: 2px solid ${({ theme }) => theme.colors.bg.primary};
         }
       }
       .data-status {
@@ -220,10 +220,32 @@ const Wrapper = styled.section`
           font-size: calc(11px + (12 - 11) * ((100vw - 320px) / (1920 - 320)));
         }
         .status {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
           padding-top: 8px;
           padding-bottom: 0px;
-          letter-spacing: 0.5px;
+          letter-spacing: 0.3px;
           font-weight: 600;
+          text-transform: capitalize;
+          .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            display: inline-block;
+          }
+        }
+        .status-seen {
+          color: ${({ theme }) => theme.colors.success};
+          .status-dot {
+            background: ${({ theme }) => theme.colors.success};
+          }
+        }
+        .status-unseen {
+          color: ${({ theme }) => theme.colors.text.muted};
+          .status-dot {
+            background: ${({ theme }) => theme.colors.warning};
+          }
         }
       }
     }

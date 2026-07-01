@@ -27,11 +27,11 @@ export default Welcome;
 
 const Wrapper = styled.section`
   .top-btn {
-    background-color: #3180fc;
+    background: ${({ theme }) => theme.colors.accent.gradient};
     color: white;
-    width: 4rem;
-    height: 4rem;
-    font-size: 2.4rem;
+    width: 3.4rem;
+    height: 3.4rem;
+    font-size: 2rem;
     padding: 0.25rem;
   }
 `;

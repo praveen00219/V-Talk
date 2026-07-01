@@ -5,9 +5,11 @@ const userSchema = mongoose.Schema(
   {
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true, selected: false },
+    // select: false so the hash is never returned unless explicitly requested
+    password: { type: String, required: true, select: false },
     about: { type: String, default: "Hey there! I am using V-Talk" },
-    contact: { type: Number, required: true },
+    // String, not Number: preserves leading zeros and "+" country codes
+    contact: { type: String, required: true },
     pic: {
       type: String,
       default:
@@ -16,6 +18,8 @@ const userSchema = mongoose.Schema(
     },
     cloudinary_id: { type: String },
     is_verified: { type: Boolean, default: false },
+    // updated whenever the password changes; used to invalidate older tokens
+    passwordChangedAt: { type: Date },
   },
   { timestamps: true }
 );
@@ -31,6 +35,9 @@ userSchema.pre("save", async function (next) {
 
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
+  // back-date by 1s so a token issued in this same request stays valid
+  this.passwordChangedAt = new Date(Date.now() - 1000);
+  next();
 });
 
 const User = mongoose.model("User", userSchema);

@@ -1,15 +1,17 @@
-const express = require("express");
 const dotenv = require("dotenv");
+dotenv.config();
+
+const express = require("express");
 const connectDB = require("./config/db.js");
-const { chats } = require("./data/data.js");
 const colors = require("colors");
+const cors = require("cors");
+const helmet = require("helmet");
+const mongoSanitize = require("express-mongo-sanitize");
+
 const chatRoutes = require("./routes/chatRoutes.js");
 const userRoutes = require("./routes/userRoutes.js");
 const messageRoutes = require("./routes/messageRoutes.js");
-const cors = require("cors");
-const helmet = require("helmet");
-
-const { socket } = require("socket.io");
+const { apiLimiter } = require("./middleware/rateLimiters.js");
 
 const { notFound, errorHandler } = require("./middleware/errorMiddleware.js");
 const { PORT, CLIENT_ACCESS_URL } = require("./config/keys.js");
@@ -28,24 +30,31 @@ if (UNSAFE_PORTS.has(port)) {
   port = 4000;
 }
 
-dotenv.config();
 const app = express();
 connectDB();
 
-// socket.io implement
-
 const http = require("http");
-const { Server } = require("socket.io");
 
-// const cors = require("cors");
-
-app.use(cors());
-
-const server = http.createServer(app);
+// CORS restricted to the configured client origin(s) (comma-separated allowed)
+const allowedOrigins = (CLIENT_ACCESS_URL || "")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
+const corsOptions = {
+  origin: (origin, cb) => {
+    // allow non-browser clients (no Origin header) and configured origins
+    if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+    return cb(new Error("Not allowed by CORS"));
+  },
+  credentials: true,
+};
 
 app.use(helmet());
-app.use(express.json()); //to accept json data
-// app.use(express.json());
+app.use(cors(corsOptions));
+app.use(express.json()); // to accept json data
+app.use(mongoSanitize()); // strip $/. keys to block NoSQL operator injection
+
+const server = http.createServer(app);
 
 app.get("/", (req, res) => {
   res.json({
@@ -54,6 +63,7 @@ app.get("/", (req, res) => {
 });
 
 // Routes
+app.use("/api", apiLimiter);
 app.use("/api/chat", chatRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/message", messageRoutes);
@@ -72,7 +82,7 @@ server.listen(port, () => {
 const io = require("socket.io")(server, {
   pingTimeout: 60000,
   cors: {
-    origin: CLIENT_ACCESS_URL,
+    origin: allowedOrigins,
     methods: ["GET", "POST"],
     allowedHeaders: ["my-custom-header"],
     credentials: true,
@@ -80,7 +90,7 @@ const io = require("socket.io")(server, {
 });
 
 io.on("connection", (socket) => {
-  console.log("connetcted to Socket.io");
+  // a client connected
 
   socket.on("setup", (userData) => {
     socket.join(userData._id);

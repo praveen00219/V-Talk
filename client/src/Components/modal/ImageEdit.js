@@ -133,10 +133,10 @@ function ImageEdit() {
                   leaveFrom="opacity-100 scale-100"
                   leaveTo="opacity-0 scale-95"
                 >
-                  <Dialog.Panel className="dialog-panel w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                  <Dialog.Panel className="dialog-panel w-full max-w-md transform overflow-hidden rounded-2xl p-6 text-left align-middle shadow-xl transition-all">
                     <Dialog.Title
                       as="h3"
-                      className="text-lg text-center font-medium leading-6 text-gray-900"
+                      className="text-lg text-center font-medium leading-6"
                     >
                       Update Profile
                     </Dialog.Title>
@@ -147,7 +147,8 @@ function ImageEdit() {
                           {/* <p>Image Uploaded</p> */}
                           <img
                             src={imagePath}
-                            className="w-1/2 h-1/2 mx-auto"
+                            alt="Selected preview"
+                            className="w-1/2 h-1/2 mx-auto rounded-lg"
                           />
                         </>
                       ) : (
@@ -166,8 +167,8 @@ function ImageEdit() {
                             htmlFor="profile-img-file-input"
                             className="profile-photo-edit mt-2"
                           >
-                            <div className="border-dashed border-2 border-sky-500 w-full h-48 full flex justify-center items-center">
-                              <h5 className="text-black">Choose a file</h5>
+                            <div className="dropzone border-dashed border-2 w-full h-48 full flex justify-center items-center rounded-lg cursor-pointer">
+                              <h5>Choose a file</h5>
                             </div>
                           </label>
                         </>
@@ -178,7 +179,7 @@ function ImageEdit() {
                       <div className="mt-4">
                         <button
                           type="button"
-                          className="close-btn inline-flex justify-center rounded-md border border-transparent  px-4 py-2 text-sm font-medium text-cyan-500 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                          className="close-btn inline-flex justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium focus:outline-none"
                           onClick={closeModal}
                         >
                           Cancel
@@ -188,18 +189,19 @@ function ImageEdit() {
                         {loading ? (
                           <button
                             type="button"
-                            className="disabled: close-btn inline-flex justify-center rounded-md border border-transparent  px-4 py-2 text-sm font-medium text-cyan-500 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                            // onClick={uploadImage}
+                            className="btn inline-flex justify-center rounded-md px-4 py-2 text-sm font-medium"
+                            style={{ opacity: 0.7 }}
+                            disabled
                           >
-                            uploading...
+                            Uploading…
                           </button>
                         ) : (
                           <button
                             type="button"
-                            className="close-btn inline-flex justify-center rounded-md border border-transparent  px-4 py-2 text-sm font-medium text-cyan-500 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                            className="btn inline-flex justify-center rounded-md px-4 py-2 text-sm font-medium"
                             onClick={uploadImage}
                           >
-                            upload
+                            Upload
                           </button>
                         )}
                       </div>

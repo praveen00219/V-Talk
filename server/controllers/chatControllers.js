@@ -1,7 +1,7 @@
 const asyncHandler = require("express-async-handler");
-const { remove } = require("../models/chatModel.js");
 const Chat = require("../models/chatModel.js");
 const User = require("../models/userModel.js");
+const { isMember, isGroupAdmin } = require("../utils/chatAuth.js");
 
 //@description     Create or fetch One to One Chat
 //@route           POST /api/chat/
@@ -81,7 +81,7 @@ const createGroupChat = asyncHandler(async (req, res) => {
   // console.log(req);
   // console.log(req.body.name, req.body.users);
   if (!req.body.users || !req.body.name) {
-    return res.status(400).send({ message: "Please Fill all the feilds" });
+    return res.status(400).send({ message: "Please Fill all the fields" });
   }
 
   var users = JSON.parse(req.body.users);
@@ -118,6 +118,15 @@ const createGroupChat = asyncHandler(async (req, res) => {
 const renameGroup = asyncHandler(async (req, res) => {
   const { chatId, chatName } = req.body;
 
+  const chat = await Chat.findById(chatId);
+  if (!chat) {
+    res.status(404);
+    throw new Error("chat Not Found");
+  }
+  if (!isMember(chat, req.user._id)) {
+    return res.status(403).json({ message: "Not authorized for this chat" });
+  }
+
   const updatedChat = await Chat.findByIdAndUpdate(
     chatId,
     {
@@ -141,6 +150,17 @@ const renameGroup = asyncHandler(async (req, res) => {
 const addToGroup = asyncHandler(async (req, res) => {
   const { chatId, userId } = req.body;
 
+  const chat = await Chat.findById(chatId);
+  if (!chat) {
+    res.status(404);
+    throw new Error("chat Not Found");
+  }
+  if (!isGroupAdmin(chat, req.user._id)) {
+    return res
+      .status(403)
+      .json({ message: "Only the group admin can modify members" });
+  }
+
   const added = await Chat.findByIdAndUpdate(
     chatId,
     {
@@ -161,6 +181,21 @@ const addToGroup = asyncHandler(async (req, res) => {
 
 const removeFromGroup = asyncHandler(async (req, res) => {
   const { chatId, userId } = req.body;
+
+  const chat = await Chat.findById(chatId);
+  if (!chat) {
+    res.status(404);
+    throw new Error("chat Not Found");
+  }
+  // a group admin can remove anyone; a member may remove only themselves (leave)
+  if (
+    !isGroupAdmin(chat, req.user._id) &&
+    req.user._id.toString() !== String(userId)
+  ) {
+    return res
+      .status(403)
+      .json({ message: "Only the group admin can remove other members" });
+  }
 
   const removed = await Chat.findByIdAndUpdate(
     chatId,

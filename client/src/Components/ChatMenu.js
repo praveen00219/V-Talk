@@ -149,6 +149,12 @@ const Wrapper = styled.section`
   }
   .tab-pane.active {
     display: block;
+    animation: fadeInUp 0.35s ${({ theme }) => theme.motion.easeOut};
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tab-pane.active {
+      animation: none;
+    }
   }
   .chat-menu {
     padding: 1rem 1rem;

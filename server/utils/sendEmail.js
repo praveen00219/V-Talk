@@ -24,13 +24,9 @@ const sendEmail = async (options) => {
     subject: options.subject,
     html: options.message_Content,
   };
-  const mailInfo = await transporter.sendMail(mailOptions, (error, result) => {
-    if (error) {
-      // console.log(error);
-    }
-  });
 
-  // console.log(mailInfo);
+  // await the promise form so failures actually reject (callers can react)
+  return transporter.sendMail(mailOptions);
 };
 
 module.exports = sendEmail;

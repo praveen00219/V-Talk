@@ -25,7 +25,8 @@ const Chat = () => {
 const Wrapper = styled.section`
   overflow: hidden;
   height: 100vh;
-  transition: all 0.5s;
+  background-color: ${({ theme }) => theme.colors.bg.primary};
+  transition: background-color 0.4s ${({ theme }) => theme.motion.ease};
 `;
 
 export default Chat;

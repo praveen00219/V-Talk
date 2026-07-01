@@ -1,9 +1,10 @@
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = require("./keys.js");
 
-const generateToken = (id, tokenValidity = "30d") => {
-  // console.log(tokenValidity);
-  return jwt.sign({ id }, JWT_SECRET, {
+// purpose scopes a token to one use only ("auth" | "verify" | "reset")
+// so a login token cannot be replayed to reset a password, and vice-versa.
+const generateToken = (id, tokenValidity = "30d", purpose = "auth") => {
+  return jwt.sign({ id, purpose }, JWT_SECRET, {
     expiresIn: tokenValidity,
   });
 };

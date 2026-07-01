@@ -110,7 +110,7 @@ const Navbar = styled.nav`
       cursor: pointer;
       text-decoration: none;
       font-weight: 500;
-      text-transform: uppercase;
+      letter-spacing: 0.01em;
       transition: color 0.3s linear;
       &:link,
       &:visited {
@@ -189,6 +189,7 @@ const Navbar = styled.nav`
     }
     .navbar-lists {
       width: 100vw;
+      height: calc(100vh - 100px);
       position: absolute;
       top: 100px;
       right: 0;
@@ -200,15 +201,17 @@ const Navbar = styled.nav`
       visibility: hidden;
       opacity: 0;
       transform: translateX(100%);
+      transition: transform 0.35s ${({ theme }) => theme.motion.easeOut},
+        opacity 0.3s ${({ theme }) => theme.motion.ease},
+        visibility 0.3s ${({ theme }) => theme.motion.ease};
 
-      /* transform-origin: top; */
-      .button {
-        width: 150px !important;
-        font-size: 2rem !important;
-        padding: 0 !important;
+      .navbar-link .button {
+        width: 160px;
+        font-size: 1.6rem;
+        padding: 0.4rem 0;
         &:hover {
-          color: ${({ theme }) => theme.colors.cyan} !important;
-          border: solid 2px ${({ theme }) => theme.colors.cyan} !important;
+          color: ${({ theme }) => theme.colors.cyan};
+          border: solid 2px ${({ theme }) => theme.colors.cyan};
         }
       }
     }
@@ -224,8 +227,8 @@ const Navbar = styled.nav`
         font-size: 2.2rem;
         color: ${({ theme }) => theme.colors.heading};
         &:hover {
-          color: ${({ theme }) => theme.colors.cyan} !important;
-          border-bottom: none !important;
+          color: ${({ theme }) => theme.colors.cyan};
+          border-bottom: none;
         }
       }
       .mode-toggler {

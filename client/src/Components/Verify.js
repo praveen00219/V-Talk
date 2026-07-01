@@ -105,27 +105,17 @@ const Verify = () => {
         {status ? (
           <>
             <div className="flex flex-col items-center justify-center w-3/4">
-              <MdOutlineMarkEmailRead
-                className="w-2/4 h-2/4 red"
-                color="#8af859"
-              />
+              <MdOutlineMarkEmailRead className="mail-icon" color="#16a34a" />
 
-              <p className="text-2xl text-gray-900 dark:text-white my-2 px-2 mx-auto align-middle">
-                {/* {message} */}
-                your Email is verified.
+              <p className="verify-text my-2 px-2 mx-auto align-middle">
+                Your Email is verified.
               </p>
-              {/* <p className="text-2xl text-gray-900 dark:text-white my-2 px-2 mx-auto align-middle">
-                OR
-              </p> */}
-              {/* <p className="text-2xl text-gray-900 dark:text-white my-2 px-2 mx-auto align-middle">
-                Verification Link
-              </p> */}
               <div className=" w-2/4 flex item-center justify-center">
                 <button
-                  className=" cursor-pointer bg-blue-500 my-2 px-3 rounded-lg py-3 mx-auto align-middle"
+                  className="cta-btn my-2 mx-auto"
                   onClick={() => startChatting()}
                 >
-                  <span className=" text-2xl text-white">Start Chatting</span>
+                  <span>Start Chatting</span>
                 </button>
               </div>
             </div>
@@ -133,27 +123,13 @@ const Verify = () => {
         ) : (
           <>
             <div className="flex flex-col items-center justify-center w-3/4">
-              <MdOutlineMarkEmailRead
-                className="w-2/4 h-2/4 red"
-                color="#faab07"
-              />
+              <MdOutlineMarkEmailRead className="mail-icon" color="#f59e0b" />
 
-              <p className="text-2xl text-gray-900 dark:text-white my-2 px-2 mx-auto align-middle">
+              <p className="verify-text my-2 px-2 mx-auto align-middle">
                 {message}
               </p>
-              {/* <p className="text-2xl text-gray-900 dark:text-white my-2 px-2 mx-auto align-middle">
-                OR
-              </p> */}
-              {/* <p className="text-2xl text-gray-900 dark:text-white my-2 px-2 mx-auto align-middle">
-                Verification Link
-              </p> */}
-              <button
-                className="cursor-pointer bg-blue-500 my-2 px-3 rounded-lg py-3 mx-auto align-middle"
-                onClick={() => openModal()}
-              >
-                <span className="text-2xl text-white">
-                  Verification Link Resend
-                </span>
+              <button className="cta-btn my-2 mx-auto" onClick={() => openModal()}>
+                <span>Resend Verification Link</span>
               </button>
             </div>
             <Transition className="box" appear show={isOpen} as={Fragment}>
@@ -207,7 +183,7 @@ const Verify = () => {
                               <input
                                 type="email"
                                 id="base-input"
-                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                className="input text-sm block w-full"
                                 placeholder="e.g. test@gmail.com"
                                 value={userData.email}
                                 name="email"
@@ -227,8 +203,7 @@ const Verify = () => {
                           </button>
                           <button
                             type="button"
-                            className="btn bg-cyan-500 rounded px-4"
-                            // disabled
+                            className="btn rounded px-4"
                             onClick={() => sendMail()}
                           >
                             Send
@@ -256,5 +231,35 @@ const Wrapper = styled.div`
   h1,
   p {
     color: ${({ theme }) => theme.colors.heading};
+  }
+
+  .mail-icon {
+    width: clamp(8rem, 22vw, 13rem);
+    height: auto;
+  }
+
+  .verify-text {
+    font-size: 1.5rem;
+    text-align: center;
+    color: ${({ theme }) => theme.colors.heading};
+  }
+
+  .cta-btn {
+    cursor: pointer;
+    padding: 0.85rem 1.75rem;
+    border-radius: ${({ theme }) => theme.radius.md};
+    background: ${({ theme }) => theme.colors.accent.gradient};
+    box-shadow: ${({ theme }) => theme.colors.shadow.sm};
+    transition: transform 0.3s ${({ theme }) => theme.motion.easeOut},
+      box-shadow 0.3s ease;
+    span {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #fff;
+    }
+    &:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 24px ${({ theme }) => theme.colors.boxShadow.primary};
+    }
   }
 `;

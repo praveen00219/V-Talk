@@ -1,3 +1,4 @@
+const fs = require("fs/promises");
 const asyncHandler = require("express-async-handler");
 const User = require("../models/userModel.js");
 const generateToken = require("../config/generateToken.js");
@@ -8,13 +9,24 @@ const sendEmail = require("../utils/sendEmail.js");
 
 const { JWT_SECRET, CLIENT_ACCESS_URL } = require("../config/keys.js");
 
+const MIN_PASSWORD_LENGTH = 8;
+const isStrongPassword = (pw) =>
+  typeof pw === "string" && pw.length >= MIN_PASSWORD_LENGTH;
+
 // signup new user
 const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password, contact, pic } = req.body;
 
   if (!name || !email || !password || !contact) {
     res.status(400);
-    throw new Error("Please Enter all the Feilds");
+    throw new Error("Please Enter all the Fields");
+  }
+
+  if (!isStrongPassword(password)) {
+    return res.status(400).json({
+      message: `Password must be at least ${MIN_PASSWORD_LENGTH} characters`,
+      success: false,
+    });
   }
 
   const userExists = await User.findOne({ email });
@@ -41,7 +53,7 @@ const registerUser = asyncHandler(async (req, res) => {
   });
 
   if (user) {
-    const token = generateToken(user._id, "120s");
+    const token = generateToken(user._id, "120s", "verify");
     const url = `${CLIENT_ACCESS_URL}/verify-email/${token}`;
     // console.log(url);
     const options = {
@@ -63,7 +75,7 @@ const registerUser = asyncHandler(async (req, res) => {
       name: user.name,
       email: user.email,
       pic: user.pic,
-      token: generateToken(user._id, "30d"),
+      token: generateToken(user._id, "30d", "auth"),
       message: "An Email is sent to your Email. Please Verify Your Email",
       success: true,
     });
@@ -86,7 +98,7 @@ const resendVerificationLink = asyncHandler(async (req, res) => {
       return;
     }
 
-    const token = generateToken(user._id, "120s");
+    const token = generateToken(user._id, "120s", "verify");
     const url = `${CLIENT_ACCESS_URL}/verify-email/${token}`;
     const options = {
       name: user.name,
@@ -118,6 +130,11 @@ const verifyEmail = asyncHandler(async (req, res) => {
 
     //decodes token id
     const decoded = await jwt.verify(token, JWT_SECRET);
+    if (decoded.purpose !== "verify") {
+      return res
+        .status(400)
+        .send({ message: "Invalid Verification Link", success: false });
+    }
 
     const user = await User.findOne({ _id: decoded.id });
     // console.log(user);
@@ -147,33 +164,23 @@ const verifyEmail = asyncHandler(async (req, res) => {
 const authUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
-  const user = await User.findOne({ email });
-  if (!user) {
-    return res.status(404).json({
-      message: "Invalid Credentials OR User not found",
-      success: false,
-    });
-  }
-  if (user && (await user.matchPassword(password))) {
-    res.json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      pic: user.pic,
-      token: generateToken(user._id),
-      message: "Login Successfull",
-      success: true,
-    });
-  } else {
-    return res.status(404).json({
-      message: "Invalid Credentials OR User not found",
-      success: false,
-    });
-  }
-  if (!user.is_verified) {
-    const token = generateToken(user._id, "120s");
-    const url = `${CLIENT_ACCESS_URL}/verify-email/${token}`;
+  // password is select:false on the schema, so request it explicitly
+  const user = await User.findOne({ email: String(email || "") }).select(
+    "+password"
+  );
 
+  // generic message avoids leaking which accounts exist
+  if (!user || !(await user.matchPassword(password))) {
+    return res.status(404).json({
+      message: "Invalid Credentials OR User not found",
+      success: false,
+    });
+  }
+
+  // enforce email verification BEFORE issuing an auth token
+  if (!user.is_verified) {
+    const token = generateToken(user._id, "120s", "verify");
+    const url = `${CLIENT_ACCESS_URL}/verify-email/${token}`;
     const options = {
       name: user.name,
       email: user.email,
@@ -188,21 +195,36 @@ const authUser = asyncHandler(async (req, res) => {
     };
     await sendEmail(options);
 
-    return res.status(201).json({
-      // verificationURL: url,
-      message: `An Email is sent to your Email ${user.email}. Please Verify Your Email`,
+    return res.status(403).json({
+      message: `Please verify your email first. A new verification link has been sent to ${user.email}.`,
+      success: false,
+      is_verified: false,
     });
   }
+
+  return res.json({
+    _id: user._id,
+    name: user.name,
+    email: user.email,
+    pic: user.pic,
+    token: generateToken(user._id, "30d", "auth"),
+    message: "Login Successful",
+    success: true,
+  });
 });
 
 // Search user
 const allUsers = asyncHandler(async (req, res) => {
   try {
-    const keyword = req.query.search
+    // escape regex metacharacters so user input can't inject a pattern (ReDoS)
+    const rawSearch = req.query.search ? String(req.query.search) : "";
+    const escaped = rawSearch.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+    const keyword = escaped
       ? {
           $or: [
-            { name: { $regex: req.query.search, $options: "i" } },
-            { email: { $regex: req.query.search, $options: "i" } },
+            { name: { $regex: escaped, $options: "i" } },
+            { email: { $regex: escaped, $options: "i" } },
           ],
         }
       : {};
@@ -211,7 +233,7 @@ const allUsers = asyncHandler(async (req, res) => {
     res.send(users);
   } catch (error) {
     return res.status(401).json({
-      message: "Unathorize Access",
+      message: "Unauthorized Access",
       success: false,
     });
   }
@@ -234,7 +256,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
   try {
     const { email } = req.body;
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: String(email || "") });
     if (!user) {
       return res.status(404).json({
         message: "User Not Found",
@@ -242,7 +264,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
       });
     }
 
-    const password_Reset_Token = generateToken(user._id, "300s");
+    const password_Reset_Token = generateToken(user._id, "300s", "reset");
     const password_Reset_URL = `${CLIENT_ACCESS_URL}/reset-password/${password_Reset_Token}`;
     const options = {
       name: user.name,
@@ -276,25 +298,41 @@ const resetPassword = asyncHandler(async (req, res) => {
 
     //decodes token id
     const decoded = await jwt.verify(token, JWT_SECRET);
+    if (decoded.purpose !== "reset") {
+      return res
+        .status(400)
+        .send({ message: "Invalid or expired reset link", success: false });
+    }
 
-    let user = await User.findOne({ _id: decoded.id }).select("password");
-    // console.log(user);
+    let user = await User.findOne({ _id: decoded.id }).select("+password");
     if (!user) {
       return res.status(400).send({ message: "Invalid link" });
     }
-    // const data = {
-    //   is_verified: true,
-    // };
-    // user = await User.findByIdAndUpdate(user._id, data, {
-    //   new: true,
-    // });
+
+    // single-use: reject a reset token issued before the last password change
+    if (
+      user.passwordChangedAt &&
+      decoded.iat * 1000 < user.passwordChangedAt.getTime()
+    ) {
+      return res.status(400).send({
+        message: "password Reset Link has been expired",
+        success: false,
+      });
+    }
+
+    if (!isStrongPassword(newPassword)) {
+      return res.status(400).send({
+        message: `Password must be at least ${MIN_PASSWORD_LENGTH} characters`,
+        success: false,
+      });
+    }
+
     user.password = newPassword;
-    user = await user.save();
+    await user.save();
 
     res.status(200).send({
       message: "Password changed successfully",
       success: true,
-      user,
     });
   } catch (error) {
     res.status(400).send({
@@ -341,9 +379,9 @@ const invitingUser = asyncHandler(async (req, res) => {
     const websiteUrl = CLIENT_ACCESS_URL;
     // console.log(senderUser);
     if (InvitedUser !== null) {
-      res.status(201).json({
+      return res.status(201).json({
         success: false,
-        message: "User Already Exist. You chat with user.",
+        message: "User Already Exists. You can chat with this user.",
       });
     }
 
@@ -373,7 +411,7 @@ const invitingUser = asyncHandler(async (req, res) => {
       message: `An Invitation Email is sent to your friend email ${email} `,
     });
   } catch (error) {
-    res.status(400).send({ succss: true, message: "Internal Server Error" });
+    res.status(400).send({ success: false, message: "Internal Server Error" });
   }
 });
 
@@ -381,6 +419,9 @@ const invitingUser = asyncHandler(async (req, res) => {
 const uploadProfileImage = asyncHandler(async (req, res) => {
   try {
     const file = req.file;
+    if (!file) {
+      return res.status(400).json({ message: "No image file provided" });
+    }
 
     let user = await User.findById(req.user.id);
     // delete exsisting image from cloudinary
@@ -388,8 +429,13 @@ const uploadProfileImage = asyncHandler(async (req, res) => {
       await cloudinary.uploader.destroy(user.cloudinary_id);
     }
 
-    // upload new image to cloudinary
-    const result = await cloudinary.uploader.upload(file.path);
+    // upload new image to cloudinary, then remove the multer temp file
+    let result;
+    try {
+      result = await cloudinary.uploader.upload(file.path);
+    } finally {
+      await fs.unlink(file.path).catch(() => {});
+    }
 
     const data = {
       // name: req.body.name || user.name,

@@ -6,6 +6,7 @@ import AuthPage from "./Pages/AuthPage";
 // import HomePage from "./Pages/HomePage";
 
 import { ThemeProvider } from "styled-components";
+import { MotionConfig } from "framer-motion";
 import { GlobalStyle } from "./GlobalStyle/GlobalStyle";
 import React, { Suspense, useEffect, useState } from "react";
 import Loading from "./Components/Loading";
@@ -24,15 +25,22 @@ import "aos/dist/aos.css";
 import ForgotPassword from "./Components/Auth/ForgotPassword";
 import ResetPassword from "./Components/Auth/ResetPassword";
 import ErrorPage from "./Components/ErrorPage";
+import { makeLightTheme, makeDarkTheme } from "./Components/Themes";
 const HomePage = React.lazy(() => import("./Pages/HomePage"));
+
+// Honour the OS "reduce motion" preference for scroll-entrance animations.
+const prefersReducedMotion =
+  typeof window !== "undefined" &&
+  window.matchMedia &&
+  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 AOS.init({
   once: true,
-  duration: 2000,
-  offset: 100,
+  duration: prefersReducedMotion ? 0 : 800,
+  offset: 80,
+  easing: "ease-out-cubic",
+  disable: prefersReducedMotion,
 });
-
-// const socket = io.connect("http://localhost:4000");
 
 function App() {
   const [loading, setloading] = useState(true);
@@ -45,135 +53,11 @@ function App() {
   // const user = useSelector((globalState) => globalState.user.userDetails);
 
   const ThemeColor = useSelector((state) => state.setColorReducer.themeColor);
-  const rgb = ThemeColor.split(")")[0].split("(")[1];
 
-  // Brand palette
-  const brand = {
-    cream: "#EDE7C7",
-    red: "#8B0101",
-    maroon: "#5B0302",
-    espresso: "#200E00",
-  };
-
-  const lightTheme = {
-    colors: {
-      heading: "rgb(24 24 29)",
-      heading2: "rgb(255, 255, 255)",
-      white: "#fff",
-      black: " #212529",
-      cyan: "#1ca9fe",
-      green: "#4eac6d",
-      danger: "#ff4e2b",
-      light: "#223645",
-      primaryRgb: `${ThemeColor}`,
-
-      text: {
-        primary: "#000000",
-        secondary: "rgba(29 ,29, 29, .8)",
-      },
-
-      rgb: {
-        primary: "111, 201, 252",
-        secondary: "78,172,109",
-        cyan: "28,157,234",
-        heading: "0,0,0",
-      },
-
-      bg: {
-        primary: "#fff",
-        secondary: "#eff7fe",
-      },
-      bg2: {
-        primary: "#fff",
-        secondary: "rgba(28,157,234,.05)",
-      },
-
-      btn: {
-        primary: "28, 157, 234",
-        secondary: "22 163 74",
-        danger: "255, 78, 43",
-        light: "#f6f6f9",
-      },
-      border2: {
-        primary: "#00000026",
-      },
-      boxShadow: {
-        primary: "rgba(28, 157, 234, 0.2)",
-      },
-
-      hr: "#ffffff",
-      border: "239, 241, 242",
-      img_border: "255, 255, 255",
-      gradient: "linear-gradient(145deg,#1ca9fe,#1c6ee9);",
-      gradientStrong: "linear-gradient(145deg,#1ca9fe,#1c6ee9);",
-      gradientSubtle: "linear-gradient(180deg, rgba(28,157,234,0.08), rgba(28,110,233,0.06))",
-    },
-    media: {
-      mobile: "800px",
-      tab: "998px",
-    },
-  };
-  const darkTheme = {
-    colors: {
-      heading: "rgb(255, 255, 255)",
-      heading2: "rgb(24 24 29)",
-      white: "#ffffff",
-      black: "#000000",
-      cyan: "#1ca9fe",
-      green: "#4eac6d",
-      danger: "#ff4e2b",
-      light: "#223645",
-      primaryRgb: `${ThemeColor}`,
-
-      text: {
-        primary: "#212529",
-        secondary: "#8f9198",
-      },
-
-      rgb: {
-        primary: "0, 128, 201",
-        secondary: "78,172,109",
-        cyan: "28,157,234",
-        heading: "255,255,255",
-      },
-
-      bg: {
-        black: "#000000",
-        primary: "#262626",
-        secondary: "#2e2e2e",
-      },
-      border2: {
-        primary: "#FFFFFF26",
-      },
-
-      bg2: {
-        primary: "#0c1631",
-        secondary: "#0e1b38",
-      },
-      boxShadow: {
-        primary: "rgba(1, 201 ,245, 0.4)",
-      },
-
-
-      btn: {
-        primary: "28, 157, 234",
-        secondary: "22 163 74",
-        danger: "255, 78, 43",
-        light: "#25262c",
-      },
-      
-      hr: "#ffffff",
-      border: "65, 66, 72",
-      img_border: "31, 41, 55",
-      gradient: "linear-gradient(145deg,#1ca9fe,#1c6ee9);",
-      gradientStrong: "linear-gradient(145deg,#1ca9fe,#1c6ee9);",
-      gradientSubtle: "linear-gradient(180deg, rgba(28,157,234,0.10), rgba(28,110,233,0.08))",
-    },
-    media: {
-      mobile: "800px",
-      tab: "998px",
-    },
-  };
+  // Themes are built from the user-selected accent color so the picker drives
+  // CTAs, gradients, focus rings and scrollbars across every surface.
+  const lightTheme = makeLightTheme(ThemeColor);
+  const darkTheme = makeDarkTheme(ThemeColor);
 
   const getUserData = async () => {
     await dispatch(getMySelf());
@@ -189,8 +73,9 @@ function App() {
         setloading(false);
       }, 1000);
     }
-    // eslint-disable-next-line
-  }, [localStorage]);
+    // run once on mount; localStorage is a stable reference, not a real dependency
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // useEffect(() => {
   //   if (user) {
@@ -203,6 +88,7 @@ function App() {
 
   return (
     <ThemeProvider theme={darkThemeEnabled ? darkTheme : lightTheme}>
+      <MotionConfig reducedMotion="user">
       <GlobalStyle />
       <div className="App w-screen">
         {loading ? (
@@ -235,6 +121,7 @@ function App() {
           </Suspense>
         )}
       </div>
+      </MotionConfig>
     </ThemeProvider>
   );
 }

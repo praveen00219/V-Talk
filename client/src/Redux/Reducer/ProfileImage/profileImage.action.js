@@ -1,7 +1,6 @@
 import axios from "axios";
 import { UPLOAD_IMAGE } from "./profileImage.type";
-
-const SERVER_ACCESS_BASE_URL = "https://v-talk-backend.onrender.com";
+import SERVER_ACCESS_BASE_URL from "../../../config/serverConfig";
 
 // profile picture update
 export const uploadProfilePicture = (image) => async (dispatch) => {

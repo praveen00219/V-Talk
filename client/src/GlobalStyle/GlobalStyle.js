@@ -9,14 +9,39 @@ export const GlobalStyle = createGlobalStyle`
     scroll-behavior: smooth;
   }
 
+  html { scroll-behavior: smooth; }
+
+  body {
+    background-color: ${({ theme }) => theme.colors.bg.primary};
+    color: ${({ theme }) => theme.colors.heading};
+    transition: background-color 0.4s ${({ theme }) => theme.motion.ease},
+      color 0.4s ${({ theme }) => theme.motion.ease};
+  }
+
+  /* Accessible focus ring for keyboard users (accent-tinted). */
+  :focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.accent.ring};
+    border-radius: ${({ theme }) => theme.radius.sm};
+  }
+
+  ::selection {
+    background: ${({ theme }) => theme.colors.accent.soft};
+    color: ${({ theme }) => theme.colors.heading};
+  }
 
   ::-webkit-scrollbar {
     background-color: initial;
-    width: 5px;
+    width: 8px;
+    height: 8px;
 }
 ::-webkit-scrollbar-thumb {
-  background-color: rgba(${({ theme }) => theme.colors.rgb.primary}, .2);
+  background-color: rgba(${({ theme }) => theme.colors.rgb.primary}, .25);
     border-radius: 10px;
+    transition: background-color 0.2s ease;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(${({ theme }) => theme.colors.rgb.primary}, .45);
 }
 ::-webkit-scrollbar-track {
   box-shadow: inset 0 0 6px ${({ theme }) => theme.colors.border};
@@ -27,6 +52,8 @@ export const GlobalStyle = createGlobalStyle`
   background-color: ${({ theme }) => theme.colors.bg.primary};
   color: ${({ theme }) => theme.colors.heading};
   overflow-x: hidden;
+  transition: background-color 0.4s ${({ theme }) => theme.motion.ease},
+    color 0.4s ${({ theme }) => theme.motion.ease};
 }
 
 .box{
@@ -133,11 +160,47 @@ export const GlobalStyle = createGlobalStyle`
   .input {
     -webkit-appearance: none;
     appearance: none;
-    border-color: rgba(209, 213, 219, 1);
-    border-radius: 0.375rem;
+    background-color: ${({ theme }) => theme.colors.bg.secondary};
+    color: ${({ theme }) => theme.colors.heading};
+    border-style: solid;
+    border-color: rgba(${({ theme }) => theme.colors.border}, 1);
+    border-radius: ${({ theme }) => theme.radius.md};
     border-width: 1px;
-    padding: 0.5rem 0.75rem;
+    padding: 0.65rem 0.85rem;
     width: 100%;
+    transition: border-color 0.2s ${({ theme }) => theme.motion.ease},
+      box-shadow 0.2s ${({ theme }) => theme.motion.ease},
+      background-color 0.2s ${({ theme }) => theme.motion.ease};
+  }
+  .input::placeholder { color: ${({ theme }) => theme.colors.text.muted}; }
+  .input:focus,
+  .input:focus-visible {
+    outline: none;
+    border-color: ${({ theme }) => theme.colors.accent.solid};
+    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.accent.ring};
+  }
+
+  .dropzone {
+    border-color: rgba(${({ theme }) => theme.colors.accent.rgb}, 0.5);
+    color: ${({ theme }) => theme.colors.heading};
+    transition: border-color 0.2s ${({ theme }) => theme.motion.ease},
+      background-color 0.2s ${({ theme }) => theme.motion.ease};
+  }
+  .dropzone:hover {
+    border-color: ${({ theme }) => theme.colors.accent.solid};
+    background-color: ${({ theme }) => theme.colors.accent.softer};
+  }
+
+  .user-badge {
+    background: ${({ theme }) => theme.colors.accent.soft};
+    color: ${({ theme }) => theme.colors.primaryRgb};
+  }
+  .badge-remove {
+    color: ${({ theme }) => theme.colors.primaryRgb};
+    transition: background-color 0.2s ${({ theme }) => theme.motion.ease};
+    &:hover {
+      background: ${({ theme }) => theme.colors.accent.soft};
+    }
   }
   
   h1,
@@ -149,15 +212,16 @@ export const GlobalStyle = createGlobalStyle`
     margin-top: 0;
     margin-bottom: 0.1rem;
     font-weight: 700;
-    // line-height: 1.2;
+    line-height: 1.18;
+    letter-spacing: -0.01em;
     color: ${({ theme }) => theme.colors.heading};
   }
-  
+
   a {
     font-size: 0.8rem;
     color: ${({ theme }) => theme.colors.black};
   }
-  
+
   p {
     display: block;
     margin-block-start: 1em;
@@ -170,29 +234,30 @@ export const GlobalStyle = createGlobalStyle`
     font-size: 1rem;
     margin-top: 0;
     margin-bottom: 1rem;
-    
+    line-height: 1.65;
   }
-  
+
   h1 {
-    font-size: 3rem;
-    font-weight: 700;
-    line-height: 2.5rem;
+    font-size: clamp(2.25rem, 1.6rem + 2.8vw, 3.25rem);
+    font-weight: 800;
+    line-height: 1.12;
   }
-  
+
   h2 {
-    font-size: 2.5rem;
+    font-size: clamp(1.9rem, 1.45rem + 1.9vw, 2.5rem);
     font-weight: 700;
+    line-height: 1.18;
   }
-  
+
   h3 {
-    font-size: 2rem;
-    font-weight: 500;
-    line-height: 2rem;
+    font-size: clamp(1.5rem, 1.2rem + 1.1vw, 2rem);
+    font-weight: 600;
+    line-height: 1.25;
   }
   h4{
-    font-size: 1.5rem;
-    font-weight: 500;
-    line-height: 2rem;
+    font-size: clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem);
+    font-weight: 600;
+    line-height: 1.3;
   }
   
   ul,
@@ -222,6 +287,21 @@ export const GlobalStyle = createGlobalStyle`
   }
 }
 
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translate3d(0, 18px, 0); }
+  100% { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+@keyframes softPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
 .typing-loader {
     width: 8px;
     height: 8px;
@@ -241,7 +321,7 @@ export const GlobalStyle = createGlobalStyle`
     width: 8px;
     height: 8px;
     border-radius: 100%;
-    box-shadow: 0 40px 0 #fff;
+    box-shadow: 0 40px 0 ${({ theme }) => theme.colors.primaryRgb};
     animation: loadertyping .8s ease-in-out infinite alternate;
 }
 .typing-loader:before {
@@ -254,10 +334,10 @@ export const GlobalStyle = createGlobalStyle`
 }
 @keyframes loadertyping {
   0% {
-    box-shadow: 0 30px 0 #fff;
+    box-shadow: 0 30px 0 ${({ theme }) => theme.colors.primaryRgb};
 }
 100% {
-    box-shadow: 0 10px 0 #fff;
+    box-shadow: 0 10px 0 ${({ theme }) => theme.colors.primaryRgb};
 }
 }
 

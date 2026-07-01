@@ -14,6 +14,22 @@ if (localStorage.ETalkUser) {
   axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 }
 
+// Global handling for expired/invalid auth tokens: clear session and send the
+// user back to the auth screen instead of silently failing.
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error?.response?.status === 401) {
+      localStorage.removeItem("ETalkUser");
+      delete axios.defaults.headers.common["Authorization"];
+      if (window.location.pathname !== "/auth") {
+        window.location.assign("/auth");
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>

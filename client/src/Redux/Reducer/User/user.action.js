@@ -1,7 +1,6 @@
 import axios from "axios";
 import { CLEAR_USER, INVITE_FRIENDS, SELF, UPDATE_PROFILE } from "./user.type";
-
-const SERVER_ACCESS_BASE_URL = "https://v-talk-backend.onrender.com";
+import SERVER_ACCESS_BASE_URL from "../../../config/serverConfig";
 
 export const getMySelf = () => async (dispatch) => {
   try {

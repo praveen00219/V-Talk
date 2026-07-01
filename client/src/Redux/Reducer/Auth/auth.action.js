@@ -13,12 +13,7 @@ import {
   CLEAR_AUTH_STORE,
 } from "./auth.type";
 
-const SERVER_ACCESS_BASE_URL = "https://v-talk-backend.onrender.com";
-
-console.log(
-  "SERVER_ACCESS_BASE_URL :",
-  process.env.REACT_APP_SERVER_ACCESS_BASE_URL
-);
+import SERVER_ACCESS_BASE_URL from "../../../config/serverConfig";
 
 // Sign IN
 

@@ -2,11 +2,16 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
+import styled from "styled-components";
+import { motion } from "framer-motion";
 import {
   clearAuthStore,
-  forgotPassword,
   resetPassword,
 } from "../../Redux/Reducer/Auth/auth.action";
+import AppButton from "../../Styles/Button";
+import Field from "../../Styles/Input";
+import Toggler from "../Toggler";
+import { fadeInUp } from "../../Styles/motion";
 
 const ResetPassword = () => {
   const dispatch = useDispatch();
@@ -23,211 +28,187 @@ const ResetPassword = () => {
   const status = useSelector((globalState) => globalState.auth.success);
 
   useEffect(() => {
-    setUserData((prev) => ({
-      ...prev,
-      token: token,
-    }));
+    setUserData((prev) => ({ ...prev, token: token }));
   }, [token]);
 
   useEffect(() => {
     if (result) {
       setMessage(result);
       if (!status) {
-        toast.error(result, {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
+        toast.error(result, { position: "top-right", autoClose: 5000, theme: "light" });
       } else {
-        toast.success(result, {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
+        toast.success(result, { position: "top-right", autoClose: 5000, theme: "light" });
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [result]);
-  // useEffect(() => {
-  //   if (!status) {
-  //     return;
-  //   }
-  //   if (status === false) {
-  //     alert(message);
-  //   }
-  // }, [status]);
 
-  //   on change of the email field
   const handleChange = (e) => {
     setUserData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const sendPasswordResetLink = () => {
-    if (
-      (userData.newPassword === null || userData.newPassword === "") &&
-      (userData.confirmPassword === null || userData.confirmPassword === "")
-    ) {
+  const sendPasswordResetLink = (e) => {
+    if (e) e.preventDefault();
+    if (!userData.newPassword && !userData.confirmPassword) {
       toast.warn("Please fill new Password and Confirm Password both", {
         position: "top-right",
         autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
         theme: "light",
       });
       return;
     }
     if (userData.newPassword !== userData.confirmPassword) {
-      toast.warn(
-        "Password and Confirm Password Does not Match Does not match.",
-        {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        }
-      );
+      toast.warn("Password and Confirm Password do not match.", {
+        position: "top-right",
+        autoClose: 5000,
+        theme: "light",
+      });
       return;
     }
-
-    // dispatch action htmlFor password reset link
     dispatch(resetPassword(userData));
-    // alert(
-    //   "password : " +
-    //     userData.password +
-    //     "\nconfirmPassword : " +
-    //     userData.confirmPassword +
-    //     "\ntoken : " +
-    //     userData.token
-    // );
   };
 
-  // Redirecting to forgot password PAge
   const NavigateToForgotPasswordPage = () => {
-    // window.location.reload();
     dispatch(clearAuthStore());
     navigate("/forgot-password");
   };
 
-  // Redirecting to Home PAge
   const NavigateToHomePage = () => {
     dispatch(clearAuthStore());
     navigate("/");
   };
+
   return (
-    <>
+    <Wrapper>
       <ToastContainer
         position="top-right"
         autoClose={5000}
-        hideProgressBar={false}
         newestOnTop={false}
         closeOnClick
-        rtl={false}
         pauseOnFocusLoss
         draggable
         pauseOnHover
         theme="light"
       />
-      <section className="bg-lightblue-50 dark:bg-gray-900">
-        <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
-          {/* Here we have to add a navabar component */}
-
-          <div className="w-full p-6 bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md dark:bg-gray-800 dark:border-gray-700 sm:p-8">
-            <h2 className="mb-1 text-xl font-bold text-center leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
-              Reset Password
-            </h2>
-            {/* <form className="mt-4 space-y-4 lg:mt-5 md:space-y-5" action="#"> */}
-            {message ? (
-              <>
-                <p className="text-gray-500 text-center">{message}</p>
-                <button
-                  type="button"
-                  className="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2"
-                  onClick={NavigateToHomePage}
-                >
-                  Home
-                </button>
-                <button
-                  type="button"
-                  className="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2"
-                  onClick={NavigateToForgotPasswordPage}
-                >
-                  Resend Password Reset Link
-                </button>
-              </>
-            ) : (
-              <>
-                <div className="mt-4 space-y-4 lg:mt-5 md:space-y-5">
-                  <div>
-                    <label
-                      htmlFor="password"
-                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                    >
-                      New Password
-                    </label>
-                    <input
-                      type="password"
-                      name="newPassword"
-                      value={userData.newPassword}
-                      id="password"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                      placeholder="e.g. &_t&k4zl|9WfX[{N"
-                      required=""
-                      onChange={handleChange}
-                    />
-                  </div>
-                  <div>
-                    <label
-                      htmlFor="confirmPassword"
-                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                    >
-                      Confirm Password
-                    </label>
-                    <input
-                      type="password"
-                      name="confirmPassword"
-                      value={userData.confirmPassword}
-                      id="confirmPassword"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                      placeholder="e.g. &_t&k4zl|9WfX[{N"
-                      required=""
-                      onChange={handleChange}
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-                    onClick={sendPasswordResetLink}
-                  >
-                    Change Password
-                  </button>
-                </div>
-              </>
-            )}
-
-            {/* </form> */}
-          </div>
+      <div className="toggle-icon">
+        <Toggler />
+      </div>
+      <motion.div
+        className="auth-card"
+        variants={fadeInUp}
+        initial="hidden"
+        animate="show"
+      >
+        <div className="logo">
+          <img src="/images/logo.png" alt="V-Talk logo" />
         </div>
-      </section>
-      <ToastContainer />
-    </>
+        <h2 className="title">Reset Password</h2>
+        {message ? (
+          <div className="result">
+            <p className="result-text">{message}</p>
+            <div className="actions">
+              <AppButton $variant="primary" onClick={NavigateToHomePage}>
+                Home
+              </AppButton>
+              <AppButton
+                $variant="secondary"
+                onClick={NavigateToForgotPasswordPage}
+              >
+                Resend Link
+              </AppButton>
+            </div>
+          </div>
+        ) : (
+          <form className="form" onSubmit={sendPasswordResetLink}>
+            <Field
+              id="reset-new"
+              label="New Password"
+              name="newPassword"
+              password
+              autoComplete="new-password"
+              value={userData.newPassword}
+              placeholder="New password"
+              required
+              onChange={handleChange}
+            />
+            <Field
+              id="reset-confirm"
+              label="Confirm Password"
+              name="confirmPassword"
+              password
+              autoComplete="new-password"
+              value={userData.confirmPassword}
+              placeholder="Confirm password"
+              required
+              onChange={handleChange}
+            />
+            <AppButton type="submit" $variant="primary" $block>
+              Change Password
+            </AppButton>
+          </form>
+        )}
+      </motion.div>
+    </Wrapper>
   );
 };
+
+const Wrapper = styled.section`
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  min-height: 100vh;
+  padding: 1.5rem;
+  background: radial-gradient(
+      1200px 600px at 50% -10%,
+      ${({ theme }) => theme.colors.accent.softer},
+      transparent 60%
+    ),
+    ${({ theme }) => theme.colors.bg.secondary};
+
+  .toggle-icon {
+    position: absolute;
+    top: 14px;
+    right: 20px;
+    z-index: 5;
+  }
+
+  .auth-card {
+    width: 100%;
+    max-width: 26rem;
+    padding: 2.25rem;
+    background-color: ${({ theme }) => theme.colors.bg.primary};
+    border: 1px solid ${({ theme }) => theme.colors.border2.primary};
+    border-radius: ${({ theme }) => theme.radius.xl};
+    box-shadow: ${({ theme }) => theme.colors.shadow.lg};
+  }
+
+  .logo {
+    text-align: center;
+    margin-bottom: 1rem;
+    img {
+      height: 48px;
+      display: inline-block;
+    }
+  }
+
+  .title {
+    text-align: center;
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .result-text {
+    text-align: center;
+    color: ${({ theme }) => theme.colors.text.muted};
+    margin-bottom: 1.25rem;
+  }
+  .actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+  }
+`;
 
 export default ResetPassword;

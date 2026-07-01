@@ -86,25 +86,11 @@ export const technologiesImg = [
 ];
 
 export const colors = [
-  // Palette from provided image: #8B0101, #5B0302, #200E00, #EDE7C7
-  {
-    "id": 1,
-    // Primary accent (deep red)
-    "color": "rgb(139, 1, 1)"
-  },
-  {
-    "id": 2,
-    // Darker accent (maroon)
-    "color": "rgb(91, 3, 2)"
-  },
-  {
-    "id": 3,
-    // Deep background (espresso brown)
-    "color": "rgb(32, 14, 0)"
-  },
-  {
-    "id": 4,
-    // Light background (cream)
-    "color": "rgb(237, 231, 199)"
-  }
+  // Cool accent presets that harmonize with the blue/cyan identity.
+  // The first entry is the default accent (cyan).
+  { "id": 1, "name": "Cyan",   "color": "rgb(28, 157, 234)" },
+  { "id": 2, "name": "Blue",   "color": "rgb(37, 99, 235)" },
+  { "id": 3, "name": "Teal",   "color": "rgb(13, 148, 136)" },
+  { "id": 4, "name": "Indigo", "color": "rgb(99, 102, 241)" },
+  { "id": 5, "name": "Violet", "color": "rgb(139, 92, 246)" }
 ]

@@ -1,23 +1,37 @@
+const fs = require("fs/promises");
 const asyncHandler = require("express-async-handler");
 const Message = require("../models/messageModel.js");
 const User = require("../models/userModel.js");
 const Chat = require("../models/chatModel.js");
 const cloudinary = require("../utils/cloudinary.js");
+const { isMember } = require("../utils/chatAuth.js");
+
+// best-effort removal of multer temp files after they're uploaded to Cloudinary
+const removeTempFiles = async (files = []) => {
+  await Promise.all(
+    files.map((f) => (f?.path ? fs.unlink(f.path).catch(() => {}) : null))
+  );
+};
 
 //@description     Get all Messages
 //@route           GET /api/Message/:chatId
 //@access          Protected
 const allMessages = asyncHandler(async (req, res) => {
-  try {
-    const messages = await Message.find({ chat: req.params.chatId, deletedFor: { $ne: req.user._id } })
-      .populate("sender", "name pic email")
-      .populate("chat");
-    res.json(messages);
-  } catch (error) {
-    0;
-    res.status(400);
-    throw new Error(error.message);
+  const chat = await Chat.findById(req.params.chatId);
+  if (!chat) {
+    return res.status(404).json({ message: "Chat not found" });
   }
+  if (!isMember(chat, req.user._id)) {
+    return res.status(403).json({ message: "Not authorized to view this chat" });
+  }
+
+  const messages = await Message.find({
+    chat: req.params.chatId,
+    deletedFor: { $ne: req.user._id },
+  })
+    .populate("sender", "name pic email")
+    .populate("chat");
+  res.json(messages);
 });
 
 //@description     Create New Message
@@ -31,30 +45,45 @@ const sendMessage = asyncHandler(async (req, res) => {
     return res.sendStatus(400);
   }
 
+  // only members of the chat may post into it
+  const chat = await Chat.findById(chatId);
+  if (!chat) {
+    return res.status(404).json({ message: "Chat not found" });
+  }
+  if (!isMember(chat, req.user._id)) {
+    return res
+      .status(403)
+      .json({ message: "Not authorized to post in this chat" });
+  }
+
   // prepare attachments if any
   let attachments = [];
   if (files && files.length > 0) {
-    // upload each file to cloudinary (auto resource type)
-    const uploads = await Promise.all(
-      files.map((file) =>
-        cloudinary.uploader.upload(file.path, {
-          resource_type: "auto",
-          folder: "e-talk/messages",
-        })
-      )
-    );
+    try {
+      // upload each file to cloudinary (auto resource type)
+      const uploads = await Promise.all(
+        files.map((file) =>
+          cloudinary.uploader.upload(file.path, {
+            resource_type: "auto",
+            folder: "e-talk/messages",
+          })
+        )
+      );
 
-    attachments = uploads.map((result, idx) => ({
-      url: result.secure_url,
-      publicId: result.public_id,
-      resourceType: result.resource_type,
-      format: result.format,
-      bytes: result.bytes,
-      width: result.width,
-      height: result.height,
-      originalFilename: result.original_filename || files[idx]?.originalname,
-      mimeType: files[idx]?.mimetype,
-    }));
+      attachments = uploads.map((result, idx) => ({
+        url: result.secure_url,
+        publicId: result.public_id,
+        resourceType: result.resource_type,
+        format: result.format,
+        bytes: result.bytes,
+        width: result.width,
+        height: result.height,
+        originalFilename: result.original_filename || files[idx]?.originalname,
+        mimeType: files[idx]?.mimetype,
+      }));
+    } finally {
+      await removeTempFiles(files);
+    }
   }
 
   var newMessage = {
@@ -98,6 +127,9 @@ const toggleReaction = asyncHandler(async (req, res) => {
 
   let message = await Message.findById(messageId).populate("chat");
   if (!message) return res.status(404).json({ message: "Message not found" });
+  if (!isMember(message.chat, req.user._id)) {
+    return res.status(403).json({ message: "Not authorized for this chat" });
+  }
 
   // find if user already reacted
   const existing = message.reactions.find(
@@ -130,8 +162,11 @@ const toggleReaction = asyncHandler(async (req, res) => {
 // @access         Protected
 const deleteForMe = asyncHandler(async (req, res) => {
   const { messageId } = req.params;
-  let message = await Message.findById(messageId);
+  let message = await Message.findById(messageId).populate("chat");
   if (!message) return res.status(404).json({ message: "Message not found" });
+  if (!isMember(message.chat, req.user._id)) {
+    return res.status(403).json({ message: "Not authorized for this chat" });
+  }
 
   if (!message.deletedFor.map((id) => id.toString()).includes(req.user._id.toString())) {
     message.deletedFor.push(req.user._id);

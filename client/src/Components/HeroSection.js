@@ -1,49 +1,50 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
+import { motion } from "framer-motion";
 import { Button } from "../Styles/Button";
 import { HiChevronDoubleRight } from "react-icons/hi";
+import { fadeInUp, stagger } from "../Styles/motion";
 
 const HeroSection = () => {
   return (
     <Wrapper className="hero-section" id="home">
       <div className="custom-container flex h-full items-center">
-        <div className="flex">
-          <div
-            className="hero-section-data flex flex-col justify-start"
-            data-aos="fade-right"
-          >
-            <p>Welcome to V‑Talk</p>
-            <h1 className="font-bold">
-              Connect instantly with real‑time chat, groups and secure messaging
-            </h1>
-            <p className="">
-              V‑Talk is a modern chat platform with lightning‑fast
-              conversations, powerful group chats, seamless media sharing and
-              emoji reactions. Switch between Light and Dark themes, search your
-              recents, and stay in sync across devices.
-            </p>
-            <div className="login-btn">
-              <NavLink to="/auth">
-                <Button
-                  className="button hover:scale-105 text-white radius-round px-8 py-2"
-                  data-aos="fade-left"
-                >
-                  Get Started
-                  <HiChevronDoubleRight className="ml-2" />
-                </Button>
-              </NavLink>
-            </div>
-          </div>
-        </div>
+        <motion.div
+          className="hero-section-data flex flex-col justify-start"
+          variants={stagger}
+          initial="hidden"
+          animate="show"
+        >
+          <motion.p className="eyebrow" variants={fadeInUp}>
+            Welcome to V‑Talk
+          </motion.p>
+          <motion.h1 className="font-bold" variants={fadeInUp}>
+            Connect instantly with real‑time chat, groups and secure messaging
+          </motion.h1>
+          <motion.p variants={fadeInUp}>
+            V‑Talk is a modern chat platform with lightning‑fast conversations,
+            powerful group chats, seamless media sharing and emoji reactions.
+            Switch between Light and Dark themes, search your recents, and stay
+            in sync across devices.
+          </motion.p>
+          <motion.div className="login-btn" variants={fadeInUp}>
+            <NavLink to="/auth">
+              <Button className="button text-white radius-round px-8 py-2">
+                Get Started
+                <HiChevronDoubleRight className="ml-2" />
+              </Button>
+            </NavLink>
+          </motion.div>
+        </motion.div>
       </div>
 
       <div className="hero-section-image absolute w-full h-full">
         {/* <img src="https://chitchat-react.vercel.app/assets/images/landing/2.png" alt="bg" className="img-style" /> */}
       </div>
 
-      {/* shapes code */}
-      <div className="shapes">
+      {/* decorative shapes */}
+      <div className="shapes" aria-hidden="true">
         <div className="shape-1">
           <img width="250px" src="/images/shape-1.png" alt="" />
         </div>
@@ -95,13 +96,22 @@ const Wrapper = styled.section`
   .hero-section-data {
     margin: 0 2rem;
     .highlight {
-      color: #1c77ed;
+      color: ${({ theme }) => theme.colors.accent.solid};
+    }
+    .eyebrow {
+      display: inline-block;
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: ${({ theme }) => theme.colors.accent.solid};
+      margin-bottom: 0.5rem;
     }
     h1 {
       font-size: calc(1.1rem + 28 * (100vw - 320px) / 1600);
       font-weight: 800;
       margin-bottom: 17px;
-      line-height: 1.2;
+      line-height: 1.15;
       max-width: 680px;
     }
     p {
@@ -111,23 +121,25 @@ const Wrapper = styled.section`
       font-weight: 500;
       font-family: Roboto, sans-serif;
       line-height: 1.8;
-      color: rgba(${({ theme }) => theme.colors.rgb.heading}, 0.5);
+      color: rgba(${({ theme }) => theme.colors.rgb.heading}, 0.72);
     }
 
     .button {
       display: flex;
       justify-content: center;
       align-items: center;
-      width: 200px;
-      border-radius: 5px;
+      width: 210px;
+      border-radius: ${({ theme }) => theme.radius.md};
       background: ${({ theme }) => theme.colors.gradientStrong};
       font-weight: 600;
       padding: 18px 30px;
-      transition: 0.3s;
+      border: none;
+      transition: transform 0.3s ${({ theme }) => theme.motion.easeOut},
+        box-shadow 0.3s ${({ theme }) => theme.motion.ease};
       box-shadow: 0 6px 18px ${({ theme }) => theme.colors.boxShadow.primary};
       &:hover {
-        transform: translateY(-1px);
-        scale: 1.01;
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 14px 30px ${({ theme }) => theme.colors.boxShadow.primary};
       }
     }
   }

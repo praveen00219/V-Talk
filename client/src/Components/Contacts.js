@@ -135,12 +135,18 @@ const Wrapper = styled.div`
     .user-add {
       position: absolute;
       right: 0;
-      text-align: right;
-      padding: 12px 0px 12px 0px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
       width: 40px;
       height: 40px;
+      color: ${({ theme }) => theme.colors.text.secondary};
+      transition: background-color 0.2s ${({ theme }) => theme.motion.ease},
+        color 0.2s ${({ theme }) => theme.motion.ease};
       &:hover {
-        background-color: ${({ theme }) => theme.colors.bg.secondary};
+        background-color: ${({ theme }) => theme.colors.accent.soft};
+        color: ${({ theme }) => theme.colors.primaryRgb};
       }
     }
   }

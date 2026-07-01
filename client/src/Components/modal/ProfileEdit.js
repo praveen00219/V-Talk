@@ -131,10 +131,10 @@ const ProfileEdit = () => {
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
               >
-                <Dialog.Panel className="dialog-panel w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                <Dialog.Panel className="dialog-panel w-full max-w-md transform overflow-hidden rounded-2xl p-6 text-left align-middle shadow-xl transition-all">
                   <Dialog.Title
                     as="h3"
-                    className="text-lg font-medium leading-6 text-gray-900"
+                    className="text-lg font-medium leading-6"
                   >
                     Profile Edit
                   </Dialog.Title>
@@ -142,14 +142,14 @@ const ProfileEdit = () => {
                   <div className="mb-6">
                     <label
                       htmlFor="base-input"
-                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                      className="block mb-2 text-sm font-medium"
                     >
                       Name
                     </label>
                     <input
                       type="text"
                       id="base-input"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                      className="input text-sm block w-full"
                       placeholder="e.g. john Doe"
                       name="name"
                       value={updateProfileData.name}
@@ -159,14 +159,14 @@ const ProfileEdit = () => {
                   <div className="mb-6">
                     <label
                       htmlFor="base-input"
-                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                      className="block mb-2 text-sm font-medium"
                     >
                       About
                     </label>
                     <input
                       type="text"
                       id="base-input"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                      className="input text-sm block w-full"
                       placeholder="e.g. Hey there! I am using V-Talk"
                       name="about"
                       value={updateProfileData.about}
@@ -175,7 +175,9 @@ const ProfileEdit = () => {
                   </div>
 
                   <Button
-                    className="button bg-green-600 hover:bg-green-500 active:bg-green-700 text-white radius-round h-11 px-8 py-2 w-full"
+                    $variant="primary"
+                    $block
+                    className="button text-white radius-round h-11 px-8 py-2"
                     onClick={() => handleUpdateProfile()}
                   >
                     Update Profile
@@ -187,7 +189,7 @@ const ProfileEdit = () => {
                   <div className="mt-4">
                     <button
                       type="button"
-                      className="close-btn inline-flex justify-center rounded-md border border-transparent  px-4 py-2 text-sm font-medium text-cyan-500 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                      className="close-btn inline-flex justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium focus:outline-none"
                       onClick={closeModal}
                     >
                       close

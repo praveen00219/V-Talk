@@ -33,16 +33,17 @@ import { useRef } from "react";
 // import { clearSelectChatAction } from "../Redux/Reducer/Chat/chat.action";
 import Spinner from "../Styles/Spinner";
 import { FiPaperclip, FiX } from "react-icons/fi";
-const SERVER_ACCESS_BASE_URL = process.env.REACT_APP_SERVER_ACCESS_BASE_URL;
+import SERVER_ACCESS_BASE_URL from "../config/serverConfig";
 
 const ENDPOINT = SERVER_ACCESS_BASE_URL;
-var socket, selectedChatCompare;
+var selectedChatCompare;
 
 const ChatWindow = () => {
   const dispatch = useDispatch();
   const inputRef = createRef();
 
   const messageEndRef = useRef(null);
+  const socketRef = useRef(null);
 
   // Added: quick emoji list, reaction grouper, and handlers to fix no-undef
   const quickEmojis = ["👍", "❤️", "😂", "😮", "😢", "🙏"];
@@ -204,20 +205,15 @@ const ChatWindow = () => {
     });
   };
 
-  const getUserId = () => {
-    if (loggedUser._id === sender?.users[0]._id) {
-      const arr = sender.users.reverse();
-      setUser(arr);
-    } else {
-      setUser(sender?.users);
-    }
-  };
-
-  // console.log(user)
-
+  // Order users so the other participant is first, WITHOUT mutating Redux state.
   useEffect(() => {
-    getUserId();
-  });
+    if (!loggedUser || !sender?.users) return;
+    if (loggedUser._id === sender.users[0]?._id) {
+      setUser([...sender.users].reverse());
+    } else {
+      setUser(sender.users);
+    }
+  }, [loggedUser, sender]);
 
   //  console.log(sender?.users)
 
@@ -226,12 +222,11 @@ const ChatWindow = () => {
     setNewMessage(e.target.value);
 
     // typing Indicator
-    if (!socketConnected) return;
+    if (!socketConnected || !socketRef.current) return;
 
     if (!typing) {
       setTyping(true);
-      socket.emit("typing", user[0]._id);
-      console.log(typing);
+      socketRef.current.emit("typing", user[0]._id);
     }
 
     let lastTypingTime = new Date().getTime();
@@ -241,7 +236,9 @@ const ChatWindow = () => {
       var timeDiff = timeNow - lastTypingTime;
 
       if (timeDiff >= timerLength && typing) {
-        socket.emit("stop typing", user[0]._id);
+        if (socketRef.current) {
+          socketRef.current.emit("stop typing", user[0]._id);
+        }
         setTyping(false);
       }
       // console.log(typing);
@@ -256,7 +253,9 @@ const ChatWindow = () => {
     const hasFiles = selectedFiles && selectedFiles.length > 0;
 
     if (!hasText && !hasFiles) {
-      socket.emit("stop typing", user[0]._id);
+      if (socketRef.current) {
+        socketRef.current.emit("stop typing", user[0]._id);
+      }
       alert("Please type a message or attach at least one file");
       return;
     }
@@ -281,38 +280,58 @@ const ChatWindow = () => {
   }, [senderUser]);
 
   useEffect(() => {
-    socket = io(ENDPOINT, {
-      withCredentials: true,
-      extraHeaders: {
-        "my-custom-header": "abcd",
-      },
-    });
-    socket.emit("setup", loggedUser);
-    socket.on("connected", () => setSocketConnected(true));
-    socket.on("typing", () => setIsTyping(true));
-    socket.on("stop typing", () => setIsTyping(false));
+    // Only create socket if it doesn't exist and user is logged in
+    if (!socketRef.current && loggedUser) {
+      socketRef.current = io(ENDPOINT, {
+        withCredentials: true,
+        extraHeaders: {
+          "my-custom-header": "abcd",
+        },
+      });
+      
+      socketRef.current.emit("setup", loggedUser);
+      socketRef.current.on("connected", () => setSocketConnected(true));
+      socketRef.current.on("typing", () => setIsTyping(true));
+      socketRef.current.on("stop typing", () => setIsTyping(false));
+    }
+
+    // Cleanup function to disconnect socket when component unmounts
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.off("connected");
+        socketRef.current.off("typing");
+        socketRef.current.off("stop typing");
+        socketRef.current.disconnect();
+        socketRef.current = null;
+      }
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loggedUser]);
 
   // listen for message updates (reactions/deletions)
   useEffect(() => {
     const handler = (updatedMessage) => {
       dispatch(setUpdatedMessage(updatedMessage));
     };
-    if (socket) socket.on("message updated", handler);
+    if (socketRef.current) {
+      socketRef.current.on("message updated", handler);
+    }
     return () => {
-      if (socket) socket.off("message updated", handler);
+      if (socketRef.current) {
+        socketRef.current.off("message updated", handler);
+      }
     };
   }, [dispatch]);
 
   useEffect(() => {
+    if (!socketRef.current) return;
+    
     const eventHandler = (newMessageRecieved) => {
       if (
         !selectedChatCompare ||
         selectedChatCompare._id !== newMessageRecieved.chat._id
       ) {
-        // we will give notification
-        console.log(newMessageRecieved);
+        // message for a different chat — could surface a notification here
       } else {
         setTimeout(() => {
           setCount(count + 1);
@@ -322,12 +341,14 @@ const ChatWindow = () => {
         // console.log(message);
       }
     };
-    socket.on("message recieved", eventHandler);
+    socketRef.current.on("message recieved", eventHandler);
 
     return () => {
-      socket.off("message recieved", eventHandler);
+      if (socketRef.current) {
+        socketRef.current.off("message recieved", eventHandler);
+      }
     };
-  });
+  }, [dispatch, count]);
 
   useEffect(() => {
     setSender(senderUser);
@@ -343,7 +364,9 @@ const ChatWindow = () => {
 
   useEffect(() => {
     setMessage(allMessage);
-    socket.emit("join chat", sender);
+    if (socketRef.current && sender) {
+      socketRef.current.emit("join chat", sender);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allMessage]);
 
@@ -354,13 +377,17 @@ const ChatWindow = () => {
   // for automatic scrolling down last message
   useEffect(() => {
     messageEndRef.current?.scrollIntoView({
-      behaviour: "smooth",
+      behavior: "smooth",
     });
   }, [message, newMessage]);
 
   useEffect(() => {
-    socket.emit("new message", createdMessage);
-    dispatch(updateGetAllChats(createdMessage));
+    if (socketRef.current && createdMessage) {
+      socketRef.current.emit("new message", createdMessage);
+    }
+    if (createdMessage) {
+      dispatch(updateGetAllChats(createdMessage));
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [createdMessage]);
 
@@ -472,7 +499,7 @@ const ChatWindow = () => {
                         {message.map((item, index) =>
                           isMyMessage(loggedUser, item) && item.sender.pic ? (
                             <>
-                              <li key={index} className="chat-list right">
+                              <li key={item._id} className="chat-list right">
                                 <div className="conversation-list">
                                   <div className="chat-avatar mr-2">
                                     <img
@@ -740,7 +767,7 @@ const ChatWindow = () => {
                             </>
                           ) : (
                             <>
-                              <li key={index} className="chat-list">
+                              <li key={item._id} className="chat-list">
                                 <div className="conversation-list">
                                   <div className="chat-avatar mr-2">
                                     <img
@@ -1273,6 +1300,23 @@ const Wrapper = styled.section`
     z-index: 100;
     left: 10px;
     bottom: 100px;
+    transform-origin: bottom left;
+    animation: emojiPop 0.22s ${({ theme }) => theme.motion.spring};
+  }
+  @keyframes emojiPop {
+    0% {
+      opacity: 0;
+      transform: translateY(12px) scale(0.96);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .emoji-picker {
+      animation: none;
+    }
   }
   .submit-btn {
     width: 50px;
@@ -1377,20 +1421,24 @@ const Wrapper = styled.section`
               height: 2.2rem;
             }
             .chat-wrap-content {
-              padding: 12px 20px;
-              background-color: ${({ theme }) => theme.colors.bg.primary};
+              padding: 12px 18px;
+              background-color: ${({ theme }) => theme.colors.bg.secondary};
               position: relative;
-              border-radius: 30px 0 25px 30px;
-              box-shadow: 0 2px 4px rgb(15 34 58 / 12%);
+              border-radius: 18px 18px 4px 18px;
+              box-shadow: ${({ theme }) => theme.colors.shadow.sm};
               color: ${({ theme }) => theme.colors.heading};
+              word-break: break-word;
+              overflow-wrap: anywhere;
             }
             .chat-wrap-content-left {
-              padding: 12px 20px;
-              background-color: ${({ theme }) => theme.colors.bg.primary};
+              padding: 12px 18px;
+              background-color: ${({ theme }) => theme.colors.bg.secondary};
               position: relative;
-              border-radius: 0 30px 25px 30px;
-              box-shadow: 0 2px 4px rgb(15 34 58 / 12%);
+              border-radius: 18px 18px 18px 4px;
+              box-shadow: ${({ theme }) => theme.colors.shadow.sm};
               color: ${({ theme }) => theme.colors.heading};
+              word-break: break-word;
+              overflow-wrap: anywhere;
             }
             .conversation-name {
               font-size: 12px;
@@ -1409,10 +1457,9 @@ const Wrapper = styled.section`
             }
             .chat-wrap-content {
               color: ${({ theme }) => theme.colors.white};
-              background-color: rgba(
-                ${({ theme }) => theme.colors.rgb.primary},
-                0.7
-              );
+              background: ${({ theme }) => theme.colors.accent.gradient};
+              border-radius: 18px 18px 4px 18px;
+              box-shadow: 0 4px 12px ${({ theme }) => theme.colors.boxShadow.primary};
             }
           }
         }
@@ -1430,8 +1477,14 @@ const Wrapper = styled.section`
       input {
         color: ${({ theme }) => theme.colors.heading};
         background-color: ${({ theme }) => theme.colors.bg.secondary};
+        border: 1px solid transparent;
+        border-radius: ${({ theme }) => theme.radius.pill};
+        transition: border-color 0.2s ${({ theme }) => theme.motion.ease},
+          box-shadow 0.2s ${({ theme }) => theme.motion.ease};
         &:focus {
           background-color: ${({ theme }) => theme.colors.bg.secondary};
+          border-color: ${({ theme }) => theme.colors.accent.solid};
+          box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.accent.ring};
         }
       }
       .dot-btn,
@@ -1450,14 +1503,17 @@ const Wrapper = styled.section`
       .links-list-items {
         .btn {
           color: #fff;
-          background-color: ${({ theme }) => theme.colors.primaryRgb};
-          &:hover {
-            background-color: rgb(
-              ${({ theme }) => theme.colors.rgb.primary},
-              0.8
-            );
-          }
+          background: ${({ theme }) => theme.colors.accent.gradient};
           border-color: ${({ theme }) => theme.colors.primaryRgb};
+          transition: transform 0.15s ${({ theme }) => theme.motion.easeOut},
+            box-shadow 0.2s ${({ theme }) => theme.motion.ease};
+          &:hover {
+            transform: translateY(-1px) scale(1.03);
+            box-shadow: 0 6px 16px ${({ theme }) => theme.colors.boxShadow.primary};
+          }
+          &:active {
+            transform: scale(0.96);
+          }
         }
       }
     }

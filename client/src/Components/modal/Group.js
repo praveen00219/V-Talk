@@ -169,7 +169,7 @@ const Group = () => {
                 <Dialog.Panel className="dialog-panel w-full max-w-md transform overflow-hidden rounded-2xl p-6 text-left align-middle shadow-xl transition-all">
                   <Dialog.Title
                     as="h3"
-                    className="text-lg text-center font-medium leading-6 text-gray-900"
+                    className="text-lg text-center font-medium leading-6"
                   >
                     Create New Group
                   </Dialog.Title>
@@ -181,14 +181,14 @@ const Group = () => {
                       <div className="mb-6">
                         <label
                           htmlFor="base-input"
-                          className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                          className="block mb-2 text-sm font-medium"
                         >
                           Group Name
                         </label>
                         <input
                           type="text"
                           id="base-input"
-                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                          className="input text-sm block w-full"
                           placeholder="e.g. My Group"
                           value={groupChatName}
                           onChange={(e) => setGroupChatName(e.target.value)}
@@ -197,14 +197,14 @@ const Group = () => {
                       <div className="mb-6">
                         <label
                           htmlFor="base-input"
-                          className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                          className="block mb-2 text-sm font-medium"
                         >
                           Search User
                         </label>
                         <input
                           type="text"
                           id="base-input"
-                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                          className="input text-sm block w-full"
                           placeholder="Add User e.g. John , Jane"
                           value={search}
                           onChange={(e) => setSearch(e.target.value)}
@@ -217,12 +217,12 @@ const Group = () => {
                               <li key={index} className="inline-flex flex-wrap">
                                 <span
                                   id="badge-dismiss-default"
-                                  className="inline-flex items-center px-2 py-1 mr-2 text-sm font-medium text-blue-800 bg-blue-100 rounded dark:bg-blue-900 dark:text-blue-300"
+                                  className="user-badge inline-flex items-center px-2 py-1 mr-2 mb-2 text-sm font-medium rounded"
                                 >
                                   {item.name}
                                   <button
                                     type="button"
-                                    className="inline-flex items-center p-0.5 ml-2 text-sm text-blue-400 bg-transparent rounded-sm hover:bg-blue-200 hover:text-blue-900 dark:hover:bg-blue-800 dark:hover:text-blue-300"
+                                    className="badge-remove inline-flex items-center p-0.5 ml-2 text-sm bg-transparent rounded-sm"
                                     data-dismiss-target="#badge-dismiss-default"
                                     aria-label="Remove"
                                     onClick={() => deleteSelectedUser(item)}
@@ -317,15 +317,14 @@ const Group = () => {
                   <div className="modal-footer flex justify-end mt-3">
                     <button
                       type="button"
-                      className="close-btn mr-4 inline-flex justify-center rounded-md border border-transparent  px-4 py-2 text-sm font-medium text-cyan-500  focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                      className="close-btn mr-4 inline-flex justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium focus:outline-none"
                       onClick={closeModal}
                     >
                       Cancel
                     </button>
                     <button
                       type="button"
-                      className="btn bg-cyan-500 rounded px-4"
-                      // disabled
+                      className="btn rounded px-4"
                       onClick={() => handleCreateNewGroupChat()}
                     >
                       {loading1 ? (

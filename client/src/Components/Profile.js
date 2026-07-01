@@ -17,12 +17,14 @@ const Profile = (props) => {
           <p>Personal Information</p>
         </div>
         <div className="icon p-1 flex items-start h-full justify-start cursor-pointer">
-              <div
-                className="p-1 bg-white text-black rounded-full"
+              <button
+                type="button"
+                aria-label="Close profile"
+                className="close-x p-1 rounded-full"
                 onClick={props.closeModal}
               >
                 <RxCross2 />
-              </div>
+              </button>
         </div>
       </div>
       <div className="user-details overflow-y-scroll ">
@@ -80,6 +82,15 @@ const Wrapper = styled.div`
   .chat-menu{
     .icon{
       display: none;
+    }
+    .close-x {
+      background-color: ${({ theme }) => theme.colors.bg.secondary};
+      color: ${({ theme }) => theme.colors.heading};
+      transition: background-color 0.2s ${({ theme }) => theme.motion.ease};
+      &:hover {
+        background-color: ${({ theme }) => theme.colors.accent.soft};
+        color: ${({ theme }) => theme.colors.primaryRgb};
+      }
     }
   }
   .user-details{

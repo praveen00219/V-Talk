@@ -71,11 +71,21 @@ const Setting = () => {
                     </Disclosure.Button>
                     <Disclosure.Panel className="disclosure-Panel pt-2 pb-2 text-sm">
                       
-                    <div className="h-full flex justify-start items-center w-full">
+                    <div className="h-full flex justify-start items-center gap-2 flex-wrap w-full" role="radiogroup" aria-label="Accent color">
                     {
                       colors.map((item)=>{
-                       return <button className={color === item.color ? "btn-style rounded-full active flex justify-center items-center" : "btn-style rounded-full flex justify-center items-center"} onClick={() => activeColor(item.color)} style={{backgroundColor: item.color}} key={item.id}>
-                       {color === item.color ? <FaCheck className="checkStyle" /> : null}
+                       const isActive = color === item.color;
+                       return <button
+                        className={isActive ? "btn-style swatch rounded-full active flex justify-center items-center" : "btn-style swatch rounded-full flex justify-center items-center"}
+                        onClick={() => activeColor(item.color)}
+                        style={{backgroundColor: item.color}}
+                        key={item.id}
+                        role="radio"
+                        aria-checked={isActive}
+                        aria-label={`${item.name} accent`}
+                        title={item.name}
+                      >
+                       {isActive ? <FaCheck className="checkStyle" /> : null}
                         </button>
                       })
                     }
@@ -120,6 +130,27 @@ const Wrapper = styled.div`
   }
   .setting-block{
     border-bottom: 1px solid rgba(${({ theme }) => theme.colors.border});
+  }
+
+  .swatch {
+    width: 2rem;
+    height: 2rem;
+    border: 2px solid transparent;
+    box-shadow: ${({ theme }) => theme.colors.shadow.sm};
+    cursor: pointer;
+    transition: transform 0.18s ${({ theme }) => theme.motion.spring},
+      box-shadow 0.2s ease;
+    &:hover {
+      transform: scale(1.12);
+    }
+    &.active {
+      border-color: ${({ theme }) => theme.colors.bg.primary};
+      box-shadow: 0 0 0 2px ${({ theme }) => theme.colors.accent.solid};
+    }
+    .checkStyle {
+      color: #fff;
+      font-size: 0.8rem;
+    }
   }
 
   .user-profile {

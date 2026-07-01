@@ -89,10 +89,9 @@ const Verification = () => {
         {status ? (
           <>
             <div className="flex flex-col items-center justify-center w-2/4 ">
-              <MdOutlineMarkEmailRead className="mail-icon" color="#8af859" />
+              <MdOutlineMarkEmailRead className="mail-icon" color="#16a34a" />
               <p className="my-2">Your Email is Verified Now.</p>
             </div>
-            <h1></h1>
           </>
         ) : (
           <>
@@ -170,7 +169,7 @@ const Verification = () => {
                               <input
                                 type="email"
                                 id="base-input"
-                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+                                className="input text-sm block w-full"
                                 placeholder="e.g. test@gmail.com"
                                 value={userData.email}
                                 name="email"
@@ -190,8 +189,7 @@ const Verification = () => {
                           </button>
                           <button
                             type="button"
-                            className="btn bg-cyan-500 rounded px-4"
-                            // disabled
+                            className="btn rounded px-4"
                             onClick={() => sendMail()}
                           >
                             Send
@@ -221,18 +219,22 @@ const Wrapper = styled.section`
   max-width: 100vw;
 
   .mail-icon {
-    font-size: 20rem;
+    font-size: clamp(8rem, 22vw, 14rem);
   }
   button {
-    font-size: 1.1rem;
-    color: ${({ theme }) => theme.colors.heading};
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #fff;
     margin: 0.5rem;
     padding: 0.6rem 2rem;
-    border-radius: 10px;
-    background-color: ${({ theme }) => theme.colors.cyan};
-    transition: all 0.4s ease-in-out;
+    border-radius: ${({ theme }) => theme.radius.md};
+    background: ${({ theme }) => theme.colors.accent.gradient};
+    box-shadow: ${({ theme }) => theme.colors.shadow.sm};
+    transition: transform 0.3s ${({ theme }) => theme.motion.easeOut},
+      box-shadow 0.3s ease;
     &:hover {
-      transform: translateY(-5px);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 24px ${({ theme }) => theme.colors.boxShadow.primary};
     }
   }
   h1 {
