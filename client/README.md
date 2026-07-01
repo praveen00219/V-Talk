@@ -1,70 +1,117 @@
-# Getting Started with Create React App
+# V-Talk — Client
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+The web front-end for **V-Talk**, a modern real-time chat application. Built with
+React 18 (Create React App), it features a marketing landing page, a full auth
+flow, and a real-time chat interface — all sharing one cohesive **blue/cyan
+design language** with light/dark themes and a customizable accent color.
 
-## Available Scripts
+> Looking for the API/socket server? See the `server/` package at the repo root.
 
-In the project directory, you can run:
+## Tech stack
 
-### `npm start`
+| Area | Libraries |
+| --- | --- |
+| UI | React 18, React Router 6 |
+| State | Redux + redux-thunk (redux-logger in dev) |
+| Styling | Tailwind CSS 3 + styled-components (theme tokens) |
+| Motion | framer-motion, AOS (scroll), react-wavify |
+| Realtime | socket.io-client |
+| Networking | axios |
+| UX | @headlessui/react, react-toastify, react-icons, emoji-mart, swiper, moment |
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Getting started
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+```bash
+# from the client/ directory
+npm install
+npm start
+```
 
-### `npm test`
+The app runs at [http://localhost:3000](http://localhost:3000) and talks to the
+backend at the URL configured below (default `http://localhost:4000`). Start the
+`server/` package as well for a fully working app.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Environment
 
-### `npm run build`
+Create `client/.env` to point the client at your backend. The base URL is the
+single source of truth for both REST (axios) and the realtime socket
+([src/config/serverConfig.js](src/config/serverConfig.js)):
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```env
+REACT_APP_SERVER_ACCESS_BASE_URL=http://localhost:4000
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+If unset, it falls back to `http://localhost:4000`.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Scripts
 
-### `npm run eject`
+| Command | Description |
+| --- | --- |
+| `npm start` | Run the dev server with hot reload. |
+| `npm run build` | Production build to `build/` (minified, hashed). |
+| `npm test` | Run the test runner in watch mode. |
+| `npm run eject` | Eject CRA config (one-way — avoid unless necessary). |
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+> Tip: `npm run build` treats lint warnings as errors only when `CI=true`. To
+> build locally without failing on warnings, run `CI=false npm run build`.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Design system
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+The UI is driven by design tokens rather than scattered hardcoded colors.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+- **Theme tokens** — [src/Components/Themes.js](src/Components/Themes.js) exports
+  `makeLightTheme(accent)` / `makeDarkTheme(accent)` plus shared `spacing`,
+  `radius`, `motion`, and `shadow` scales. Themes are built from the
+  user-selected accent color, so the picker drives CTAs, gradients, focus rings,
+  scrollbars, and message bubbles everywhere. They are provided to the app via
+  the styled-components `ThemeProvider` in [src/App.js](src/App.js).
+- **Reusable primitives** — in [src/Styles/](src/Styles/):
+  - `Button.js` — themed button with `$variant` (`primary`/`secondary`/`ghost`/`danger`/`icon`), `$block`, and a built-in `loading` spinner (default export `AppButton`).
+  - `Input.js` — labeled field with error state and an accessible password toggle.
+  - `Card.js` — surface primitive (`solid` / `$glass`).
+  - `Skeleton.js` — shimmer placeholder for loading states.
+  - `motion.js` — shared framer-motion presets (`fadeInUp`, `stagger`, `scaleIn`, …).
+- **Global styles** — [src/GlobalStyle/GlobalStyle.js](src/GlobalStyle/GlobalStyle.js)
+  and [src/index.css](src/index.css) provide the theme-aware body, fluid
+  typography, `:focus-visible` rings, and a global `prefers-reduced-motion` guard.
 
-## Learn More
+### Theming & accessibility
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+- **Dark mode** is toggled via Redux (`themeReducer`) and persisted to
+  `localStorage`; the whole UI cross-fades on switch.
+- **Accent color** is chosen from cool presets in **Settings**
+  ([src/Components/Setting.js](src/Components/Setting.js)); the choice is stored in
+  `localStorage` and flows through every theme token.
+- **Reduced motion** is honored app-wide (CSS guard + framer-motion
+  `MotionConfig reducedMotion="user"`), so animations calm down when the OS
+  requests it.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## Project structure
 
-### Code Splitting
+```
+src/
+  App.js                 App shell, routes, ThemeProvider + MotionConfig
+  index.css              Base + reduced-motion guard
+  Pages/                 HomePage, AuthPage
+  Layout/                DefaultLayout HOC
+  Components/
+    Auth/                Login, Signup, Forgot/Reset, Verify screens
+    modal/               Group, Invite, ProfileEdit, ImageEdit, NetworkError
+    Welcome, HeroSection, Features, Technologies, Contact, Footer, Nav, Header
+    Chat, ChatWindow, ChatMenu, SideMenu, UserList, Contacts, Setting, ...
+    Themes.js            Theme token factory
+  Styles/                Button, Input, Card, Skeleton, Spinner, motion presets
+  GlobalStyle/           createGlobalStyle theme-aware globals
+  Redux/                 Store, reducers/actions (Auth, User, Chat, Message,
+                         Theme, SetColor, Tab, ProfileImage)
+  config/serverConfig.js Backend base URL (env-driven)
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## Features
 
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- Email/password auth with signup, login, email verification, and password reset.
+- Real-time 1-to-1 and group messaging over socket.io, with emoji, media/file
+  sharing, reactions, and a typing indicator.
+- Contacts, search, group management, and profile/avatar editing.
+- Light/dark themes with a customizable accent color.
+- Responsive layout for mobile, tablet, and desktop.

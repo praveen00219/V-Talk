@@ -2,7 +2,10 @@
 
 ## Project Overview
 
-V-Talk is a modern chat Application that is build using the MERN Stack stands for MongoDB, ExpressJS, ReactJS, Redux, NodeJS. It is a real-time chat application that allows users to chat with each other in real-time. It also allows users to create groups and chat with multiple users at once.
+V-Talk is a modern real-time chat application built on the **MERN stack**
+(MongoDB, Express, React + Redux, Node.js). Users can chat one-to-one or in
+groups in real time, react with emoji, share media, and personalize the app with
+light/dark themes and a customizable accent color.
 
 ## Live Website
 
@@ -10,131 +13,118 @@ V-Talk is a modern chat Application that is build using the MERN Stack stands fo
 
 ## Features
 
-- **Secure authentication with JWT**: Sign up/sign in, email verification, and forgot/reset password flows
-- Real-time messaging with **Socket.IO supporting** one-to-one and group chats
-- **Group chat management**: Create groups (minimum 3 users), rename groups, add/remove members, and group admin controls
-- **Message interactions**: Emoji reactions, delete for me, and delete for everyone (sender-only)
-- **Typing indicators and live message updates** across participants
-- **User discovery**: Search users by name or email and start chats instantly
-- **Profile management**: Update avatar (Cloudinary) and profile details; view others' profiles
-- **Theming and personalization**: Global dark/light mode and per-chat chat themes
-- **Email invitations**: Invite friends via email to join the platform
+- **Secure authentication with JWT**: sign up / sign in, email verification, and forgot/reset password flows
+- **Real-time messaging with Socket.IO**: one-to-one and group chats with live updates
+- **Group chat management**: create groups (minimum 3 users), rename groups, add/remove members, and admin controls
+- **Message interactions**: emoji reactions, delete for me, and delete for everyone (sender-only)
+- **Typing indicators** and live message delivery across participants
+- **User discovery**: search users by name or email and start chats instantly
+- **Profile management**: update avatar (Cloudinary) and profile details; view others' profiles
+- **Email invitations**: invite friends via email to join the platform
+- **Theming & personalization**: light/dark mode plus a customizable accent color
 - **Fully responsive UI** for mobile, tablet, and desktop
+
+## Design & UX
+
+The interface is built on a unified **blue/cyan design system** rather than
+scattered ad-hoc styling:
+
+- **Design tokens** — a single theme factory (`client/src/Components/Themes.js`)
+  defines color, spacing, radius, motion, and shadow scales for light and dark
+  modes. The chosen accent color flows through every token (buttons, gradients,
+  focus rings, scrollbars, message bubbles).
+- **Reusable primitives** — themed `Button` (variants + loading), `Input`, `Card`,
+  `Skeleton`, and shared framer-motion presets in `client/src/Styles/`.
+- **Accessible & motion-aware** — app-wide `:focus-visible` rings, ARIA labels on
+  icon buttons, and full `prefers-reduced-motion` support.
+
+See [`client/README.md`](client/README.md) for front-end architecture details.
 
 ## Tech Stack
 
-**Client:** React, Redux, TailwindCSS
+**Client:** React 18, React Router, Redux (thunk), Tailwind CSS, styled-components, framer-motion, socket.io-client, axios
 
-**Server:** Node, Express
+**Server:** Node.js, Express, Socket.IO, MongoDB + Mongoose, JWT, Cloudinary, Nodemailer
 
-**Deployment:** Vercel(Frontend), Backend(Render)
+**Deployment:** Vercel (frontend) · Render (backend)
 
 ## Installation Guide
 
-To Run V-Talk project on local system follow the simple steps:
+To run V-Talk on your local machine, follow these steps.
 
-### Step-1
-
-clone this project on your local system
+### Step 1 — Clone the repository
 
 ```bash
-  git clone https://github.com/praveen00219/V-Talk.git
-  cd V-Talk
+git clone https://github.com/praveen00219/V-Talk.git
+cd V-Talk
 ```
 
-### Step-2 Installing Dependency
+### Step 2 — Install dependencies
 
-Installing Dependency for client and Server both
+Install for the client and the server (in separate terminals or one after the other):
 
 ```bash
-  cd V-Talk
+# client
+cd client
+npm install
+
+# server
+cd ../server
+npm install
 ```
 
-To Installing Dependency for client
+### Step 3 — Add environment variables
+
+Create a `.env` file in each package. Templates and setup instructions live in
+[`server/.env.example`](server/.env.example).
+
+**Client** (`client/.env`) — defaults to `http://localhost:4000` if omitted:
+
+| Variable | Description |
+| --- | --- |
+| `REACT_APP_SERVER_ACCESS_BASE_URL` | Backend base URL for REST + sockets |
+
+**Server** (`server/.env`):
+
+| Variable | Description |
+| --- | --- |
+| `NODE_ENV` | `development` or `production` |
+| `PORT` | Server port (default `4000`) |
+| `DB_NAME` | Database name (e.g. `V-Talk`) |
+| `MONGO_URL` | MongoDB Atlas connection string |
+| `JWT_SECRET` | Long random string for signing tokens |
+| `CLOUDINARY_CLOUD_NAME` | Cloudinary account name |
+| `CLOUDINARY_API_KEY` | Cloudinary API key |
+| `CLOUDINARY_API_SECRET` | Cloudinary API secret |
+| `SMPT_SERVICES` | Mail service (e.g. `gmail`) |
+| `SMPT_MAIL` | Sender email address |
+| `SMPT_PASSWORD` | Mail app password (not the account password) |
+| `SMPT_HOST` | SMTP host (e.g. `smtp.gmail.com`) |
+| `SMPT_PORT` | SMTP port (e.g. `587`) |
+| `CLIENT_ACCESS_URL` | Allowed client origin for CORS + sockets |
+
+> Never commit real secrets. If a secret is ever exposed, rotate it in the
+> provider dashboard.
+
+### Step 4 — Start the application
+
+**Frontend (client):**
 
 ```bash
-  cd client
-  npm i
+cd client
+npm start
 ```
 
-To Installing Dependency for server
+The client runs at [http://localhost:3000](http://localhost:3000).
+
+**Backend (server):**
 
 ```bash
-  cd server
-  npm i
+cd server
+npm start        # or: npm run dev  (auto-restart on changes)
 ```
 
-### Step-3 Adding Environment Variables
-
-To run this project, you will need to add the following environment variables to your .env file
-
-### Environment Variables for Client
-
-`REACT_APP_SERVER_ACCESS_BASE_URL`
-
-### Environment Variables for Server
-
-`MONGO_URL`
-
-`JWT_SECRET`
-
-`CLOUDINARY_CLOUD_NAME`
-
-`CLOUDINARY_API_KEY`
-
-`CLOUDINARY_API_SECRET`
-
-`SMPT_SERVICES`
-
-`SMPT_MAIL`
-
-`SMPT_PASSWORD`
-
-`SMPT_HOST`
-
-`SMPT_PORT`
-
-`CLIENT_ACCESS_URL`
-
-### Step-4 Start the Application on local machine
-
-#### To Start Frontend Server(or client):
-
-Move into client Directory by
-
-```bash
-  cd client
-```
-
-start the Frontend server by
-
-```bash
-  npm start
-```
-
-after ruunning this command, It will start after some time.
-
-#### To Start Backend Server(or server):
-
-Move into server Directory by
-
-```bash
-  cd server
-```
-
-start the Backend server by
-
-```bash
-  npm start
-```
-
-To start the server automatic after every changes we have to run this command :
-
-```bash
-  npm run dev
-```
-
-after starting the both Frontend and Backend server you can access application on the browser.
+With both servers running, open the client in your browser to use the app.
 
 ## Screenshots
 
@@ -148,4 +138,4 @@ after starting the both Frontend and Backend server you can access application o
 
 ## Feedback
 
-If you have any feedback or Suggestion, please reach out to us at praveen2192000@gmail.com
+If you have any feedback or suggestions, please reach out at praveen2192000@gmail.com
