@@ -20,6 +20,13 @@ const userSchema = mongoose.Schema(
     is_verified: { type: Boolean, default: false },
     // updated whenever the password changes; used to invalidate older tokens
     passwordChangedAt: { type: Date },
+    // privacy: whether others may see this user's online status & last seen
+    showOnlineStatus: { type: Boolean, default: true },
+    // stamped when the user's last socket disconnects
+    lastSeen: { type: Date },
+    // E2EE: ECDH P-256 public key (JWK JSON) generated in the user's browser;
+    // the matching private key never leaves that browser
+    publicKey: { type: String },
   },
   { timestamps: true }
 );

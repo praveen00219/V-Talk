@@ -6,11 +6,7 @@ import ChatWindow from "./ChatWindow";
 import SideMenu from "./SideMenu";
 import { ToastContainer} from "react-toastify";
 import NetworkError from "./modal/NetworkError";
-import { useSelector } from "react-redux";
 const Chat = () => {
-
-  const isNetworkError = useSelector((globalstate)=> globalstate.message.NetworkError)
-  
   return (
     <NetworkError>
      <ToastContainer />

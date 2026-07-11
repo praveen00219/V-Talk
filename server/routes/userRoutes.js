@@ -9,6 +9,8 @@ const {
   resendVerificationLink,
   forgotPassword,
   updateProfile,
+  updateSettings,
+  updatePublicKey,
   resetPassword,
   invitingUser,
 } = require("../controllers/userControllers.js");
@@ -31,6 +33,8 @@ router.route("/verify").put(verifyEmail);
 router.route("/forgotpassword").post(emailLimiter, forgotPassword);
 router.route("/resetpassword").post(authLimiter, resetPassword);
 router.route("/updateprofile").put(protect, updateProfile);
+router.route("/settings").put(protect, updateSettings);
+router.route("/publickey").put(protect, updatePublicKey);
 router.route("/invitefriends").post(protect, emailLimiter, invitingUser);
 router
   .route("/profilepic")

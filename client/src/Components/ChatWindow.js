@@ -12,6 +12,8 @@ import moment from "moment";
 import {
   getSender,
   getSenderPic,
+  getOtherUser,
+  formatLastSeen,
   isMyMessage,
 } from "../HelperFunction/chat.Helper";
 import { useDispatch } from "react-redux";
@@ -23,6 +25,13 @@ import {
   deleteMessageForMe,
   deleteMessageForEveryone,
 } from "../Redux/Reducer/Message/message.action";
+import {
+  setOnlineUsers,
+  userOnline,
+  userOffline,
+} from "../Redux/Reducer/Presence/presence.action";
+import { encryptTextForUser } from "../HelperFunction/e2ee.Helper";
+import EncryptedText from "./EncryptedText";
 
 import { Dialog, Menu, Transition } from "@headlessui/react";
 import UserProfile from "./SlideMenu/UserProfile";
@@ -174,6 +183,31 @@ const ChatWindow = () => {
 
   const loading = useSelector((globalState) => globalState.message.isLoading);
 
+  const onlineUserIds = useSelector(
+    (globalState) => globalState.presence.onlineUserIds
+  );
+  const lastSeenById = useSelector(
+    (globalState) => globalState.presence.lastSeenById
+  );
+
+  // reciprocity: hide everyone's presence when my own toggle is off
+  const presenceVisible = loggedUser?.showOnlineStatus !== false;
+  const otherUser =
+    sender && !sender.isGroupChat
+      ? getOtherUser(loggedUser, sender.users)
+      : null;
+  const otherOnline = otherUser
+    ? onlineUserIds.includes(otherUser._id)
+    : false;
+  // live socket override wins over the fetch-time snapshot, gated by THEIR toggle
+  const otherLastSeen = otherUser
+    ? Object.prototype.hasOwnProperty.call(lastSeenById, otherUser._id)
+      ? lastSeenById[otherUser._id]
+      : otherUser.showOnlineStatus !== false
+      ? otherUser.lastSeen
+      : null
+    : null;
+
   function closeModal() {
     setIsOpen(false);
   }
@@ -264,6 +298,28 @@ const ChatWindow = () => {
       content: newMessage,
       ...(hasFiles ? { attachments: selectedFiles } : {}),
     };
+
+    // E2EE: encrypt 1-on-1 text when the partner has published a public key
+    if (hasText && !sender.isGroupChat) {
+      const otherUser = getOtherUser(loggedUser, sender.users);
+      if (otherUser?.publicKey) {
+        try {
+          const encryptedData = await encryptTextForUser(
+            loggedUser._id,
+            otherUser,
+            newMessage
+          );
+          messageData.content = encryptedData.content;
+          messageData.iv = encryptedData.iv;
+          messageData.encrypted = true;
+        } catch (error) {
+          console.error("encryption failed:", error);
+          alert("Could not encrypt the message. Please try again.");
+          return;
+        }
+      }
+    }
+
     setNewMessage("");
     clearSelectedFiles();
     await dispatch(sendMessge(messageData));
@@ -289,18 +345,36 @@ const ChatWindow = () => {
         },
       });
       
-      socketRef.current.emit("setup", loggedUser);
+      // re-emit setup on every (re)connect so the server's presence registry
+      // survives socket.io auto-reconnects
+      socketRef.current.on("connect", () => {
+        socketRef.current.emit("setup", loggedUser);
+      });
       socketRef.current.on("connected", () => setSocketConnected(true));
       socketRef.current.on("typing", () => setIsTyping(true));
       socketRef.current.on("stop typing", () => setIsTyping(false));
+      socketRef.current.on("online users", (userIds) =>
+        dispatch(setOnlineUsers(userIds))
+      );
+      socketRef.current.on("user online", (userId) =>
+        dispatch(userOnline(userId))
+      );
+      socketRef.current.on("user offline", (payload) =>
+        dispatch(userOffline(payload))
+      );
     }
 
-    // Cleanup function to disconnect socket when component unmounts
+    // Cleanup when unmounting or when loggedUser changes (e.g. after a settings
+    // save): the socket is recreated and presence converges server-side.
     return () => {
       if (socketRef.current) {
+        socketRef.current.off("connect");
         socketRef.current.off("connected");
         socketRef.current.off("typing");
         socketRef.current.off("stop typing");
+        socketRef.current.off("online users");
+        socketRef.current.off("user online");
+        socketRef.current.off("user offline");
         socketRef.current.disconnect();
         socketRef.current = null;
       }
@@ -463,15 +537,21 @@ const ChatWindow = () => {
                                     </span>
                                   </>
                                 ))
-                              ) : (
-                                <>
-                                  {/* {socketConnected ? (
-                                    <>offline</>
-                                  ) : (
-                                    <>Offline</>
-                                  )} */}
-                                </>
-                              )}
+                              ) : presenceVisible && otherUser ? (
+                                otherOnline ? (
+                                  <span className="presence-label online">
+                                    Online
+                                  </span>
+                                ) : otherLastSeen ? (
+                                  <span className="presence-label">
+                                    last seen {formatLastSeen(otherLastSeen)}
+                                  </span>
+                                ) : (
+                                  <span className="presence-label">
+                                    Offline
+                                  </span>
+                                )
+                              ) : null}
                             </small>
                           </p>
                         </div>
@@ -517,7 +597,11 @@ const ChatWindow = () => {
                                               This message was deleted
                                             </em>
                                           ) : (
-                                            item.content
+                                            <EncryptedText
+                                              message={item}
+                                              chat={sender}
+                                              loggedUser={loggedUser}
+                                            />
                                           )}
                                         </span>
                                         
@@ -837,7 +921,11 @@ const ChatWindow = () => {
                                               This message was deleted
                                             </em>
                                           ) : (
-                                            item.content
+                                            <EncryptedText
+                                              message={item}
+                                              chat={sender}
+                                              loggedUser={loggedUser}
+                                            />
                                           )}
                                         </span>
                                         {item.reactions &&
@@ -1391,6 +1479,13 @@ const Wrapper = styled.section`
       color: ${({ theme }) => theme.colors.heading};
       border-bottom: 1px solid rgba(${({ theme }) => theme.colors.border}, 0.3);
       animation: fadeInLeft 0.5s;
+      .presence-label {
+        color: ${({ theme }) => theme.colors.text.secondary};
+        &.online {
+          color: ${({ theme }) => theme.colors.success};
+          font-weight: 600;
+        }
+      }
     }
     .chat-conversation {
       overflow-y: scroll;

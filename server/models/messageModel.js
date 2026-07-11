@@ -4,6 +4,10 @@ const messageModel = mongoose.Schema(
   {
     sender: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     content: { type: String, trim: true },
+    // E2EE: when true, content is AES-GCM ciphertext (base64) and iv is the
+    // base64 nonce; the server never sees the plaintext
+    encrypted: { type: Boolean, default: false },
+    iv: { type: String },
     chat: { type: mongoose.Schema.Types.ObjectId, ref: "Chat" },
     // reactions will store one reaction per user
     reactions: [

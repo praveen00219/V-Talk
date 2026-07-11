@@ -1,0 +1,3 @@
+export const SET_ONLINE_USERS = "SET_ONLINE_USERS";
+export const USER_ONLINE = "USER_ONLINE";
+export const USER_OFFLINE = "USER_OFFLINE";

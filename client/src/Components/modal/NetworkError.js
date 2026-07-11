@@ -1,37 +1,27 @@
 import React from 'react';
-import {Detector} from "react-detect-offline"
 import styled from 'styled-components';
+import useOnlineStatus from '../../hooks/useOnlineStatus';
 
 const NetworkError = (props) => {
-  
-//   const Refresh = () =>{
-//     window.location.reload();
-//   }
+  const online = useOnlineStatus();
+
+  if (online) return <>{props.children}</>;
+
   return (
-   <>
-    <Detector
-        render = {({online})=>(
-            online ? props.children :
-            <Wrapper>
-              <div className='container bg-black w-screen h-screen  p-10'>
-                <div className='wrapper flex flex-col justify-center items-center w-full h-full p-5'>
-                <div className="title text-center">
-                    <h1>Whoops!</h1>
-                </div>
-                <div className="description text-center mt-5">
-                    <p className=' text-lg text-center'>There seems to be a connection with your network connection</p>
-                </div>
-                {/* <div className="btn text-center cursor-pointer" onClick={()=>Refresh()}>
-                    <span className='text-xl'>Try Again</span>
-                </div> */}
-                </div>
-              </div>
-             </Wrapper>
-        )}
-    />
-   </>
-  )
-}
+    <Wrapper>
+      <div className='container bg-black w-screen h-screen  p-10'>
+        <div className='wrapper flex flex-col justify-center items-center w-full h-full p-5'>
+          <div className="title text-center">
+            <h1>Whoops!</h1>
+          </div>
+          <div className="description text-center mt-5">
+            <p className=' text-lg text-center'>There seems to be a problem with your network connection</p>
+          </div>
+        </div>
+      </div>
+    </Wrapper>
+  );
+};
 
 export default NetworkError;
 
@@ -46,4 +36,4 @@ const Wrapper = styled.div`
 .title.h1{
     color: ${({ theme }) => theme.colors.heading};
 }
-`
+`;

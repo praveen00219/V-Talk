@@ -1,12 +1,23 @@
 import React from "react";
 import styled from "styled-components";
-import { getSender, getSenderPic } from "../HelperFunction/chat.Helper";
+import { useSelector } from "react-redux";
+import {
+  getSender,
+  getSenderPic,
+  getOtherUser,
+} from "../HelperFunction/chat.Helper";
 
 import moment from "moment";
 import Highlighter from "react-highlight-words";
 
 const UserList = ({ searchOpen, query , chatList, chat, loggedUser, result, setSelectedChat }) => {
-  
+
+  const onlineUserIds = useSelector(
+    (globalState) => globalState.presence.onlineUserIds
+  );
+  // reciprocity: hide everyone's presence when my own toggle is off
+  const presenceVisible = loggedUser?.showOnlineStatus !== false;
+
   const userChatShow = () => {
     document
       .getElementById("user-chat")
@@ -54,6 +65,13 @@ const UserList = ({ searchOpen, query , chatList, chat, loggedUser, result, setS
                         }
                         alt="user_logo"
                       />
+                      {presenceVisible &&
+                      !item.isGroupChat &&
+                      onlineUserIds.includes(
+                        getOtherUser(loggedUser, item.users)?._id
+                      ) ? (
+                        <span className="online-dot" aria-label="online" />
+                      ) : null}
                     </div>
                     <div className="details w-3/4">
                       <Highlighter
@@ -84,7 +102,9 @@ const UserList = ({ searchOpen, query , chatList, chat, loggedUser, result, setS
                         <span className="text-xs truncate">
                           {" "}
                           {item.latestMessage != null
-                            ? item.latestMessage.content
+                            ? item.latestMessage.encrypted
+                              ? "🔒 Message"
+                              : item.latestMessage.content
                             : ""}
                         </span>
                       </p>
@@ -185,6 +205,16 @@ const Wrapper = styled.section`
         left: 0;
         width: 50px;
         height: 50px;
+        .online-dot {
+          position: absolute;
+          bottom: 0;
+          right: 2px;
+          width: 12px;
+          height: 12px;
+          border-radius: 50%;
+          background: ${({ theme }) => theme.colors.success};
+          border: 2px solid ${({ theme }) => theme.colors.bg.primary};
+        }
       }
       .details {
         padding: 12px 12px 12px 60px;

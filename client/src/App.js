@@ -17,6 +17,7 @@ import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { getMySelf } from "./Redux/Reducer/User/user.action";
 import { fetchChats } from "./Redux/Reducer/Chat/chat.action";
+import { ensureE2EEKeys } from "./HelperFunction/e2ee.Helper";
 import Verification from "./Components/Verification";
 import Verify from "./Components/Verify";
 
@@ -50,7 +51,7 @@ function App() {
   const darkThemeEnabled = useSelector(
     (state) => state.themeReducer.darkThemeEnabled
   );
-  // const user = useSelector((globalState) => globalState.user.userDetails);
+  const user = useSelector((globalState) => globalState.user.userDetails);
 
   const ThemeColor = useSelector((state) => state.setColorReducer.themeColor);
 
@@ -76,6 +77,17 @@ function App() {
     // run once on mount; localStorage is a stable reference, not a real dependency
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // E2EE bootstrap: once logged in, make sure this browser has a keypair and
+  // the server has its public key
+  useEffect(() => {
+    if (user && user._id) {
+      ensureE2EEKeys(user).catch((error) =>
+        console.error("E2EE key setup failed:", error)
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user && user._id]);
 
   // useEffect(() => {
   //   if (user) {

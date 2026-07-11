@@ -12,6 +12,8 @@ const chatRoutes = require("./routes/chatRoutes.js");
 const userRoutes = require("./routes/userRoutes.js");
 const messageRoutes = require("./routes/messageRoutes.js");
 const { apiLimiter } = require("./middleware/rateLimiters.js");
+const User = require("./models/userModel.js");
+const presence = require("./utils/presence.js");
 
 const { notFound, errorHandler } = require("./middleware/errorMiddleware.js");
 const { PORT, CLIENT_ACCESS_URL } = require("./config/keys.js");
@@ -89,13 +91,65 @@ const io = require("socket.io")(server, {
   },
 });
 
+// expose io to route controllers (settings toggle broadcasts presence changes)
+app.set("io", io);
+
 io.on("connection", (socket) => {
   // a client connected
 
-  socket.on("setup", (userData) => {
-    socket.join(userData._id);
-    console.log(`${userData.name} with _id: ${userData._id} is connected.`);
+  socket.on("setup", async (userData) => {
+    if (!userData || !userData._id) {
+      return;
+    }
+    const userId = String(userData._id);
+    socket.join(userId);
+    socket.data.userId = userId;
+    console.log(`${userData.name} with _id: ${userId} is connected.`);
     socket.emit("connected");
+
+    // visibility is read from the DB, not trusted from the client payload.
+    // lastSeen is stamped on connect too, so it stays populated even if the
+    // server dies before the disconnect handler runs, and existing accounts
+    // get a value the first time they open the app.
+    let visible = true;
+    try {
+      const dbUser = await User.findByIdAndUpdate(
+        userId,
+        { lastSeen: new Date() },
+        { new: true }
+      ).select("showOnlineStatus");
+      visible = dbUser ? dbUser.showOnlineStatus !== false : true;
+    } catch (err) {
+      console.error("presence lookup failed:", err.message);
+    }
+
+    const isFirst = presence.addSocket(userId, socket.id, visible);
+    socket.emit("online users", presence.getVisibleOnlineUserIds());
+    if (isFirst && visible) {
+      socket.broadcast.emit("user online", userId);
+    }
+  });
+
+  socket.on("disconnect", async () => {
+    const userId = socket.data.userId;
+    if (!userId) {
+      return;
+    }
+    const { isLast, wasVisible } = presence.removeSocket(userId, socket.id);
+    if (!isLast) {
+      return;
+    }
+    const lastSeen = new Date();
+    try {
+      // always persist, even when hidden, so a truthful value exists if the
+      // user re-enables visibility later
+      await User.findByIdAndUpdate(userId, { lastSeen });
+    } catch (err) {
+      console.error("lastSeen update failed:", err.message);
+    }
+    if (wasVisible) {
+      io.emit("user offline", { userId, lastSeen: lastSeen.toISOString() });
+    }
   });
 
   socket.on("join chat", (room) => {

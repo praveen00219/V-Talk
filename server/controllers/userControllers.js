@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken");
 
 const cloudinary = require("../utils/cloudinary.js");
 const sendEmail = require("../utils/sendEmail.js");
+const presence = require("../utils/presence.js");
 
 const { JWT_SECRET, CLIENT_ACCESS_URL } = require("../config/keys.js");
 
@@ -365,6 +366,81 @@ const updateProfile = asyncHandler(async (req, res) => {
   }
 });
 
+// update per-user settings (currently: the showOnlineStatus privacy toggle)
+const updateSettings = asyncHandler(async (req, res) => {
+  try {
+    const { showOnlineStatus } = req.body;
+    // explicit boolean check: the "value || user.value" idiom would drop `false`
+    if (typeof showOnlineStatus !== "boolean") {
+      return res.status(400).json({
+        message: "showOnlineStatus must be a boolean",
+        success: false,
+      });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { showOnlineStatus },
+      { new: true }
+    ).select("-password");
+
+    // live-flip presence for everyone if the user is currently connected
+    const io = req.app.get("io");
+    const userId = String(req.user._id);
+    if (io && presence.setVisibility(userId, showOnlineStatus)) {
+      if (showOnlineStatus) {
+        io.emit("user online", userId);
+      } else {
+        // never leak lastSeen while hidden
+        io.emit("user offline", { userId, lastSeen: null });
+      }
+    }
+
+    return res.status(200).json({
+      message: "Settings updated successfully.",
+      user,
+      success: true,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: error.message,
+    });
+  }
+});
+
+// store the user's E2EE public key (ECDH P-256 JWK, generated in their browser)
+const updatePublicKey = asyncHandler(async (req, res) => {
+  try {
+    const { publicKey } = req.body;
+    if (
+      typeof publicKey !== "string" ||
+      publicKey.length === 0 ||
+      publicKey.length > 1024
+    ) {
+      return res.status(400).json({
+        message: "publicKey must be a non-empty string",
+        success: false,
+      });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { publicKey },
+      { new: true }
+    ).select("-password");
+
+    return res.status(200).json({
+      message: "Public key updated successfully.",
+      user,
+      success: true,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: error.message,
+    });
+  }
+});
+
 /**
  *  Inviting User
  */
@@ -465,5 +541,7 @@ module.exports = {
   forgotPassword,
   resetPassword,
   updateProfile,
+  updateSettings,
+  updatePublicKey,
   invitingUser,
 };

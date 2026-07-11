@@ -38,8 +38,10 @@ const allMessages = asyncHandler(async (req, res) => {
 //@route           POST /api/Message/
 //@access          Protected
 const sendMessage = asyncHandler(async (req, res) => {
-  const { content, chatId } = req.body;
+  const { content, chatId, encrypted, iv } = req.body;
   const files = req.files || [];
+  // multipart/form-data sends booleans as strings
+  const isEncrypted = encrypted === true || encrypted === "true";
 
   if ((!content || content.trim() === "") && files.length === 0) {
     return res.sendStatus(400);
@@ -89,6 +91,8 @@ const sendMessage = asyncHandler(async (req, res) => {
   var newMessage = {
     sender: req.user._id,
     content: content,
+    encrypted: isEncrypted,
+    iv: isEncrypted ? iv : undefined,
     chat: chatId,
     attachments,
   };
@@ -208,6 +212,8 @@ const deleteForEveryone = asyncHandler(async (req, res) => {
   message.isDeletedForEveryone = true;
   message.deletedAt = new Date();
   message.content = ""; // optional: keep empty content
+  message.encrypted = false; // content is blanked, nothing left to decrypt
+  message.iv = undefined;
   message.attachments = [];
 
   await message.save();

@@ -1,3 +1,5 @@
+import moment from "moment";
+
 // To get the sender
 export const getSender = (loggedUser, users) => {
   // console.log(users);
@@ -14,6 +16,24 @@ export const getSenderPic = (loggedUser, users) => {
     return;
   }
   return users[0]._id === loggedUser._id ? users[1].pic : users[0].pic;
+};
+
+// the "other" participant of a 1-on-1 chat
+export const getOtherUser = (loggedUser, users) => {
+  if (!users || !loggedUser) {
+    return null;
+  }
+  return users[0]._id === loggedUser._id ? users[1] : users[0];
+};
+
+// "last seen" formatting, e.g. "today at 7:30 pm"
+export const formatLastSeen = (lastSeen) => {
+  return moment(lastSeen).calendar(null, {
+    sameDay: "[today at] h:mm a",
+    lastDay: "[yesterday at] h:mm a",
+    lastWeek: "dddd [at] h:mm a",
+    sameElse: "DD/MM/YYYY [at] h:mm a",
+  });
 };
 
 // get sender profile details

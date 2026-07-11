@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { Disclosure } from "@headlessui/react";
+import { Disclosure, Switch } from "@headlessui/react";
 import { BiChevronUp } from "react-icons/bi";
+import { toast } from "react-toastify";
 
 import {BsCircleHalf} from "react-icons/bs"
 import { useDispatch, useSelector } from "react-redux";
@@ -11,6 +12,7 @@ import ImageEdit from "./modal/ImageEdit";
 import { colors } from "../config.js/data";
 import { FaCheck } from "react-icons/fa";
 import {toggleColor} from "../Redux/Reducer/SetColor/setColorAction"
+import { updateUserSettings } from "../Redux/Reducer/User/user.action";
 
 const Setting = () => {
   const user = useSelector((globalState) => globalState.user.userDetails);
@@ -24,6 +26,19 @@ const Setting = () => {
     setColor(color);
     dispatch(toggleColor(color));
   }
+
+  // privacy: show online status toggle (reads server-confirmed value from redux)
+  const showOnlineStatus = user?.showOnlineStatus !== false;
+  const [savingPresence, setSavingPresence] = useState(false);
+
+  const handlePresenceToggle = async (value) => {
+    setSavingPresence(true);
+    const res = await dispatch(updateUserSettings({ showOnlineStatus: value }));
+    setSavingPresence(false);
+    if (res?.type === "ERROR") {
+      toast.error("Could not update setting");
+    }
+  };
 
   
   return (
@@ -99,6 +114,28 @@ const Setting = () => {
           </div>
         </div>
 
+        <div className="setting-block">
+          <div className="privacy-setting w-full pt-3 pb-3">
+            <div className="flex w-full justify-between items-center py-2">
+              <span className="text-sm font-medium">Show online status</span>
+              <Switch
+                checked={showOnlineStatus}
+                onChange={handlePresenceToggle}
+                disabled={savingPresence}
+                className={
+                  showOnlineStatus ? "presence-switch on" : "presence-switch"
+                }
+              >
+                <span className="presence-thumb" aria-hidden="true" />
+              </Switch>
+            </div>
+            <p className="text-xs presence-caption m-0">
+              When off, you won't see others' online status or last seen, and
+              they won't see yours.
+            </p>
+          </div>
+        </div>
+
        {/* <div className="user-name w-4/5">
                         <span className="text-gray-500">Name</span>
                         <p >{user.name}</p>
@@ -130,6 +167,43 @@ const Wrapper = styled.div`
   }
   .setting-block{
     border-bottom: 1px solid rgba(${({ theme }) => theme.colors.border});
+  }
+
+  .presence-switch {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    width: 42px;
+    height: 24px;
+    border: none;
+    border-radius: 9999px;
+    background: rgba(${({ theme }) => theme.colors.border}, 0.6);
+    cursor: pointer;
+    transition: background 0.2s ease;
+    &.on {
+      background: ${({ theme }) => theme.colors.accent.solid};
+    }
+    &:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+    .presence-thumb {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: ${({ theme }) => theme.colors.shadow.sm};
+      transform: translateX(3px);
+      transition: transform 0.2s ease;
+    }
+    &.on .presence-thumb {
+      transform: translateX(21px);
+    }
+  }
+  .presence-caption {
+    color: ${({ theme }) => theme.colors.text.secondary};
   }
 
   .swatch {

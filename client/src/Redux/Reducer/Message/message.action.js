@@ -4,7 +4,6 @@ import {
   GET_ALL_MESSAGE,
   UPDATE_GET_ALL_MESSAGE,
   SHOW_TOOGLE_LOADING,
-  SHOW_NETWORK_ERROR,
   UPDATE_MESSAGE,
   REMOVE_MESSAGE,
 } from "./message.type";
@@ -22,7 +21,6 @@ export const getAllChats = (selectedChat) => async (dispatch) => {
     // console.log(allMessage);
     return dispatch({ type: GET_ALL_MESSAGE, payload: allMessage.data });
   } catch (error) {
-    dispatch(showNetworkError(true));
     return dispatch({ type: "ERROR", payload: error });
   }
   //   }
@@ -41,7 +39,6 @@ export const updateGetAllChats = (messageRecived) => async (dispatch) => {
       payload: updatedAllMessage,
     });
   } catch (error) {
-    dispatch(showNetworkError(true));
     return dispatch({ type: "ERROR", payload: error });
   }
 };
@@ -50,7 +47,7 @@ export const updateGetAllChats = (messageRecived) => async (dispatch) => {
 export const sendMessge = (messageData) => async (dispatch) => {
   try {
     // messageData can include: chatId (required), content (optional), attachments (FileList or Array<File>)
-    const { chatId, content, attachments } = messageData || {};
+    const { chatId, content, attachments, encrypted, iv } = messageData || {};
     const hasFiles = attachments && (attachments.length || attachments.size);
 
     let data;
@@ -61,13 +58,17 @@ export const sendMessge = (messageData) => async (dispatch) => {
       form.append("chatId", chatId);
       if (content !== undefined && content !== null)
         form.append("content", content);
+      if (encrypted) {
+        form.append("encrypted", "true");
+        form.append("iv", iv);
+      }
       // attachments may be FileList or array
       const filesArray = Array.from(attachments);
       filesArray.forEach((file) => form.append("attachments", file));
       data = form;
       // Do NOT set Content-Type manually; let axios set the multipart boundary automatically
     } else {
-      data = { chatId, content };
+      data = { chatId, content, ...(encrypted ? { encrypted: true, iv } : {}) };
     }
 
     const newMessage = await axios({
@@ -79,7 +80,6 @@ export const sendMessge = (messageData) => async (dispatch) => {
 
     return dispatch({ type: SEND_MESSAGE, payload: newMessage.data });
   } catch (error) {
-    dispatch(showNetworkError(true));
     return dispatch({ type: "ERROR", payload: error });
   }
 };
@@ -92,7 +92,6 @@ export const clearSelectedMessage = () => async (dispatch) => {
       payload: "",
     });
   } catch (error) {
-    dispatch(showNetworkError(true));
     return dispatch({ type: "ERROR", payload: error });
   }
 };
@@ -100,13 +99,6 @@ export const clearSelectedMessage = () => async (dispatch) => {
 export const loadingToggleAction = (state) => {
   return {
     type: SHOW_TOOGLE_LOADING,
-    payload: state,
-  };
-};
-
-export const showNetworkError = (state) => {
-  return {
-    type: SHOW_NETWORK_ERROR,
     payload: state,
   };
 };
@@ -169,7 +161,6 @@ export const deleteMessageForEveryone = (messageId) => async (dispatch) => {
     dispatch({ type: UPDATE_MESSAGE, payload: res.data });
     return res.data;
   } catch (error) {
-    dispatch(showNetworkError(true));
     const payload = error?.response?.data || {
       message: error.message || "Network error",
     };

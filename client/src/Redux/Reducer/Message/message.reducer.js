@@ -1,9 +1,7 @@
-import {} from "./message.action";
 import {
   CLEAR_ALL_MESSAGE,
   GET_ALL_MESSAGE,
   SEND_MESSAGE,
-  SHOW_NETWORK_ERROR,
   SHOW_TOOGLE_LOADING,
   UPDATE_GET_ALL_MESSAGE,
   UPDATE_MESSAGE,
@@ -13,7 +11,6 @@ const initialState = {
   allMessages: [],
   createdMessage: {},
   isLoading: false,
-  sNetworkError: false,
 };
 
 const messageReducer = (state = initialState, action) => {
@@ -69,11 +66,6 @@ const messageReducer = (state = initialState, action) => {
       return{
         ...state,
         isLoading: action.payload
-      }
-      case SHOW_NETWORK_ERROR:
-      return{
-        ...state,
-        isNetworkError: action.payload
       }
 
     default:

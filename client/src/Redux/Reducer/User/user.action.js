@@ -30,6 +30,24 @@ export const updateUserProfile = (userData) => async (dispatch) => {
     return dispatch({ type: "ERROR", payload: payload });
   }
 };
+// update per-user settings (e.g. the showOnlineStatus privacy toggle)
+export const updateUserSettings = (settings) => async (dispatch) => {
+  try {
+    const res = await axios({
+      method: "PUT",
+      url: `${SERVER_ACCESS_BASE_URL}/api/user/settings`,
+      data: { ...settings },
+    });
+    // the endpoint returns the updated user; refresh userDetails without a refetch
+    return dispatch({ type: SELF, payload: { userDetails: res.data.user } });
+  } catch (error) {
+    const payload = error?.response?.data || {
+      message: error.message || "Network error",
+    };
+    return dispatch({ type: "ERROR", payload: payload });
+  }
+};
+
 // Inviting User
 export const inviteNewUser = (email) => async (dispatch) => {
   try {
