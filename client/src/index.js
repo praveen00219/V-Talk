@@ -22,7 +22,9 @@ axios.interceptors.response.use(
     if (error?.response?.status === 401) {
       localStorage.removeItem("ETalkUser");
       delete axios.defaults.headers.common["Authorization"];
-      if (window.location.pathname !== "/auth") {
+      // the admin portal manages its own session — don't yank admins to /auth
+      const onAdminRoute = window.location.pathname.startsWith("/admin");
+      if (!onAdminRoute && window.location.pathname !== "/auth") {
         window.location.assign("/auth");
       }
     }

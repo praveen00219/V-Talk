@@ -14,6 +14,8 @@ const messageRoutes = require("./routes/messageRoutes.js");
 const { apiLimiter } = require("./middleware/rateLimiters.js");
 const User = require("./models/userModel.js");
 const presence = require("./utils/presence.js");
+const adminRoutes = require("./routes/adminRoutes.js");
+const ensureAdminAccount = require("./utils/adminBootstrap.js");
 
 const { notFound, errorHandler } = require("./middleware/errorMiddleware.js");
 const { PORT, CLIENT_ACCESS_URL } = require("./config/keys.js");
@@ -33,7 +35,7 @@ if (UNSAFE_PORTS.has(port)) {
 }
 
 const app = express();
-connectDB();
+connectDB().then(() => ensureAdminAccount().catch(console.error));
 
 const http = require("http");
 
@@ -69,6 +71,7 @@ app.use("/api", apiLimiter);
 app.use("/api/chat", chatRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/message", messageRoutes);
+app.use("/api/admin", adminRoutes);
 app.use(notFound);
 app.use(errorHandler);
 

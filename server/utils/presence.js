@@ -31,6 +31,10 @@ const removeSocket = (userId, socketId) => {
 
 const isOnline = (userId) => registry.has(userId);
 
+// all currently-connected users, regardless of their visibility setting
+// (used by admin stats — admins see reality)
+const getOnlineCount = () => registry.size;
+
 // returns false when the user has no live sockets (nothing to broadcast)
 const setVisibility = (userId, visible) => {
   const entry = registry.get(userId);
@@ -50,6 +54,7 @@ module.exports = {
   addSocket,
   removeSocket,
   isOnline,
+  getOnlineCount,
   setVisibility,
   getVisibleOnlineUserIds,
 };

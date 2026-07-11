@@ -5,6 +5,7 @@ const User = require("../models/userModel.js");
 const Chat = require("../models/chatModel.js");
 const cloudinary = require("../utils/cloudinary.js");
 const { isMember } = require("../utils/chatAuth.js");
+const { checkFileQuota, recordUsage } = require("../middleware/quotaMiddleware.js");
 
 // best-effort removal of multer temp files after they're uploaded to Cloudinary
 const removeTempFiles = async (files = []) => {
@@ -56,6 +57,16 @@ const sendMessage = asyncHandler(async (req, res) => {
     return res
       .status(403)
       .json({ message: "Not authorized to post in this chat" });
+  }
+
+  // daily file-share quota (message quota already gated pre-multer);
+  // reject before any Cloudinary spend and clean up multer temp files
+  if (files.length > 0) {
+    const fileQuotaError = checkFileQuota(req, files.length);
+    if (fileQuotaError) {
+      await removeTempFiles(files);
+      return res.status(429).json(fileQuotaError);
+    }
   }
 
   // prepare attachments if any
@@ -110,6 +121,13 @@ const sendMessage = asyncHandler(async (req, res) => {
     await Chat.findByIdAndUpdate(chatId, {
       latestMessage: message,
     });
+
+    // count usage only for successful sends; a counter failure must not fail the send
+    try {
+      await recordUsage(req.user._id, files.length);
+    } catch (e) {
+      console.error("usage increment failed:", e.message);
+    }
 
     res.json(message);
   } catch (error) {

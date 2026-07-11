@@ -27,6 +27,19 @@ const userSchema = mongoose.Schema(
     // E2EE: ECDH P-256 public key (JWK JSON) generated in the user's browser;
     // the matching private key never leaves that browser
     publicKey: { type: String },
+    // ---- admin portal + subscription quotas ----
+    role: { type: String, enum: ["user", "admin"], default: "user" },
+    plan: { type: String, enum: ["free", "premium"], default: "free" },
+    // per-user overrides; null = use the plan default (0 = explicitly no sends)
+    messageLimit: { type: Number, default: null, min: 0 },
+    fileLimit: { type: Number, default: null, min: 0 },
+    isBlocked: { type: Boolean, default: false },
+    // rolling per-day counters; day is a local-date key "YYYY-MM-DD"
+    usage: {
+      day: { type: String, default: "" },
+      messagesSent: { type: Number, default: 0 },
+      filesShared: { type: Number, default: 0 },
+    },
   },
   { timestamps: true }
 );

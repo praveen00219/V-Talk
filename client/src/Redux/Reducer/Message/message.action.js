@@ -80,7 +80,12 @@ export const sendMessge = (messageData) => async (dispatch) => {
 
     return dispatch({ type: SEND_MESSAGE, payload: newMessage.data });
   } catch (error) {
-    return dispatch({ type: "ERROR", payload: error });
+    const payload = error?.response?.data || {
+      message: error.message || "Network error",
+    };
+    dispatch({ type: "ERROR", payload });
+    // typed failure so the UI can react (quota toast, input restore)
+    return { error: true, status: error?.response?.status, data: payload };
   }
 };
 

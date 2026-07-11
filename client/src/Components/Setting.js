@@ -13,6 +13,7 @@ import { colors } from "../config.js/data";
 import { FaCheck } from "react-icons/fa";
 import {toggleColor} from "../Redux/Reducer/SetColor/setColorAction"
 import { updateUserSettings } from "../Redux/Reducer/User/user.action";
+import { FREE_DEFAULTS, getTodayKey } from "../config/planLimits";
 
 const Setting = () => {
   const user = useSelector((globalState) => globalState.user.userDetails);
@@ -39,6 +40,17 @@ const Setting = () => {
       toast.error("Could not update setting");
     }
   };
+
+  // today's quota usage (fields flow from getmyself; staleness accepted)
+  const todayKey = getTodayKey();
+  const usage =
+    user?.usage && user.usage.day === todayKey
+      ? user.usage
+      : { messagesSent: 0, filesShared: 0 };
+  const effMessageLimit =
+    user?.messageLimit != null ? user.messageLimit : FREE_DEFAULTS.messages;
+  const effFileLimit =
+    user?.fileLimit != null ? user.fileLimit : FREE_DEFAULTS.files;
 
   
   return (
@@ -133,6 +145,22 @@ const Setting = () => {
               When off, you won't see others' online status or last seen, and
               they won't see yours.
             </p>
+          </div>
+        </div>
+
+        <div className="setting-block">
+          <div className="usage-setting w-full pt-3 pb-3">
+            <span className="text-sm font-medium">Today's usage</span>
+            {user?.plan === "premium" ? (
+              <p className="text-xs presence-caption m-0 mt-1">
+                Premium — unlimited messages and files.
+              </p>
+            ) : (
+              <p className="text-xs presence-caption m-0 mt-1">
+                Messages: {usage.messagesSent || 0}/{effMessageLimit} · Files:{" "}
+                {usage.filesShared || 0}/{effFileLimit}
+              </p>
+            )}
           </div>
         </div>
 

@@ -28,6 +28,7 @@ import ResetPassword from "./Components/Auth/ResetPassword";
 import ErrorPage from "./Components/ErrorPage";
 import { makeLightTheme, makeDarkTheme } from "./Components/Themes";
 const HomePage = React.lazy(() => import("./Pages/HomePage"));
+const AdminPage = React.lazy(() => import("./Pages/AdminPage"));
 
 // Honour the OS "reduce motion" preference for scroll-entrance animations.
 const prefersReducedMotion =
@@ -128,6 +129,7 @@ function App() {
                 <Route path="" element={<Login />} />
                 <Route path="signup" element={<Signup />} />
               </Route>
+              <Route path="/admin/*" element={<AdminPage />} />
               <Route path="/*" element={<ErrorPage />} />
             </Routes>
           </Suspense>

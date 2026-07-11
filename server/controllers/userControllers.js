@@ -178,6 +178,15 @@ const authUser = asyncHandler(async (req, res) => {
     });
   }
 
+  // blocked accounts get no token and no verification emails
+  if (user.isBlocked) {
+    return res.status(403).json({
+      message: "Your account has been blocked by the administrator.",
+      code: "ACCOUNT_BLOCKED",
+      success: false,
+    });
+  }
+
   // enforce email verification BEFORE issuing an auth token
   if (!user.is_verified) {
     const token = generateToken(user._id, "120s", "verify");

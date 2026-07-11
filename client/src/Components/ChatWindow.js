@@ -9,6 +9,7 @@ import Picker from "@emoji-mart/react";
 import { createRef } from "react";
 import { useSelector } from "react-redux";
 import moment from "moment";
+import { toast } from "react-toastify";
 import {
   getSender,
   getSenderPic,
@@ -61,16 +62,9 @@ const ChatWindow = () => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [previewItems, setPreviewItems] = useState([]);
 
-  const handleFilesChange = (e) => {
-    const files = Array.from(e.target.files || []);
-    if (!files.length) return;
-
-    // limit to 10 like server
-    const limited = files.slice(0, 10);
-    setSelectedFiles(limited);
-
-    // build previews for images/videos and generic for others
-    const previews = limited.map((file) => {
+  // build previews for images/videos and generic for others
+  const buildPreviews = (files) =>
+    files.map((file) => {
       const url = URL.createObjectURL(file);
       const type = file.type;
       let kind = "file";
@@ -78,7 +72,15 @@ const ChatWindow = () => {
       else if (type.startsWith("video/")) kind = "video";
       return { url, kind, name: file.name, size: file.size, type };
     });
-    setPreviewItems(previews);
+
+  const handleFilesChange = (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+
+    // limit to 10 like server
+    const limited = files.slice(0, 10);
+    setSelectedFiles(limited);
+    setPreviewItems(buildPreviews(limited));
   };
 
   const clearSelectedFiles = () => {
@@ -293,6 +295,10 @@ const ChatWindow = () => {
       alert("Please type a message or attach at least one file");
       return;
     }
+    // keep the plaintext + files so they can be restored if the send is rejected
+    const plainText = newMessage;
+    const filesToSend = selectedFiles;
+
     const messageData = {
       chatId: sender._id,
       content: newMessage,
@@ -322,7 +328,18 @@ const ChatWindow = () => {
 
     setNewMessage("");
     clearSelectedFiles();
-    await dispatch(sendMessge(messageData));
+    const result = await dispatch(sendMessge(messageData));
+    if (result?.error) {
+      toast.error(result.data?.message || "Message could not be sent");
+      // quota/blocked rejections: give the typed text and files back
+      if (result.status === 429 || result.status === 403) {
+        setNewMessage(plainText);
+        if (filesToSend.length) {
+          setSelectedFiles(filesToSend);
+          setPreviewItems(buildPreviews(filesToSend));
+        }
+      }
+    }
   };
   useEffect(() => {
     if (inputRef.current !== null) {
@@ -745,7 +762,7 @@ const ChatWindow = () => {
                                         <div className="conversation-name ">
                                           <small className=" mb-0 text-gray-500">
                                             {moment(item.createdAt)
-                                              .format("DD/MMM/YYYY , h:mm a")
+                                              .format("h:mm a")
                                               .toUpperCase()}
                                           </small>
 
@@ -1030,7 +1047,7 @@ const ChatWindow = () => {
                                         <div className="conversation-name ">
                                           <small className=" mb-0 text-gray-400">
                                             {moment(item.createdAt)
-                                              .format("DD/MMM/YYYY , h:mm a")
+                                              .format("h:mm a")
                                               .toUpperCase()}
                                           </small>
 
@@ -1475,10 +1492,16 @@ const Wrapper = styled.section`
       width: 100%;
       background-color: ${({ theme }) => theme.colors.bg.primary};
       z-index: 50;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
       color: ${({ theme }) => theme.colors.heading};
       border-bottom: 1px solid rgba(${({ theme }) => theme.colors.border}, 0.3);
       animation: fadeInLeft 0.5s;
+      .chat-avatar img {
+        box-shadow: 0 0 0 2px ${({ theme }) => theme.colors.accent.soft};
+      }
+      h6 {
+        font-weight: 600;
+      }
       .presence-label {
         color: ${({ theme }) => theme.colors.text.secondary};
         &.online {
@@ -1490,21 +1513,35 @@ const Wrapper = styled.section`
     .chat-conversation {
       overflow-y: scroll;
       height: calc(100vh - 200px);
+      scroll-behavior: smooth;
+      &::-webkit-scrollbar {
+        width: 6px;
+      }
+      &::-webkit-scrollbar-thumb {
+        background: rgba(${({ theme }) => theme.colors.border}, 0.9);
+        border-radius: 3px;
+      }
+      &::-webkit-scrollbar-track {
+        background: transparent;
+      }
       .chat-conversation-list {
-        margin-top: 40px;
-        padding-bottom: 50px;
+        margin-top: 32px;
+        padding: 0 10px 50px;
         margin-bottom: 0;
         animation: fadeInLeft 0.5s;
         li {
           margin: 0;
           display: flex;
           .conversation-list {
-            margin-bottom: 24px;
+            margin-bottom: 14px;
             display: inline-flex;
             position: relative;
             align-items: flex-start;
             justify-content: center;
             max-width: 80%;
+            @media screen and (min-width: 800px) {
+              max-width: 62%;
+            }
             .user-name {
               color: ${({ theme }) => theme.colors.heading};
             }
@@ -1514,30 +1551,39 @@ const Wrapper = styled.section`
               border-radius: 100%;
               width: 2.2rem;
               height: 2.2rem;
+              box-shadow: 0 0 0 2px rgba(${({ theme }) => theme.colors.border}, 0.5);
             }
             .chat-wrap-content {
-              padding: 12px 18px;
+              padding: 10px 16px;
               background-color: ${({ theme }) => theme.colors.bg.secondary};
               position: relative;
-              border-radius: 18px 18px 4px 18px;
+              border-radius: 18px 18px 6px 18px;
               box-shadow: ${({ theme }) => theme.colors.shadow.sm};
               color: ${({ theme }) => theme.colors.heading};
+              font-size: 0.925rem;
+              line-height: 1.45;
               word-break: break-word;
               overflow-wrap: anywhere;
             }
             .chat-wrap-content-left {
-              padding: 12px 18px;
-              background-color: ${({ theme }) => theme.colors.bg.secondary};
+              padding: 10px 16px;
+              background-color: ${({ theme }) => theme.colors.bg.elevated};
+              border: 1px solid rgba(${({ theme }) => theme.colors.border}, 0.5);
               position: relative;
-              border-radius: 18px 18px 18px 4px;
+              border-radius: 18px 18px 18px 6px;
               box-shadow: ${({ theme }) => theme.colors.shadow.sm};
               color: ${({ theme }) => theme.colors.heading};
+              font-size: 0.925rem;
+              line-height: 1.45;
               word-break: break-word;
               overflow-wrap: anywhere;
             }
             .conversation-name {
-              font-size: 12px;
+              font-size: 11px;
               font-weight: 500;
+              margin-top: 3px;
+              letter-spacing: 0.2px;
+              opacity: 0.75;
               color: ${({ theme }) => theme.colors.text.secondary};
             }
           }
@@ -1553,8 +1599,8 @@ const Wrapper = styled.section`
             .chat-wrap-content {
               color: ${({ theme }) => theme.colors.white};
               background: ${({ theme }) => theme.colors.accent.gradient};
-              border-radius: 18px 18px 4px 18px;
-              box-shadow: 0 4px 12px ${({ theme }) => theme.colors.boxShadow.primary};
+              border-radius: 18px 18px 6px 18px;
+              box-shadow: 0 3px 10px ${({ theme }) => theme.colors.boxShadow.primary};
             }
           }
         }
@@ -1572,10 +1618,14 @@ const Wrapper = styled.section`
       input {
         color: ${({ theme }) => theme.colors.heading};
         background-color: ${({ theme }) => theme.colors.bg.secondary};
-        border: 1px solid transparent;
+        border: 1px solid rgba(${({ theme }) => theme.colors.border}, 0.4);
         border-radius: ${({ theme }) => theme.radius.pill};
+        font-size: 0.95rem;
         transition: border-color 0.2s ${({ theme }) => theme.motion.ease},
           box-shadow 0.2s ${({ theme }) => theme.motion.ease};
+        &::placeholder {
+          color: ${({ theme }) => theme.colors.text.muted};
+        }
         &:focus {
           background-color: ${({ theme }) => theme.colors.bg.secondary};
           border-color: ${({ theme }) => theme.colors.accent.solid};
