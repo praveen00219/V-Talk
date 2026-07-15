@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
+import { useSelector } from "react-redux";
 import Wave from "react-wavify";
 import { toast, ToastContainer } from "react-toastify";
 import AppButton from "../Styles/Button";
@@ -12,6 +13,9 @@ const prefersReducedMotion =
 const Contact = () => {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [submitting, setSubmitting] = useState(false);
+  const darkThemeEnabled = useSelector(
+    (state) => state.themeReducer.darkThemeEnabled
+  );
 
   const handleChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -22,13 +26,12 @@ const Contact = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!form.name.trim() || !form.email.trim() || !form.message.trim()) {
-      toast.warn("Please fill in all fields.", { autoClose: 2000, theme: "light" });
+      toast.warn("Please fill in all fields.", { autoClose: 2000 });
       return;
     }
     if (!isValidEmail(form.email)) {
       toast.error("Please enter a valid email address.", {
         autoClose: 2000,
-        theme: "light",
       });
       return;
     }
@@ -38,7 +41,6 @@ const Contact = () => {
       setSubmitting(false);
       toast.success("Thanks for your feedback! 💙", {
         autoClose: 2500,
-        theme: "light",
       });
       setForm({ name: "", email: "", message: "" });
     }, 600);
@@ -46,7 +48,7 @@ const Contact = () => {
 
   return (
     <Wrapper id="contact">
-      <ToastContainer />
+      <ToastContainer theme={darkThemeEnabled ? "dark" : "light"} />
       <div className="custom-container">
         <div className="wrapper w-full flex lg:flex-row flex-col lg:space-x-[30px] justify-center items-center">
           <div className="feedback-content lg:w-1/2 w-full">
@@ -239,7 +241,7 @@ const Wrapper = styled.section`
             font-weight: 700;
             letter-spacing: 0.06em;
             text-transform: uppercase;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             margin-bottom: 0.75rem;
           }
           h1 {
@@ -300,7 +302,6 @@ const Wrapper = styled.section`
   @media only screen and (max-width: 992px) {
     padding: 6rem 0;
     h1 {
-      font-size: 2rem;
       margin-bottom: 1rem;
     }
     .custom-container {

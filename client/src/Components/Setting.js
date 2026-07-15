@@ -1,10 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { Disclosure, Switch } from "@headlessui/react";
 import { BiChevronUp } from "react-icons/bi";
 import { toast } from "react-toastify";
 
-import {BsCircleHalf} from "react-icons/bs"
+import { BsCircleHalf, BsMoonStarsFill, BsSunFill } from "react-icons/bs";
+import {
+  AiFillContacts,
+  AiFillInfoCircle,
+  AiTwotoneMail,
+} from "react-icons/ai";
 import { useDispatch, useSelector } from "react-redux";
 
 import ProfileEdit from "./modal/ProfileEdit";
@@ -14,12 +19,15 @@ import { FaCheck } from "react-icons/fa";
 import {toggleColor} from "../Redux/Reducer/SetColor/setColorAction"
 import { updateUserSettings } from "../Redux/Reducer/User/user.action";
 import { FREE_DEFAULTS, getTodayKey } from "../config/planLimits";
+import { TOGGLE_DARKTHEME } from "../Redux/Reducer/Theme/theme.type";
 
 const Setting = () => {
   const user = useSelector((globalState) => globalState.user.userDetails);
   const ThemeColor = useSelector((state) => state.setColorReducer.themeColor);
   const [color, setColor] = useState(ThemeColor);
-  
+  const darkThemeEnabled = useSelector(
+    (state) => state.themeReducer.darkThemeEnabled
+  );
 
   const dispatch = useDispatch();
 
@@ -27,6 +35,8 @@ const Setting = () => {
     setColor(color);
     dispatch(toggleColor(color));
   }
+
+  const toggleDarkTheme = () => dispatch({ type: TOGGLE_DARKTHEME });
 
   // privacy: show online status toggle (reads server-confirmed value from redux)
   const showOnlineStatus = user?.showOnlineStatus !== false;
@@ -57,7 +67,7 @@ const Setting = () => {
     <Wrapper className="setting-tab dynamic-sidebar">
       <div className="relative flex items-center chat-menu flex-wrap justify-between w-full ">
         <div>
-          <h2>Setting</h2>
+          <h2 className="text-2xl m-0">Setting</h2>
           <p>Personal Information</p>
         </div>
         <div className="icon text-right"></div>
@@ -72,9 +82,67 @@ const Setting = () => {
           </div>
         </div>
 
+        {/* Profile details (merged from the old standalone Profile tab) */}
+        <div className="setting-block">
+          <div className="profile-info w-full pt-3 pb-3">
+            <div className="flex justify-between w-full mt-2">
+              <div className="grid place-items-center text-3xl info-icon">
+                <AiFillInfoCircle className="icon" />
+              </div>
+              <div className="w-4/5">
+                <span className="label text-xs">About</span>
+                <p className="w-full break-words m-0">{user.about}</p>
+              </div>
+            </div>
+            <div className="flex justify-between w-full mt-3">
+              <div className="grid place-items-center text-3xl info-icon">
+                <AiFillContacts className="icon" />
+              </div>
+              <div className="w-4/5">
+                <span className="label text-xs">Mobile</span>
+                <p className="w-full break-words m-0">{user.contact}</p>
+              </div>
+            </div>
+            <div className="flex justify-between w-full mt-3">
+              <div className="grid place-items-center text-3xl info-icon">
+                <AiTwotoneMail className="icon" />
+              </div>
+              <div className="w-4/5">
+                <span className="label text-xs">Email Address</span>
+                <p className="w-full break-words m-0">{user.email}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div className="setting-block">
           <div className="profile-setting w-full pt-4">
           <ProfileEdit/>
+          </div>
+        </div>
+
+        {/* Appearance: light/dark toggle (merged from the sidebar) */}
+        <div className="setting-block">
+          <div className="appearance-setting w-full pt-3 pb-3">
+            <div className="flex w-full justify-between items-center py-2">
+              <div className="flex items-center">
+                {darkThemeEnabled ? (
+                  <BsMoonStarsFill className="mr-4" />
+                ) : (
+                  <BsSunFill className="mr-4" />
+                )}
+                <span className="text-sm font-medium">Dark mode</span>
+              </div>
+              <Switch
+                checked={darkThemeEnabled}
+                onChange={toggleDarkTheme}
+                className={
+                  darkThemeEnabled ? "presence-switch on" : "presence-switch"
+                }
+              >
+                <span className="presence-thumb" aria-hidden="true" />
+              </Switch>
+            </div>
           </div>
         </div>
 
@@ -87,9 +155,9 @@ const Setting = () => {
                     <Disclosure.Button className="flex w-full justify-between items-center rounded-lg py-2 text-left text-sm font-medium focus:outline-none focus-visible:ring focus-visible:ring-opacity-75">
                       <div className="flex justify-between items-center">
                         <BsCircleHalf className="mb-4 mr-4" />
-                        <span>Themes</span>
+                        <span>Accent Color</span>
                       </div>
-                      
+
                       <BiChevronUp
                         className={`${
                           open ? "rotate-180 transform mb-4" : ""
@@ -196,6 +264,21 @@ const Wrapper = styled.div`
   .setting-block{
     border-bottom: 1px solid rgba(${({ theme }) => theme.colors.border});
   }
+  .details {
+    height: calc(100vh - 90px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: rgba(${({ theme }) => theme.colors.border}, 0.9);
+      border-radius: 3px;
+    }
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+  }
 
   .presence-switch {
     position: relative;
@@ -232,6 +315,15 @@ const Wrapper = styled.div`
   }
   .presence-caption {
     color: ${({ theme }) => theme.colors.text.secondary};
+  }
+
+  .profile-info {
+    .info-icon {
+      color: ${({ theme }) => theme.colors.primaryRgb};
+    }
+    .label {
+      color: ${({ theme }) => theme.colors.text.muted};
+    }
   }
 
   .swatch {

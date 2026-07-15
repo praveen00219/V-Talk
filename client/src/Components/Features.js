@@ -88,8 +88,14 @@ const Wrapper = styled.section`
 
     .section-header {
       margin: 0 50px;
+      h4 {
+        color: ${({ theme }) => theme.colors.accent.solid};
+        font-weight: 700;
+        font-size: 0.9rem;
+        letter-spacing: 0.1em;
+        margin: 0;
+      }
       h2 {
-        font-size: calc(1rem + 20 * (100vw - 320px) / 1600);
         font-weight: 700;
         color: ${({ theme }) => theme.colors.heading};
         margin: 25px 0;
@@ -213,14 +219,6 @@ const Wrapper = styled.section`
     }
   }
   @media only screen and (max-width: 521px) {
-    .features-box-content {
-      h3 {
-        font-size: 1.5rem;
-      }
-      p {
-        font-size: 1rem;
-      }
-    }
     .features-box-content {
       h3 {
         font-size: 1.1rem;

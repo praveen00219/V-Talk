@@ -38,7 +38,7 @@ const Wrapper = styled.section`
   .button {
     width: auto;
     height: auto;
-    font-size: 1.5rem;
+    font-size: 0.9375rem;
   }
 `;
 

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
+import { useSelector } from "react-redux";
 import { ToastContainer } from "react-toastify";
 import Loading from "../Components/Loading";
 import adminAxios, {
@@ -12,6 +13,9 @@ import AdminDashboard from "../Components/Admin/AdminDashboard";
 const AdminPage = () => {
   const [adminUser, setAdminUser] = useState(null);
   const [checking, setChecking] = useState(true);
+  const darkThemeEnabled = useSelector(
+    (state) => state.themeReducer.darkThemeEnabled
+  );
 
   // validate any stored admin token on mount
   useEffect(() => {
@@ -43,7 +47,7 @@ const AdminPage = () => {
 
   return (
     <Wrapper>
-      <ToastContainer />
+      <ToastContainer theme={darkThemeEnabled ? "dark" : "light"} />
       {checking ? (
         <Loading />
       ) : adminUser ? (

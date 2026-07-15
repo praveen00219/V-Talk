@@ -363,7 +363,7 @@ const Wrapper = styled.section`
           }
         }
         .status-seen {
-          color: ${({ theme }) => theme.colors.success};
+          color: ${({ theme }) => theme.colors.successText};
           .status-dot {
             background: ${({ theme }) => theme.colors.success};
           }

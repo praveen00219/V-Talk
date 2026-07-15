@@ -219,7 +219,7 @@ export const GlobalStyle = createGlobalStyle`
 
   a {
     font-size: 0.8rem;
-    color: ${({ theme }) => theme.colors.black};
+    color: ${({ theme }) => theme.colors.heading};
   }
 
   p {
@@ -268,7 +268,7 @@ export const GlobalStyle = createGlobalStyle`
   }
   
   .btn-light {
-    color: ${({ theme }) => theme.colors.black};
+    color: ${({ theme }) => theme.colors.heading};
     background-color: ${({ theme }) => theme.colors.btnlight};
     border-color: ${({ theme }) => theme.colors.btnlight};
   }

@@ -1,13 +1,17 @@
 import React from "react";
 import styled from "styled-components";
+import { useSelector } from "react-redux";
 import LoginForm from "./LoginForm";
 import Toggler from "../Toggler";
 import { ToastContainer } from "react-toastify";
 
 const Login = () => {
+  const darkThemeEnabled = useSelector(
+    (state) => state.themeReducer.darkThemeEnabled
+  );
   return (
     <Wrapper className="login-page-bg">
-      <ToastContainer />
+      <ToastContainer theme={darkThemeEnabled ? "dark" : "light"} />
       <div className="toggle-icon">
         <Toggler />
       </div>

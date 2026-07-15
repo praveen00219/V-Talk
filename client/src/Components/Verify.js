@@ -253,7 +253,7 @@ const Wrapper = styled.div`
     transition: transform 0.3s ${({ theme }) => theme.motion.easeOut},
       box-shadow 0.3s ease;
     span {
-      font-size: 1.25rem;
+      font-size: 0.9375rem;
       font-weight: 600;
       color: #fff;
     }

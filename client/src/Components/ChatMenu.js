@@ -1,6 +1,5 @@
 import React from "react";
 import styled from "styled-components";
-import Profile from "./Profile";
 import Favourite from "./Favourite";
 import Setting from "./Setting";
 import Default from "./Default";
@@ -9,16 +8,14 @@ import { useSelector } from "react-redux";
 
 // Tab panes for the sidebar. The old Contacts tab (4) was merged into the
 // Chat tab's search bar (people search + invite live in Default/UserList now).
+// The old standalone Profile tab (1) was merged into Settings.
 const ChatMenu = () => {
   const tabIndex = useSelector((state) => state.tabReducer);
-  const user = useSelector((globalState) => globalState.user.userDetails);
 
   return (
     <>
       <Wrapper className="chat-menu-section ">
         <div className="tab-content">
-         
-
           <div
             className={
               tabIndex === 3 || tabIndex === 0 || tabIndex === 4
@@ -28,17 +25,8 @@ const ChatMenu = () => {
           >
             <Default />
           </div>
-                    <div className={tabIndex === 2 ? "tab-pane active" : "tab-pane "}>
+          <div className={tabIndex === 2 ? "tab-pane active" : "tab-pane "}>
             <Favourite />
-          </div>
-           <div className={tabIndex === 1 ? "tab-pane active" : "tab-pane "}>
-            <Profile
-              pic={user.pic}
-              name={user.name}
-              email={user.email}
-              about={user.about}
-              contact={user.contact}
-            />
           </div>
           <div className={tabIndex === 5 ? "tab-pane active" : "tab-pane "}>
             <Setting />

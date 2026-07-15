@@ -149,7 +149,7 @@ const Dropdown = (props) => {
               {({ active }) => (
                 <button
                   style={{
-                    fontSize: "13px",
+                    fontSize: "14px",
                     fontWeight: "400",
                     marginBottom: "0",
                   }}
@@ -167,7 +167,7 @@ const Dropdown = (props) => {
                     />
                   </div>{" "}
                   <h6
-                    style={{ fontSize: "13px", fontWeight: "400" }}
+                    style={{ fontSize: "14px", fontWeight: "400" }}
                     className=" relative w-full text-left"
                   >
                     view contact
@@ -179,7 +179,7 @@ const Dropdown = (props) => {
               {({ active }) => (
                 <button
                   style={{
-                    fontSize: "13px",
+                    fontSize: "14px",
                     fontWeight: "400",
                     marginBottom: "0",
                   }}
@@ -204,7 +204,7 @@ const Dropdown = (props) => {
                     )}
                   </div>{" "}
                   <h6
-                    style={{ fontSize: "13px", fontWeight: "400" }}
+                    style={{ fontSize: "14px", fontWeight: "400" }}
                     className=" relative w-full text-left"
                   >
                     {isFavourite ? "Remove From Favourites" : "Mark As Favourites"}
@@ -216,7 +216,7 @@ const Dropdown = (props) => {
               {({ active }) => (
                 <button
                   style={{
-                    fontSize: "13px",
+                    fontSize: "14px",
                     fontWeight: "400",
                     marginBottom: "0",
                   }}
@@ -234,7 +234,7 @@ const Dropdown = (props) => {
                     />
                   </div>{" "}
                   <h6
-                    style={{ fontSize: "13px", fontWeight: "400" }}
+                    style={{ fontSize: "14px", fontWeight: "400" }}
                     className=" relative w-full text-left"
                   >
                     Delete Chat
@@ -246,7 +246,7 @@ const Dropdown = (props) => {
               {({ active }) => (
                 <button
                   style={{
-                    fontSize: "13px",
+                    fontSize: "14px",
                     fontWeight: "400",
                     marginBottom: "0",
                   }}
@@ -275,7 +275,7 @@ const Dropdown = (props) => {
                     )}
                   </div>{" "}
                   <h6
-                    style={{ fontSize: "13px", fontWeight: "400" }}
+                    style={{ fontSize: "14px", fontWeight: "400" }}
                     className=" relative w-full text-left"
                   >
                     {sender.isGroupChat

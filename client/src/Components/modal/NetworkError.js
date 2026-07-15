@@ -9,7 +9,7 @@ const NetworkError = (props) => {
 
   return (
     <Wrapper>
-      <div className='container bg-black w-screen h-screen  p-10'>
+      <div className='container w-screen h-screen  p-10'>
         <div className='wrapper flex flex-col justify-center items-center w-full h-full p-5'>
           <div className="title text-center">
             <h1>Whoops!</h1>
@@ -33,7 +33,7 @@ const Wrapper = styled.div`
     background-color: ${({ theme }) => theme.colors.bg.secondary};
     box-shadow: 0 0 20px rgba(0,0,0,0.1)
 }
-.title.h1{
+.title h1{
     color: ${({ theme }) => theme.colors.heading};
 }
 `;

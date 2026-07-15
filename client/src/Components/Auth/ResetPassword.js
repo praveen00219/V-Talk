@@ -26,6 +26,9 @@ const ResetPassword = () => {
 
   const result = useSelector((globalState) => globalState.auth.message);
   const status = useSelector((globalState) => globalState.auth.success);
+  const darkThemeEnabled = useSelector(
+    (state) => state.themeReducer.darkThemeEnabled
+  );
 
   useEffect(() => {
     setUserData((prev) => ({ ...prev, token: token }));
@@ -35,9 +38,9 @@ const ResetPassword = () => {
     if (result) {
       setMessage(result);
       if (!status) {
-        toast.error(result, { position: "top-right", autoClose: 5000, theme: "light" });
+        toast.error(result, { position: "top-right", autoClose: 5000 });
       } else {
-        toast.success(result, { position: "top-right", autoClose: 5000, theme: "light" });
+        toast.success(result, { position: "top-right", autoClose: 5000 });
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -53,7 +56,6 @@ const ResetPassword = () => {
       toast.warn("Please fill new Password and Confirm Password both", {
         position: "top-right",
         autoClose: 5000,
-        theme: "light",
       });
       return;
     }
@@ -61,7 +63,6 @@ const ResetPassword = () => {
       toast.warn("Password and Confirm Password do not match.", {
         position: "top-right",
         autoClose: 5000,
-        theme: "light",
       });
       return;
     }
@@ -88,7 +89,7 @@ const ResetPassword = () => {
         pauseOnFocusLoss
         draggable
         pauseOnHover
-        theme="light"
+        theme={darkThemeEnabled ? "dark" : "light"}
       />
       <div className="toggle-icon">
         <Toggler />
@@ -102,7 +103,7 @@ const ResetPassword = () => {
         <div className="logo">
           <img src="/images/logo.png" alt="V-Talk logo" />
         </div>
-        <h2 className="title">Reset Password</h2>
+        <h3 className="title">Reset Password</h3>
         {message ? (
           <div className="result">
             <p className="result-text">{message}</p>
@@ -195,7 +196,6 @@ const Wrapper = styled.section`
 
   .title {
     text-align: center;
-    font-size: 1.5rem;
     margin-bottom: 1.5rem;
   }
 

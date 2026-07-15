@@ -54,7 +54,6 @@ const ProfileEdit = () => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
-        theme: "light",
       });
       return;
     }
@@ -69,7 +68,6 @@ const ProfileEdit = () => {
       pauseOnHover: true,
       draggable: true,
       progress: undefined,
-      theme: "light",
     });
     await dispatch(getMySelf());
     await dispatch(fetchChats());

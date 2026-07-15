@@ -38,7 +38,6 @@ const LoginForm = () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
-          theme: "light",
         });
         dispatch(clearAuthStore());
       } else {
@@ -50,7 +49,6 @@ const LoginForm = () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
-          theme: "light",
         });
         navigateToHome();
       }

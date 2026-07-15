@@ -35,7 +35,6 @@ function ImageEdit() {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
-        theme: "light",
       });
       return;
     }
@@ -49,7 +48,6 @@ function ImageEdit() {
       pauseOnHover: true,
       draggable: true,
       progress: undefined,
-      theme: "light",
     });
     setLoading(false);
     closeModal();

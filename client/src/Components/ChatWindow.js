@@ -173,7 +173,7 @@ const ChatWindow = () => {
         {item.attachments.map((attachment, idx) => (
           <div
             key={idx}
-            className="cursor-pointer border rounded-lg bg-white/70 backdrop-blur p-2 hover:bg-white/90 transition-colors"
+            className="attach-thumb cursor-pointer rounded-lg backdrop-blur p-2 transition-colors"
             onClick={() => setAttachmentModal({ open: true, attachment })}
           >
             {attachment.resourceType === "image" ? (
@@ -190,7 +190,7 @@ const ChatWindow = () => {
                 playsInline
               />
             ) : (
-              <div className="w-20 h-20 flex flex-col items-center justify-center bg-slate-100 rounded text-xs text-slate-600">
+              <div className="attach-file-box w-20 h-20 flex flex-col items-center justify-center rounded text-xs">
                 <div className="font-medium">FILE</div>
                 <div
                   className="truncate w-full text-center px-1"
@@ -657,7 +657,7 @@ const ChatWindow = () => {
                                   <div className="user-chat-content">
                                     <div className="flex mb-1 justify-end items-start gap-2">
                                       <div className="chat-wrap-content relative pb-5">
-                                        <span className="mb-0  text-sm font-medium text-left">
+                                        <span className="mb-0  font-medium text-left">
                                           {item.isDeletedForEveryone ? (
                                             <em className="opacity-80">
                                               This message was deleted
@@ -682,7 +682,7 @@ const ChatWindow = () => {
                                                 ).map((r) => (
                                                   <span
                                                     key={r.emoji}
-                                                    className="px-2 py-0.5 rounded-full text-xs bg-white text-slate-700 border border-slate-200 shadow-sm"
+                                                    className="reaction-pill px-2 py-0.5 rounded-full text-xs border"
                                                   >
                                                     {r.emoji}{" "}
                                                     {r.count > 1 ? r.count : ""}
@@ -698,7 +698,7 @@ const ChatWindow = () => {
                                                 leaveFrom="transform opacity-100 scale-100"
                                                 leaveTo="transform opacity-0 scale-95"
                                               >
-                                                <Menu.Items className="absolute z-50 bottom-8 right-0 w-64 origin-bottom-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none p-2">
+                                                <Menu.Items className="reaction-menu-panel absolute z-50 bottom-8 right-0 w-64 origin-bottom-right rounded-md focus:outline-none p-2">
                                                   {groupReactionUsers(
                                                     item.reactions
                                                   ).map((grp) => (
@@ -729,20 +729,16 @@ const ChatWindow = () => {
                                                                   ? "Remove my reaction"
                                                                   : "Only your own reaction can be removed"
                                                               }
-                                                              className={`px-2 py-0.5 rounded-full text-xs border border-slate-200 ${
+                                                              className={`reaction-chip px-2 py-0.5 rounded-full text-xs border ${
                                                                 hasMyReaction(
                                                                   item.reactions,
                                                                   grp.emoji
                                                                 )
-                                                                  ? `${
-                                                                      active
-                                                                        ? "bg-red-100"
-                                                                        : "bg-red-50"
+                                                                  ? `reaction-chip-mine ${
+                                                                      active ? "is-active" : ""
                                                                     } cursor-pointer`
-                                                                  : `${
-                                                                      active
-                                                                        ? "bg-slate-200"
-                                                                        : "bg-slate-100"
+                                                                  : `reaction-chip-other ${
+                                                                      active ? "is-active" : ""
                                                                     } cursor-not-allowed opacity-60`
                                                               }`}
                                                             >
@@ -756,7 +752,7 @@ const ChatWindow = () => {
                                                           )}
                                                         </Menu.Item>
                                                       </div>
-                                                      <ul className="pl-4 list-disc text-sm text-slate-700">
+                                                      <ul className="reaction-user-list pl-4 list-disc text-sm">
                                                         {grp.users.map(
                                                           (name, i) => (
                                                             <li key={i}>
@@ -777,7 +773,7 @@ const ChatWindow = () => {
                                             </Menu>
                                           )}
                                         <div className="conversation-name ">
-                                          <small className=" mb-0 text-gray-500">
+                                          <small className=" mb-0">
                                             {moment(item.createdAt)
                                               .format("h:mm a")
                                               .toUpperCase()}
@@ -793,7 +789,7 @@ const ChatWindow = () => {
                                         as="div"
                                         className="relative inline-block text-left"
                                       >
-                                        <Menu.Button className="p-1 rounded-full hover:bg-slate-200/40">
+                                        <Menu.Button className="p-1 rounded-full menu-trigger-btn">
                                           <BiDotsVerticalRounded />
                                         </Menu.Button>
                                         <Transition
@@ -805,7 +801,7 @@ const ChatWindow = () => {
                                           leaveFrom="transform opacity-100 scale-100"
                                           leaveTo="transition opacity-0 scale-95"
                                         >
-                                          <Menu.Items className="absolute z-50 right-0 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none p-2">
+                                          <Menu.Items className="reaction-menu-panel absolute z-50 right-0 mt-2 w-56 origin-top-right rounded-md focus:outline-none p-2">
                                             <div className="flex gap-2 px-2 py-1 border-b">
                                               {quickEmojis.map((emo) => (
                                                 <button
@@ -828,7 +824,7 @@ const ChatWindow = () => {
                                                     }
                                                     className={`${
                                                       active
-                                                        ? "bg-gray-100"
+                                                        ? "menu-item-active"
                                                         : ""
                                                     } block w-full text-left px-4 py-2 text-sm`}
                                                   >
@@ -848,7 +844,7 @@ const ChatWindow = () => {
                                                         }
                                                         className={`${
                                                           active
-                                                            ? "bg-gray-100"
+                                                            ? "menu-item-active"
                                                             : ""
                                                         } block w-full text-left px-4 py-2 text-sm text-red-600`}
                                                       >
@@ -901,7 +897,7 @@ const ChatWindow = () => {
                                         as="div"
                                         className="relative inline-block text-left"
                                       >
-                                        <Menu.Button className="p-1 rounded-full hover:bg-slate-200/40">
+                                        <Menu.Button className="p-1 rounded-full menu-trigger-btn">
                                           <BiDotsVerticalRounded />
                                         </Menu.Button>
                                         <Transition
@@ -913,7 +909,7 @@ const ChatWindow = () => {
                                           leaveFrom="transform opacity-100 scale-100"
                                           leaveTo="transition opacity-0 scale-95"
                                         >
-                                          <Menu.Items className="absolute z-50 left-0 mt-2 w-56 origin-top-left rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none p-2">
+                                          <Menu.Items className="reaction-menu-panel absolute z-50 left-0 mt-2 w-56 origin-top-left rounded-md focus:outline-none p-2">
                                             <div className="flex gap-2 px-2 py-1 border-b">
                                               {quickEmojis.map((emo) => (
                                                 <button
@@ -936,7 +932,7 @@ const ChatWindow = () => {
                                                     }
                                                     className={`${
                                                       active
-                                                        ? "bg-gray-100"
+                                                        ? "menu-item-active"
                                                         : ""
                                                     } block w-full text-left px-4 py-2 text-sm`}
                                                   >
@@ -949,7 +945,7 @@ const ChatWindow = () => {
                                         </Transition>
                                       </Menu>
                                       <div className="chat-wrap-content-left relative pb-5">
-                                        <span className="mb-0  text-sm font-medium text-left">
+                                        <span className="mb-0  font-medium text-left">
                                           {item.isDeletedForEveryone ? (
                                             <em className="opacity-80">
                                               This message was deleted
@@ -973,7 +969,7 @@ const ChatWindow = () => {
                                                 ).map((r) => (
                                                   <span
                                                     key={r.emoji}
-                                                    className="px-2 py-0.5 rounded-full text-xs bg-white text-slate-700 border border-slate-200 shadow-sm"
+                                                    className="reaction-pill px-2 py-0.5 rounded-full text-xs border"
                                                   >
                                                     {r.emoji}{" "}
                                                     {r.count > 1 ? r.count : ""}
@@ -989,7 +985,7 @@ const ChatWindow = () => {
                                                 leaveFrom="transform opacity-100 scale-100"
                                                 leaveTo="transition opacity-0 scale-95"
                                               >
-                                                <Menu.Items className="absolute z-50 bottom-8 left-0 w-64 origin-bottom-left rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none p-3">
+                                                <Menu.Items className="reaction-menu-panel absolute z-50 bottom-8 left-0 w-64 origin-bottom-left rounded-md focus:outline-none p-3">
                                                   {groupReactionUsers(
                                                     item.reactions
                                                   ).map((grp) => (
@@ -1020,20 +1016,16 @@ const ChatWindow = () => {
                                                                   ? "Remove my reaction"
                                                                   : "Only your own reaction can be removed"
                                                               }
-                                                              className={`px-2 py-0.5 rounded-full text-xs border border-slate-200 ${
+                                                              className={`reaction-chip px-2 py-0.5 rounded-full text-xs border ${
                                                                 hasMyReaction(
                                                                   item.reactions,
                                                                   grp.emoji
                                                                 )
-                                                                  ? `${
-                                                                      active
-                                                                        ? "bg-red-100"
-                                                                        : "bg-red-50"
+                                                                  ? `reaction-chip-mine ${
+                                                                      active ? "is-active" : ""
                                                                     } cursor-pointer`
-                                                                  : `${
-                                                                      active
-                                                                        ? "bg-slate-200"
-                                                                        : "bg-slate-100"
+                                                                  : `reaction-chip-other ${
+                                                                      active ? "is-active" : ""
                                                                     } cursor-not-allowed opacity-60`
                                                               }`}
                                                             >
@@ -1047,7 +1039,7 @@ const ChatWindow = () => {
                                                           )}
                                                         </Menu.Item>
                                                       </div>
-                                                      <ul className="pl-4 list-disc text-sm text-slate-700">
+                                                      <ul className="reaction-user-list pl-4 list-disc text-sm">
                                                         {grp.users.map(
                                                           (name, i) => (
                                                             <li key={i}>
@@ -1064,7 +1056,7 @@ const ChatWindow = () => {
                                           )}
 
                                         <div className="conversation-name ">
-                                          <small className=" mb-0 text-gray-400">
+                                          <small className=" mb-0">
                                             {moment(item.createdAt)
                                               .format("h:mm a")
                                               .toUpperCase()}
@@ -1127,7 +1119,7 @@ const ChatWindow = () => {
                         {previewItems.map((p, idx) => (
                           <div
                             key={idx}
-                            className="relative border rounded-lg bg-white/70 backdrop-blur p-2 flex items-center gap-2 min-w-[160px]"
+                            className="attach-thumb relative rounded-lg backdrop-blur p-2 flex items-center gap-2 min-w-[160px]"
                           >
                             {p.kind === "image" ? (
                               <img
@@ -1143,7 +1135,7 @@ const ChatWindow = () => {
                                 playsInline
                               />
                             ) : (
-                              <div className="w-16 h-16 flex items-center justify-center bg-slate-100 rounded text-xs text-slate-600">
+                              <div className="attach-file-box w-16 h-16 flex items-center justify-center rounded text-xs">
                                 File
                               </div>
                             )}
@@ -1154,7 +1146,7 @@ const ChatWindow = () => {
                               >
                                 {p.name}
                               </div>
-                              <div className="text-[10px] text-slate-500 truncate">
+                              <div className="attach-file-caption text-[10px] truncate">
                                 {(p.size / 1024).toFixed(1)} KB
                               </div>
                             </div>
@@ -1318,7 +1310,7 @@ const ChatWindow = () => {
                             </Dialog.Title>
                             <button
                               onClick={() => setAttachmentModal({ open: false, attachment: null })}
-                              className="p-2 rounded-full hover:bg-gray-100"
+                              className="modal-close-btn p-2 rounded-full"
                             >
                               <FiX className="w-6 h-6" />
                             </button>
@@ -1339,19 +1331,19 @@ const ChatWindow = () => {
                                   className="max-w-full max-h-[70vh] object-contain rounded"
                                 />
                               ) : (
-                                <div className="flex flex-col items-center justify-center p-8 bg-slate-50 rounded">
+                                <div className="attach-file-box flex flex-col items-center justify-center p-8 rounded">
                                   <div className="text-6xl mb-4">📄</div>
                                   <div className="text-lg font-medium mb-2">
                                     {attachmentModal.attachment.originalFilename}
                                   </div>
-                                  <div className="text-sm text-slate-600 mb-4">
+                                  <div className="attach-file-caption text-sm mb-4">
                                     File Type: {attachmentModal.attachment.mimeType}
                                   </div>
                                   <a
                                     href={attachmentModal.attachment.url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                                    className="modal-download-btn px-4 py-2 rounded transition-colors"
                                   >
                                     Download File
                                   </a>
@@ -1494,6 +1486,71 @@ const Wrapper = styled.section`
       }
     }
   }
+
+  /* attachment thumbnails, reaction pills, per-message menus, attachment
+     viewer modal — theme-aware so they don't render as bright white cards
+     on a dark background */
+  .attach-thumb {
+    border: 1px solid rgba(${({ theme }) => theme.colors.border}, 0.6);
+    background-color: ${({ theme }) => theme.colors.bg.elevated};
+    transition: background-color 0.15s ease;
+    &:hover {
+      background-color: ${({ theme }) => theme.colors.bg.secondary};
+    }
+  }
+  .attach-file-box {
+    background-color: ${({ theme }) => theme.colors.bg.muted};
+    color: ${({ theme }) => theme.colors.text.secondary};
+  }
+  .attach-file-caption {
+    color: ${({ theme }) => theme.colors.text.secondary};
+  }
+  .reaction-pill {
+    background-color: ${({ theme }) => theme.colors.bg.elevated};
+    color: ${({ theme }) => theme.colors.text.secondary};
+    border: 1px solid rgba(${({ theme }) => theme.colors.border}, 0.6);
+    box-shadow: ${({ theme }) => theme.colors.shadow.sm};
+  }
+  .reaction-menu-panel {
+    background-color: ${({ theme }) => theme.colors.bg.elevated};
+    box-shadow: ${({ theme }) => theme.colors.shadow.lg};
+    border: 1px solid rgba(${({ theme }) => theme.colors.border}, 0.6);
+  }
+  .reaction-user-list {
+    color: ${({ theme }) => theme.colors.text.secondary};
+  }
+  .reaction-chip {
+    border-color: rgba(${({ theme }) => theme.colors.border}, 0.8);
+  }
+  .reaction-chip-mine {
+    background-color: rgba(${({ theme }) => theme.colors.dangerRgb}, 0.12);
+    &.is-active {
+      background-color: rgba(${({ theme }) => theme.colors.dangerRgb}, 0.2);
+    }
+  }
+  .reaction-chip-other {
+    background-color: ${({ theme }) => theme.colors.bg.muted};
+    &.is-active {
+      background-color: rgba(${({ theme }) => theme.colors.border}, 0.7);
+    }
+  }
+  .menu-item-active {
+    background-color: ${({ theme }) => theme.colors.bg.secondary};
+  }
+  .menu-trigger-btn:hover {
+    background-color: ${({ theme }) => theme.colors.bg.secondary};
+  }
+  .modal-close-btn:hover {
+    background-color: ${({ theme }) => theme.colors.bg.secondary};
+  }
+  .modal-download-btn {
+    background-color: ${({ theme }) => theme.colors.accent.solid};
+    color: #fff;
+    transition: filter 0.15s ease;
+    &:hover {
+      filter: brightness(0.9);
+    }
+  }
   .chat-welcome-section {
     width: 100%;
     height: 100vh;
@@ -1524,11 +1581,11 @@ const Wrapper = styled.section`
       .presence-label {
         color: ${({ theme }) => theme.colors.text.secondary};
         &.online {
-          color: ${({ theme }) => theme.colors.success};
+          color: ${({ theme }) => theme.colors.successText};
           font-weight: 600;
         }
         &.blocked {
-          color: ${({ theme }) => theme.colors.danger};
+          color: ${({ theme }) => theme.colors.dangerText};
           font-weight: 600;
         }
       }

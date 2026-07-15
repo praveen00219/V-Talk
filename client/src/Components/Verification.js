@@ -105,13 +105,13 @@ const Verification = () => {
               </p> */}
               <div className="flex">
                 <button
-                  className="text-2xl cursor-pointer mx-auto"
+                  className="cursor-pointer mx-auto"
                   onClick={() => dispatch(signOut())}
                 >
                   Home
                 </button>
                 <button
-                  className="text-2xl cursor-pointer mx-auto"
+                  className="cursor-pointer mx-auto"
                   onClick={() => openModal()}
                 >
                   Resend
@@ -182,7 +182,7 @@ const Verification = () => {
                         <div className="modal-footer flex justify-end mt-3">
                           <button
                             type="button"
-                            className="close-btn mr-4 inline-flex justify-center rounded-md border border-transparent  px-4 py-2 text-sm font-medium text-cyan-500  focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                            className="close-btn mr-4 inline-flex justify-center rounded-md border border-transparent  px-4 py-2 font-medium text-cyan-500  focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                             onClick={closeModal}
                           >
                             Cancel
@@ -222,7 +222,7 @@ const Wrapper = styled.section`
     font-size: clamp(8rem, 22vw, 14rem);
   }
   button {
-    font-size: 1.05rem;
+    font-size: 0.9375rem;
     font-weight: 600;
     color: #fff;
     margin: 0.5rem;
@@ -239,7 +239,6 @@ const Wrapper = styled.section`
   }
   h1 {
     text-align: center;
-    font-size: 2.4rem;
     font-weight: bold;
     margin: 15px auto;
     line-height: 1.2;

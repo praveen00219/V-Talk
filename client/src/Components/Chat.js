@@ -1,15 +1,19 @@
 import React, { useState } from "react";
 import { Route, Routes } from "react-router-dom";
 import styled from "styled-components";
+import { useSelector } from "react-redux";
 import ChatMenu from "./ChatMenu";
 import ChatWindow from "./ChatWindow";
 import SideMenu from "./SideMenu";
 import { ToastContainer} from "react-toastify";
 import NetworkError from "./modal/NetworkError";
 const Chat = () => {
+  const darkThemeEnabled = useSelector(
+    (state) => state.themeReducer.darkThemeEnabled
+  );
   return (
     <NetworkError>
-     <ToastContainer />
+     <ToastContainer theme={darkThemeEnabled ? "dark" : "light"} />
       <Wrapper className="flex justify-start w-screen">
         <SideMenu />
         <ChatMenu />

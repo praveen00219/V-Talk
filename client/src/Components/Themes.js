@@ -68,7 +68,9 @@ const accentTokens = (accentColor) => {
   };
 };
 
-// semantic feedback colors (shared by both modes)
+// semantic feedback colors (shared by both modes) — vivid versions, meant for
+// icons, dots and tinted badge backgrounds where they're paired with a
+// low-opacity fill, not used as standalone text on a plain page background.
 const semantic = {
   success: "#16a34a",
   successRgb: "22, 163, 74",
@@ -78,6 +80,20 @@ const semantic = {
   infoRgb: "28, 157, 234",
   danger: "#ff4e2b",
   dangerRgb: "255, 78, 43",
+};
+
+// "on-surface" text-safe variants of the semantic colors: the vivid values
+// above fail WCAG AA (~3.3:1) as small text directly on a light background,
+// so light mode gets darker, accessible shades here; dark mode's near-black
+// background already gives the vivid colors plenty of contrast, so it just
+// reuses them unchanged.
+const lightSemanticText = {
+  successText: "#15803d",
+  dangerText: "#b91c1c",
+};
+const darkSemanticText = {
+  successText: semantic.success,
+  dangerText: semantic.danger,
 };
 
 // =============================================================================
@@ -100,6 +116,7 @@ export const makeLightTheme = (accentColor) => {
       // new unified accent token set (derived from picker)
       accent,
       ...semantic,
+      ...lightSemanticText,
 
       text: {
         primary: "#000000",
@@ -178,9 +195,12 @@ export const makeDarkTheme = (accentColor) => {
 
       accent,
       ...semantic,
+      ...darkSemanticText,
 
       text: {
-        primary: "#212529",
+        // was "#212529" (near-black) — invisible against every dark
+        // background in this theme; primary body text must be light here.
+        primary: "rgba(255, 255, 255, 0.92)",
         secondary: "#8f9198",
         muted: "rgba(255, 255, 255, 0.55)",
       },

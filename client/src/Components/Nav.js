@@ -124,7 +124,7 @@ const Navbar = styled.nav`
       }
 
       .button {
-        font-size: 1.1rem;
+        font-size: 0.9375rem;
         width: 100px;
         border-radius: 20px;
         color: ${({ theme }) => theme.colors.white};

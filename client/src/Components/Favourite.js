@@ -31,7 +31,7 @@ const Favourite = () => {
     <Wrapper className="favourite-tab dynamic-sidebar">
       <div className="relative chat-menu flex flex-wrap items-center justify-between w-full ">
         <div>
-          <h2>Favourites</h2>
+          <h2 className="text-2xl m-0">Favourites</h2>
           <p>Your starred conversations</p>
         </div>
         <div className="icon text-right"></div>

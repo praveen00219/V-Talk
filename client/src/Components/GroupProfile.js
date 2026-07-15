@@ -56,7 +56,6 @@ const GroupProfile = (props) => {
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
-            theme: "light",
           });
         } else {
           toast.warn("your are not admin. Please Ask Admin", {
@@ -67,7 +66,6 @@ const GroupProfile = (props) => {
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
-            theme: "light",
           });
         }
       }
@@ -80,7 +78,6 @@ const GroupProfile = (props) => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
-        theme: "light",
       });
     }
   };

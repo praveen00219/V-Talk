@@ -3,17 +3,16 @@ import styled from "styled-components";
 // import { MdOutlineEmail } from "react-icons/md";
 // import { FcAbout, FcContacts } from "react-icons/fc";
 import { AiFillContacts, AiFillInfoCircle, AiTwotoneMail } from "react-icons/ai";
-import { useSelector } from "react-redux";
 import { RxCross2 } from "react-icons/rx";
 
 const Profile = (props) => {
- 
+
   // console.log(user);
   return (
     <Wrapper className="profile-tab dynamic-sidebar">
       <div className="relative chat-menu flex flex-wrap items-center justify-between w-full ">
         <div>
-          <h2>Profile</h2>
+          <h2 className="text-2xl m-0">Profile</h2>
           <p>Personal Information</p>
         </div>
         <div className="icon p-1 flex items-start h-full justify-start cursor-pointer">
@@ -39,31 +38,31 @@ const Profile = (props) => {
           </div>
           <div className="intro mt-3 flex items-start flex-col p-4 rounded">
             <div className="flex justify-between w-full mt-2">
-              <div className="grid place-items-center text-gray-500 text-3xl">
+              <div className="grid place-items-center info-icon text-3xl">
                 <AiFillInfoCircle className="icon" />
               </div>
               <div className="w-4/5">
-                <span className="text-gray-500">About</span>
+                <span className="label">About</span>
                 <p className="w-full break-words">{props.about}</p>
               </div>
             </div>
             {/* contact */}
             <div className="flex justify-between w-full mt-2">
-              <div className="grid place-items-center text-gray-500 text-3xl">
+              <div className="grid place-items-center info-icon text-3xl">
                 <AiFillContacts className="icon" />
               </div>
               <div className="w-4/5">
-                <span className="text-gray-500">Mobile</span>
+                <span className="label">Mobile</span>
                 <p className="w-full break-words">{props.contact}</p>
               </div>
             </div>
 
             <div className="flex justify-between w-full mt-2">
-              <div className="grid place-items-center text-gray-500 text-3xl">
+              <div className="grid place-items-center info-icon text-3xl">
                 <AiTwotoneMail className="icon" />
               </div>
               <div className="w-4/5">
-                <span className="text-gray-500">Email Address</span>
+                <span className="label">Email Address</span>
                 <p className="w-full break-words">{props.email}</p>
               </div>
             </div>
@@ -111,6 +110,12 @@ const Wrapper = styled.div`
       color: ${({ theme }) => theme.colors.primaryRgb}
     }
   }
+  .info-icon {
+    color: ${({ theme }) => theme.colors.primaryRgb};
+  }
+  .label {
+    color: ${({ theme }) => theme.colors.text.muted};
+  }
   @media (max-width: 500px) {
     .details {
       margin: 10px 40px 0px 40px;
@@ -135,4 +140,3 @@ const Wrapper = styled.div`
     }
   }
 `;
-

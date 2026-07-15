@@ -100,7 +100,7 @@ const Wrapper = styled.section`
     }
     .eyebrow {
       display: inline-block;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       font-weight: 700;
       letter-spacing: 0.08em;
       text-transform: uppercase;
@@ -108,7 +108,6 @@ const Wrapper = styled.section`
       margin-bottom: 0.5rem;
     }
     h1 {
-      font-size: calc(1.1rem + 28 * (100vw - 320px) / 1600);
       font-weight: 800;
       margin-bottom: 17px;
       line-height: 1.15;

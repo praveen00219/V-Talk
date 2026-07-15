@@ -23,17 +23,19 @@ const ForgotPassword = () => {
 
   const result = useSelector((globalState) => globalState.auth.message);
   const status = useSelector((globalState) => globalState.auth.success);
+  const darkThemeEnabled = useSelector(
+    (state) => state.themeReducer.darkThemeEnabled
+  );
 
   useEffect(() => {
     if (result) {
       setMessage(result);
       if (!status) {
-        toast.error(result, { position: "top-right", autoClose: 5000, theme: "light" });
+        toast.error(result, { position: "top-right", autoClose: 5000 });
       } else {
         toast.success("Password Reset Link sent Successfully", {
           position: "top-right",
           autoClose: 5000,
-          theme: "light",
         });
       }
     }
@@ -50,7 +52,6 @@ const ForgotPassword = () => {
       toast.warn("Please enter a valid email", {
         position: "top-right",
         autoClose: 5000,
-        theme: "light",
       });
       return;
     }
@@ -77,7 +78,7 @@ const ForgotPassword = () => {
         pauseOnFocusLoss
         draggable
         pauseOnHover
-        theme="light"
+        theme={darkThemeEnabled ? "dark" : "light"}
       />
       <div className="toggle-icon">
         <Toggler />
@@ -91,7 +92,7 @@ const ForgotPassword = () => {
         <div className="logo">
           <img src="/images/logo.png" alt="V-Talk logo" />
         </div>
-        <h2 className="title">Forgot Password</h2>
+        <h3 className="title">Forgot Password</h3>
         {message ? (
           <div className="result">
             <p className="result-text">{message}</p>
@@ -175,12 +176,11 @@ const Wrapper = styled.section`
 
   .title {
     text-align: center;
-    font-size: 1.5rem;
     margin-bottom: 1.25rem;
   }
   .subtitle {
     color: ${({ theme }) => theme.colors.text.muted};
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     text-align: center;
     margin-bottom: 1.25rem;
   }

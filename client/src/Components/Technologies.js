@@ -191,7 +191,6 @@ const Wrapper = styled.section`
         font-size: 0.9rem;
       }
       h2 {
-        font-size: 2.5rem;
         font-weight: 700;
         color: ${({ theme }) => theme.colors.heading};
         margin: 25px 0;

@@ -1,11 +1,9 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { NavLink } from "react-router-dom";
-import { CgProfile } from "react-icons/cg";
 import { AiOutlineSetting, AiOutlineStar } from "react-icons/ai";
 import { BsChatSquareDots } from "react-icons/bs";
 import { CgClose, CgMenu } from "react-icons/cg";
-import Toggler from "./Toggler";
 
 import { IoLogOutOutline } from "react-icons/io5";
 
@@ -14,43 +12,57 @@ import { useDispatch, useSelector } from "react-redux";
 import { signOut } from "../Redux/Reducer/Auth/auth.action";
 import { toggleTab } from "../Redux/Reducer/Tab/tabAction";
 
+// Profile and the light/dark toggle now live inside Settings (tabId 5), so
+// they no longer have their own sidebar icons. The nav is split into a top
+// group (Chats, Favourite) and a bottom group (Setting, Logout) pinned to
+// the bottom of the rail.
+const topIconsList = [
+  {
+    tabId: 3,
+    icon: BsChatSquareDots,
+    title: "Chats",
+  },
+  {
+    tabId: 2,
+    icon: AiOutlineStar,
+    title: "Favourite",
+  },
+];
+
 const SideMenu = () => {
   const [menuIcon, setMenuIcon] = useState();
 
   const tabIndex = useSelector((state) => state.tabReducer);
+  const dispatch = useDispatch();
 
   const activeTab = (index) => {
     dispatch(toggleTab(index));
   };
 
-  // Contacts tab removed: people search + invite now live in the Chat tab's
-  // search bar. tabId maps to the ChatMenu tab panes (Setting stays 5).
-  const sideIconsList = [
-    {
-      tabId: 1,
-      icon: CgProfile,
-      title: "Profile",
-    },
-    {
-      tabId: 2,
-      icon: AiOutlineStar,
-      title: "Favourite",
-    },
-    {
-      tabId: 3,
-      icon: BsChatSquareDots,
-      title: "Chats",
-    },
-    {
-      tabId: 5,
-      icon: AiOutlineSetting,
-      title: "Setting",
-    },
-  ];
-  const dispatch = useDispatch();
-
   const handleLogout = () => {
     dispatch(signOut());
+  };
+
+  const renderNavButton = (items) => {
+    const isActive =
+      (items.tabId === 3 && tabIndex === 0) || tabIndex === items.tabId;
+    return (
+      <li key={items.tabId} className="side-menu-item">
+        <button
+          type="button"
+          aria-label={items.title}
+          aria-current={isActive ? "page" : undefined}
+          title={items.title}
+          className={isActive ? "nav-link active" : "nav-link"}
+          onClick={() => {
+            activeTab(items.tabId);
+            setMenuIcon(false);
+          }}
+        >
+          <items.icon className="icon" />
+        </button>
+      </li>
+    );
   };
 
   return (
@@ -93,38 +105,17 @@ const SideMenu = () => {
             </NavLink>
           </div>
           <div className="side-menu-list">
-            <ul className="flex flex-col justify-between gap-4">
-              {sideIconsList.map((items) => {
-                const isActive =
-                  (items.tabId === 3 && tabIndex === 0) ||
-                  tabIndex === items.tabId;
-                return (
-                  <li key={items.tabId} className="side-menu-item">
-                    <button
-                      type="button"
-                      aria-label={items.title}
-                      aria-current={isActive ? "page" : undefined}
-                      title={items.title}
-                      className={isActive ? "nav-link active" : "nav-link"}
-                      onClick={() => {
-                        activeTab(items.tabId);
-                        setMenuIcon(false);
-                      }}
-                    >
-                      <items.icon className="icon" />
-                    </button>
-                  </li>
-                );
+            <ul className="nav-top flex flex-col gap-4">
+              {topIconsList.map(renderNavButton)}
+            </ul>
+
+            {/* Setting + Logout pinned to the bottom of the rail */}
+            <ul className="nav-bottom flex flex-col gap-4">
+              {renderNavButton({
+                tabId: 5,
+                icon: AiOutlineSetting,
+                title: "Setting",
               })}
-
-              {/* Theme mode */}
-              <li className="side-menu-item" title="Theme Mode">
-                <div className="nav-link toggler-slot">
-                  <Toggler />
-                </div>
-              </li>
-
-              {/* logout */}
               <li className="side-menu-item">
                 <button
                   type="button"
@@ -156,12 +147,15 @@ const Wrapper = styled.section`
   }
   .side-menu-bar {
     height: 100%;
+    display: flex;
+    flex-direction: column;
   }
   .sideMenu-brand-box {
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100px;
+    flex-shrink: 0;
     .logo {
       img {
         vertical-align: middle;
@@ -170,6 +164,12 @@ const Wrapper = styled.section`
     }
   }
   .side-menu-list {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding-bottom: 1rem;
     .side-menu-item {
       margin: 7px auto;
       cursor: pointer;
@@ -214,9 +214,6 @@ const Wrapper = styled.section`
         &:active {
           transform: scale(0.92);
         }
-        &.toggler-slot {
-          cursor: default;
-        }
         .icon {
           display: inline;
         }
@@ -255,10 +252,13 @@ const Wrapper = styled.section`
     .side-menu-list {
       height: 100%;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
+      gap: 2rem;
+      padding-bottom: 0;
       ul {
-        height: 80%;
+        height: auto;
         .nav-link {
           font-size: 3rem !important;
         }

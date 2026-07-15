@@ -51,7 +51,6 @@ const Group = () => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
-        theme: "light",
       });
     } else {
       setSelectedUser([...selectedUser, userToAdd]);
@@ -79,7 +78,6 @@ const Group = () => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
-        theme: "light",
       });
       return;
     }
@@ -96,7 +94,6 @@ const Group = () => {
       pauseOnHover: true,
       draggable: true,
       progress: undefined,
-      theme: "light",
     });
     setGroupChatName("");
     setSearch("");
@@ -217,7 +214,7 @@ const Group = () => {
                               <li key={index} className="inline-flex flex-wrap">
                                 <span
                                   id="badge-dismiss-default"
-                                  className="user-badge inline-flex items-center px-2 py-1 mr-2 mb-2 text-sm font-medium rounded"
+                                  className="user-badge inline-flex items-center px-2 py-1 mr-2 mb-2 text-xs font-medium rounded"
                                 >
                                   {item.name}
                                   <button
@@ -300,7 +297,7 @@ const Group = () => {
                                           : "text-center"
                                       }
                                     >
-                                      <span className="text-gray-500">
+                                      <span>
                                         No Contact Found
                                       </span>
                                     </div>
@@ -324,7 +321,7 @@ const Group = () => {
                     </button>
                     <button
                       type="button"
-                      className="btn rounded px-4"
+                      className="btn rounded px-4 text-sm"
                       onClick={() => handleCreateNewGroupChat()}
                     >
                       {loading1 ? (

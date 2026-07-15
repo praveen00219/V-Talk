@@ -26,6 +26,9 @@ const SignupForm = () => {
   });
 
   const serverResponse = useSelector((globalState) => globalState.auth);
+  const darkThemeEnabled = useSelector(
+    (state) => state.themeReducer.darkThemeEnabled
+  );
 
   useEffect(() => {
     if (!serverResponse) {
@@ -41,7 +44,6 @@ const SignupForm = () => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
-        theme: "light",
       });
 
       dispatch(clearAuthStore());
@@ -56,7 +58,6 @@ const SignupForm = () => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
-        theme: "light",
       });
       navigate("/");
     }
@@ -179,7 +180,7 @@ const SignupForm = () => {
           </form>
         </div>
       </div>
-      <ToastContainer />
+      <ToastContainer theme={darkThemeEnabled ? "dark" : "light"} />
     </motion.div>
   );
 };
