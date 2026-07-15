@@ -5,6 +5,7 @@ const {
   toggleReaction,
   deleteForMe,
   deleteForEveryone,
+  markChatRead,
 } = require("../controllers/messageControllers.js");
 const { protect } = require("../middleware/authMiddleware.js");
 const { checkMessageQuota } = require("../middleware/quotaMiddleware.js");
@@ -22,6 +23,7 @@ router
     sendMessage
   );
 router.route("/:chatId").get(protect, allMessages);
+router.route("/:chatId/read").put(protect, markChatRead);
 router.route("/:messageId/react").put(protect, toggleReaction);
 router.route("/:messageId/deleteForMe").put(protect, deleteForMe);
 router.route("/:messageId").delete(protect, deleteForEveryone);

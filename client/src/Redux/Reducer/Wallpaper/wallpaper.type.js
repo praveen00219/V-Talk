@@ -1,0 +1,2 @@
+export const SET_WALLPAPER = "SET_WALLPAPER";
+export const SET_WALLPAPER_DIM = "SET_WALLPAPER_DIM";

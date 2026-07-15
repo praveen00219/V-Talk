@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
 import { Disclosure, Switch } from "@headlessui/react";
-import { BiChevronUp } from "react-icons/bi";
+import { BiChevronUp, BiImageAdd } from "react-icons/bi";
 import { toast } from "react-toastify";
 
-import { BsCircleHalf, BsMoonStarsFill, BsSunFill } from "react-icons/bs";
+import { BsCircleHalf, BsImage, BsMoonStarsFill, BsSunFill } from "react-icons/bs";
 import {
   AiFillContacts,
   AiFillInfoCircle,
@@ -20,6 +20,14 @@ import {toggleColor} from "../Redux/Reducer/SetColor/setColorAction"
 import { updateUserSettings } from "../Redux/Reducer/User/user.action";
 import { FREE_DEFAULTS, getTodayKey } from "../config/planLimits";
 import { TOGGLE_DARKTHEME } from "../Redux/Reducer/Theme/theme.type";
+import {
+  WALLPAPER_PRESETS,
+  MAX_WALLPAPER_UPLOAD_BYTES,
+} from "../config/wallpapers";
+import {
+  setWallpaper,
+  setWallpaperDim,
+} from "../Redux/Reducer/Wallpaper/wallpaper.action";
 
 const Setting = () => {
   const user = useSelector((globalState) => globalState.user.userDetails);
@@ -37,6 +45,58 @@ const Setting = () => {
   }
 
   const toggleDarkTheme = () => dispatch({ type: TOGGLE_DARKTHEME });
+
+  // chat wallpaper (theme not the light/dark one — the chat background image)
+  const theme = useTheme();
+  const wallpaper = useSelector((state) => state.wallpaperReducer);
+  const [uploadingWallpaper, setUploadingWallpaper] = useState(false);
+
+  const isActivePreset = (preset) =>
+    wallpaper.mode === preset.mode &&
+    (preset.mode !== "pattern" || wallpaper.url === preset.url);
+
+  const applyWallpaperPreset = (preset) => {
+    dispatch(setWallpaper({ mode: preset.mode, url: preset.url || "" }));
+  };
+
+  const handleWallpaperUpload = (e) => {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = ""; // allow re-selecting the same file later
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please choose an image file");
+      return;
+    }
+    if (file.size > MAX_WALLPAPER_UPLOAD_BYTES) {
+      toast.error("Image is too large (max 2MB)");
+      return;
+    }
+    setUploadingWallpaper(true);
+    const reader = new FileReader();
+    reader.onload = () => {
+      dispatch(setWallpaper({ mode: "custom", url: reader.result }));
+      setUploadingWallpaper(false);
+    };
+    reader.onerror = () => {
+      toast.error("Could not read that image");
+      setUploadingWallpaper(false);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const wallpaperSwatchStyle = (preset) => {
+    if (preset.mode === "pattern") {
+      return {
+        backgroundImage: `url(${preset.url})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      };
+    }
+    if (preset.mode === "gradient") {
+      return { background: theme.colors.gradientSubtle };
+    }
+    return { background: theme.colors.bg.primary };
+  };
 
   // privacy: show online status toggle (reads server-confirmed value from redux)
   const showOnlineStatus = user?.showOnlineStatus !== false;
@@ -195,6 +255,127 @@ const Setting = () => {
         </div>
 
         <div className="setting-block">
+          <div className="wallpaper-setting w-full pt-3">
+            <div className="mx-auto w-full max-w-md rounded-2xl py-2">
+              <Disclosure>
+                {({ open }) => (
+                  <>
+                    <Disclosure.Button className="flex w-full justify-between items-center rounded-lg py-2 text-left text-sm font-medium focus:outline-none focus-visible:ring focus-visible:ring-opacity-75">
+                      <div className="flex justify-between items-center">
+                        <BsImage className="mb-4 mr-4" />
+                        <span>Chat Wallpaper</span>
+                      </div>
+
+                      <BiChevronUp
+                        className={`${
+                          open ? "rotate-180 transform mb-4" : ""
+                        } h-5 w-5 mb-4`}
+                      />
+                    </Disclosure.Button>
+                    <Disclosure.Panel className="disclosure-Panel pt-2 pb-2 text-sm">
+                      <div
+                        className="wallpaper-grid grid grid-cols-4 gap-3"
+                        role="radiogroup"
+                        aria-label="Chat wallpaper"
+                      >
+                        {WALLPAPER_PRESETS.map((preset) => {
+                          const isActive = isActivePreset(preset);
+                          return (
+                            <button
+                              type="button"
+                              key={preset.id}
+                              className={
+                                isActive
+                                  ? "wallpaper-swatch active flex items-center justify-center"
+                                  : "wallpaper-swatch flex items-center justify-center"
+                              }
+                              style={wallpaperSwatchStyle(preset)}
+                              onClick={() => applyWallpaperPreset(preset)}
+                              role="radio"
+                              aria-checked={isActive}
+                              aria-label={preset.label}
+                              title={preset.label}
+                            >
+                              {isActive ? (
+                                <FaCheck className="checkStyle" />
+                              ) : null}
+                            </button>
+                          );
+                        })}
+                        <label
+                          className={
+                            wallpaper.mode === "custom"
+                              ? "wallpaper-swatch upload-tile active flex items-center justify-center"
+                              : "wallpaper-swatch upload-tile flex items-center justify-center"
+                          }
+                          style={
+                            wallpaper.mode === "custom" && wallpaper.url
+                              ? {
+                                  backgroundImage: `url(${wallpaper.url})`,
+                                  backgroundSize: "cover",
+                                  backgroundPosition: "center",
+                                }
+                              : undefined
+                          }
+                          title="Upload from device"
+                        >
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handleWallpaperUpload}
+                          />
+                          {wallpaper.mode === "custom" ? (
+                            <FaCheck className="checkStyle" />
+                          ) : (
+                            <BiImageAdd className="upload-icon" />
+                          )}
+                        </label>
+                      </div>
+                      <div className="wallpaper-grid grid grid-cols-4 gap-3 mt-1">
+                        {WALLPAPER_PRESETS.map((preset) => (
+                          <span
+                            key={preset.id}
+                            className="wallpaper-label text-xs text-center"
+                          >
+                            {preset.label}
+                          </span>
+                        ))}
+                        <span className="wallpaper-label text-xs text-center">
+                          {uploadingWallpaper ? "Uploading…" : "Upload"}
+                        </span>
+                      </div>
+
+                      <div className="wallpaper-dim mt-4">
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-xs font-medium">
+                            Reduce contrast
+                          </span>
+                          <span className="text-xs dim-value">
+                            {wallpaper.dim}%
+                          </span>
+                        </div>
+                        <input
+                          type="range"
+                          min="0"
+                          max="80"
+                          value={wallpaper.dim}
+                          onChange={(e) =>
+                            dispatch(setWallpaperDim(Number(e.target.value)))
+                          }
+                          className="dim-slider w-full"
+                          aria-label="Reduce wallpaper contrast"
+                        />
+                      </div>
+                    </Disclosure.Panel>
+                  </>
+                )}
+              </Disclosure>
+            </div>
+          </div>
+        </div>
+
+        <div className="setting-block">
           <div className="privacy-setting w-full pt-3 pb-3">
             <div className="flex w-full justify-between items-center py-2">
               <span className="text-sm font-medium">Show online status</span>
@@ -323,6 +504,69 @@ const Wrapper = styled.div`
     }
     .label {
       color: ${({ theme }) => theme.colors.text.muted};
+    }
+  }
+
+  .wallpaper-swatch {
+    width: 100%;
+    aspect-ratio: 1;
+    border: 2px solid rgba(${({ theme }) => theme.colors.border}, 1);
+    border-radius: ${({ theme }) => theme.radius.md};
+    cursor: pointer;
+    background-color: ${({ theme }) => theme.colors.bg.secondary};
+    box-shadow: ${({ theme }) => theme.colors.shadow.sm};
+    transition: transform 0.18s ${({ theme }) => theme.motion.spring},
+      box-shadow 0.2s ease;
+    &:hover {
+      transform: scale(1.05);
+    }
+    &.active {
+      border-color: ${({ theme }) => theme.colors.accent.solid};
+      box-shadow: 0 0 0 2px ${({ theme }) => theme.colors.accent.ring};
+    }
+    .checkStyle {
+      color: ${({ theme }) => theme.colors.white};
+      font-size: 1rem;
+      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
+    }
+    &.upload-tile {
+      .upload-icon {
+        font-size: 1.3rem;
+        color: ${({ theme }) => theme.colors.text.muted};
+      }
+    }
+  }
+  .wallpaper-label {
+    color: ${({ theme }) => theme.colors.text.muted};
+  }
+  .dim-value {
+    color: ${({ theme }) => theme.colors.text.secondary};
+  }
+  .dim-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(${({ theme }) => theme.colors.border}, 0.9);
+    cursor: pointer;
+    &::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: ${({ theme }) => theme.colors.accent.solid};
+      box-shadow: ${({ theme }) => theme.colors.shadow.sm};
+      cursor: pointer;
+    }
+    &::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border: none;
+      border-radius: 50%;
+      background: ${({ theme }) => theme.colors.accent.solid};
+      box-shadow: ${({ theme }) => theme.colors.shadow.sm};
+      cursor: pointer;
     }
   }
 

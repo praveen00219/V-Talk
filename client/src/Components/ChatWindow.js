@@ -19,6 +19,10 @@ import {
 } from "../HelperFunction/chat.Helper";
 import { useDispatch } from "react-redux";
 import {
+  markChatAsRead,
+  markChatReadLive,
+} from "../Redux/Reducer/Chat/chat.action";
+import {
   sendMessge,
   updateGetAllChats,
   setUpdatedMessage,
@@ -255,6 +259,8 @@ const ChatWindow = () => {
         .includes(String(otherUser._id))
     : false;
 
+  const wallpaper = useSelector((state) => state.wallpaperReducer);
+
   function closeModal() {
     setIsOpen(false);
   }
@@ -424,6 +430,9 @@ const ChatWindow = () => {
       socketRef.current.on("user offline", (payload) =>
         dispatch(userOffline(payload))
       );
+      socketRef.current.on("messages read", (payload) =>
+        dispatch(markChatReadLive(payload))
+      );
     }
 
     // Cleanup when unmounting or when loggedUser changes (e.g. after a settings
@@ -437,6 +446,7 @@ const ChatWindow = () => {
         socketRef.current.off("online users");
         socketRef.current.off("user online");
         socketRef.current.off("user offline");
+        socketRef.current.off("messages read");
         socketRef.current.disconnect();
         socketRef.current = null;
       }
@@ -474,6 +484,8 @@ const ChatWindow = () => {
         }, 1000);
         // console.log(message);
         dispatch(updateGetAllChats(newMessageRecieved));
+        // already viewing this chat — mark the incoming message read right away
+        dispatch(markChatAsRead(newMessageRecieved.chat._id));
         // console.log(message);
       }
     };
@@ -528,7 +540,13 @@ const ChatWindow = () => {
   }, [createdMessage]);
 
   return (
-    <Wrapper className="" id="user-chat">
+    <Wrapper
+      className=""
+      id="user-chat"
+      $wallpaperMode={wallpaper.mode}
+      $wallpaperUrl={wallpaper.url}
+      $wallpaperDim={wallpaper.dim}
+    >
       <div className="chat-window-section">
         {!sender ? (
           <>
@@ -1379,10 +1397,36 @@ const Wrapper = styled.section`
   .chat-content {
     width: 100%;
     height: 100vh;
-    width: 100%;
-    height: 100vh;
-    background-color: rgba(${({ theme }) => theme.colors.rgb.primary}, 0.1);
-    background-image: url("/images/pattern-05.png");
+    position: relative;
+    background-color: ${(props) =>
+      props.$wallpaperMode === "gradient"
+        ? "transparent"
+        : props.$wallpaperMode === "none"
+        ? props.theme.colors.bg.primary
+        : `rgba(${props.theme.colors.rgb.primary}, 0.1)`};
+    background-image: ${(props) =>
+      props.$wallpaperMode === "gradient"
+        ? props.theme.colors.gradientSubtle
+        : props.$wallpaperMode === "none"
+        ? "none"
+        : `url("${props.$wallpaperUrl}")`};
+    background-position: center;
+    background-repeat: ${(props) =>
+      props.$wallpaperMode === "custom" || props.$wallpaperMode === "gradient"
+        ? "no-repeat"
+        : "repeat"};
+    background-size: ${(props) =>
+      props.$wallpaperMode === "custom" || props.$wallpaperMode === "gradient"
+        ? "cover"
+        : "auto"};
+    &::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: #000;
+      opacity: ${(props) => (props.$wallpaperDim || 0) / 100};
+      pointer-events: none;
+    }
   }
   .loader {
     width: 100%;

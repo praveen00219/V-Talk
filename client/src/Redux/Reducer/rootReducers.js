@@ -10,6 +10,7 @@ import themeReducer from "./Theme/theme.reducer";
 import tabReducer from "./Tab/tabReducer";
 import setColorReducer from "./SetColor/setColorReducer"
 import presence from "./Presence/presence.reducer";
+import wallpaperReducer from "./Wallpaper/wallpaper.reducer";
 
 const rootReducer = combineReducers({
   auth,
@@ -21,6 +22,7 @@ const rootReducer = combineReducers({
   tabReducer,
   setColorReducer,
   presence,
+  wallpaperReducer,
 });
 
 export default rootReducer;

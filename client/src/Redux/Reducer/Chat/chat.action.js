@@ -5,6 +5,7 @@ import {
   FETCH_USER_CLEAR,
   // SELECT_CHAT,
   SHOW_USER_LOADING,
+  MARK_CHAT_READ_LIVE,
 } from "./chat.type";
 
 import SERVER_ACCESS_BASE_URL from "../../../config/serverConfig";
@@ -128,6 +129,27 @@ export const deleteChatForMe = (chatId) => async (dispatch) => {
     return { error: true, data: payload };
   }
 };
+
+// mark all of the other side's messages in a chat as read by me; best-effort
+// (not critical if it fails, so it doesn't dispatch an ERROR on failure)
+export const markChatAsRead = (chatId) => async () => {
+  if (!chatId) return;
+  try {
+    await axios({
+      method: "PUT",
+      url: `${SERVER_ACCESS_BASE_URL}/api/message/${chatId}/read`,
+    });
+  } catch (error) {
+    // silent — the tick just won't update this time
+  }
+};
+
+// live update from a "messages read" socket event: patches the matching
+// chat's latestMessage.readBy so the chat-list tick updates without a refetch
+export const markChatReadLive = (payload) => ({
+  type: MARK_CHAT_READ_LIVE,
+  payload, // { chatId, readerId }
+});
 
 // selected chat
 

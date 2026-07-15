@@ -16,6 +16,9 @@ const messageModel = mongoose.Schema(
         emoji: { type: String },
       },
     ],
+    // users (other than the sender) who have opened the chat since this
+    // message arrived — drives the sent/read tick in the chat list
+    readBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     // deletedFor stores users who have deleted this message for themselves
     deletedFor: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     // if sender deletes for everyone

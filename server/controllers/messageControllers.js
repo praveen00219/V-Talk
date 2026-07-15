@@ -275,4 +275,51 @@ const deleteForEveryone = asyncHandler(async (req, res) => {
   res.json(message);
 });
 
-module.exports = { allMessages, sendMessage, toggleReaction, deleteForMe, deleteForEveryone };
+// @description   Mark another sender's messages in a chat as read by me
+// @route         PUT /api/message/:chatId/read
+// @access        Protected
+const markChatRead = asyncHandler(async (req, res) => {
+  const { chatId } = req.params;
+  const chat = await Chat.findById(chatId);
+  if (!chat) {
+    return res.status(404).json({ message: "Chat not found" });
+  }
+  if (!isMember(chat, req.user._id)) {
+    return res.status(403).json({ message: "Not authorized for this chat" });
+  }
+
+  const result = await Message.updateMany(
+    {
+      chat: chatId,
+      sender: { $ne: req.user._id },
+      readBy: { $ne: req.user._id },
+    },
+    { $addToSet: { readBy: req.user._id } }
+  );
+
+  // notify the other member(s) live so their chat list tick updates without a refetch
+  if (result.modifiedCount > 0) {
+    const io = req.app.get("io");
+    if (io) {
+      chat.users
+        .filter((id) => String(id) !== String(req.user._id))
+        .forEach((id) => {
+          io.to(String(id)).emit("messages read", {
+            chatId,
+            readerId: String(req.user._id),
+          });
+        });
+    }
+  }
+
+  res.json({ success: true, modifiedCount: result.modifiedCount });
+});
+
+module.exports = {
+  allMessages,
+  sendMessage,
+  toggleReaction,
+  deleteForMe,
+  deleteForEveryone,
+  markChatRead,
+};

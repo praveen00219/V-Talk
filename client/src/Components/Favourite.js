@@ -3,7 +3,10 @@ import styled from "styled-components";
 import { useDispatch, useSelector } from "react-redux";
 import { AiOutlineStar } from "react-icons/ai";
 import UserList from "./UserList";
-import { selectChatAction } from "../Redux/Reducer/Chat/chat.action";
+import {
+  selectChatAction,
+  markChatAsRead,
+} from "../Redux/Reducer/Chat/chat.action";
 import { getAllChats } from "../Redux/Reducer/Message/message.action";
 
 // Starred conversations: chats the user favourited via the ☆ in the chat list.
@@ -24,6 +27,7 @@ const Favourite = () => {
     if (!selectedChat) return;
     dispatch(selectChatAction(selectedChat));
     dispatch(getAllChats(selectedChat));
+    dispatch(markChatAsRead(selectedChat._id));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedChat]);
 
@@ -50,7 +54,6 @@ const Favourite = () => {
           query=""
           searchOpen={false}
           chatList={favouriteChats}
-          chat={favouriteChats}
           loggedUser={loggedUser}
           result={result}
           setSelectedChat={setSelectedChat}

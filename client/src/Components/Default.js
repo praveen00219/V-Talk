@@ -9,6 +9,7 @@ import {
   fetchChats,
   fetchUser,
   fetchUserClear,
+  markChatAsRead,
 } from "../Redux/Reducer/Chat/chat.action";
 import { getAllChats } from "../Redux/Reducer/Message/message.action";
 import { inviteNewUser } from "../Redux/Reducer/User/user.action";
@@ -50,6 +51,9 @@ const Default = () => {
     // console.log(selectedChat);
 
     dispatch(getAllChats(selectedChat));
+    if (selectedChat?._id) {
+      dispatch(markChatAsRead(selectedChat._id));
+    }
 
     // alert(selectedChat._id)
   }, [selectedChat]);
@@ -145,7 +149,6 @@ const Default = () => {
         searchOpen={searchOpen}
         setSearchOpen={setSearchOpen}
         chatList={chatList}
-        chat={chat}
         loggedUser={loggedUser}
         result={result}
         setSelectedChat={setSelectedChat}

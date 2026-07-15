@@ -26,6 +26,15 @@ export const getOtherUser = (loggedUser, users) => {
   return users[0]._id === loggedUser._id ? users[1] : users[0];
 };
 
+// chat-list last-message stamp: time if sent today, date otherwise
+export const formatListTimestamp = (createdAt) => {
+  if (!createdAt) return "";
+  const date = moment(createdAt);
+  return date.isSame(moment(), "day")
+    ? date.format("h:mm A")
+    : date.format("DD/MM/YY");
+};
+
 // "last seen" formatting, e.g. "today at 7:30 pm"
 export const formatLastSeen = (lastSeen) => {
   return moment(lastSeen).calendar(null, {
@@ -85,6 +94,8 @@ export const getGroupProfileDetails = (loggedUser, sender) => {
       name: element.name,
       pic: element.pic,
       about: element.about,
+      email: element.email,
+      contact: element.contact,
     };
     if (groupAdmin._id !== element._id) {
       data.groupUsers.push(obj);

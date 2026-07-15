@@ -11,6 +11,7 @@ import { IoLogOutOutline } from "react-icons/io5";
 import { useDispatch, useSelector } from "react-redux";
 import { signOut } from "../Redux/Reducer/Auth/auth.action";
 import { toggleTab } from "../Redux/Reducer/Tab/tabAction";
+import ConfirmDialog from "./Admin/ConfirmDialog";
 
 // Profile and the light/dark toggle now live inside Settings (tabId 5), so
 // they no longer have their own sidebar icons. The nav is split into a top
@@ -31,6 +32,7 @@ const topIconsList = [
 
 const SideMenu = () => {
   const [menuIcon, setMenuIcon] = useState();
+  const [confirmLogout, setConfirmLogout] = useState(false);
 
   const tabIndex = useSelector((state) => state.tabReducer);
   const dispatch = useDispatch();
@@ -122,7 +124,7 @@ const SideMenu = () => {
                   aria-label="Logout"
                   title="Logout"
                   className="nav-link"
-                  onClick={handleLogout}
+                  onClick={() => setConfirmLogout(true)}
                 >
                   <IoLogOutOutline className="icon" />
                 </button>
@@ -131,6 +133,15 @@ const SideMenu = () => {
           </div>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={confirmLogout}
+        title="Log out"
+        body="You'll be signed out of V-Talk on this device. You can log back in anytime."
+        confirmLabel="Log out"
+        onConfirm={handleLogout}
+        onCancel={() => setConfirmLogout(false)}
+      />
     </Wrapper>
   );
 };

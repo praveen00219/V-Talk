@@ -9,6 +9,7 @@ import {
   REMOVE_USER_FROM_GROUP,
   SELECT_CHAT,
   SHOW_USER_LOADING,
+  MARK_CHAT_READ_LIVE,
 } from "./chat.type";
 const initialState = {
   chats: [],
@@ -73,6 +74,25 @@ const chatReducer = (state = initialState, action) => {
         ...state,
         isUserLoading: action.payload,
       };
+
+    case MARK_CHAT_READ_LIVE: {
+      const { chatId, readerId } = action.payload || {};
+      return {
+        ...state,
+        chats: state.chats.map((c) => {
+          if (c._id !== chatId || !c.latestMessage) return c;
+          const readBy = c.latestMessage.readBy || [];
+          if (readBy.some((id) => String(id) === String(readerId))) return c;
+          return {
+            ...c,
+            latestMessage: {
+              ...c.latestMessage,
+              readBy: [...readBy, readerId],
+            },
+          };
+        }),
+      };
+    }
 
     default:
       return {

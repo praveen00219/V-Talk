@@ -7,16 +7,15 @@ import {
   getSender,
   getSenderPic,
   getOtherUser,
+  formatListTimestamp,
 } from "../HelperFunction/chat.Helper";
 
-import moment from "moment";
 import Highlighter from "react-highlight-words";
 
 const UserList = ({
   searchOpen,
   query,
   chatList,
-  chat,
   loggedUser,
   result,
   setSelectedChat,
@@ -132,9 +131,9 @@ const UserList = ({
                       </p>
                     </div>
                     <div className="data-status h-full avatar-group">
-                      {chat[index].isGroupChat ? (
+                      {item.isGroupChat ? (
                         <div className="flex -space-x-4">
-                          {chat[index].users.slice(0, 3).map((u, i) => (
+                          {item.users.slice(0, 3).map((u, i) => (
                             <img
                               key={u?._id || i}
                               className="avatar-chip w-8 h-8 border-2 rounded-full hover:z-10"
@@ -143,9 +142,9 @@ const UserList = ({
                               title={u?.name}
                             />
                           ))}
-                          {chat[index].users.length > 3 ? (
+                          {item.users.length > 3 ? (
                             <div className="avatar-more flex items-center justify-center w-8 h-8 text-xs font-medium rounded-full">
-                              {`+${chat[index].users.length - 3}`}
+                              {`+${item.users.length - 3}`}
                             </div>
                           ) : null}
                         </div>
@@ -176,23 +175,39 @@ const UserList = ({
                       </button>
                       <p>
                         {item.latestMessage
-                          ? moment(item.latestMessage.createdAt).format(
-                              "DD/MM/YY"
-                            )
+                          ? formatListTimestamp(item.latestMessage.createdAt)
                           : ""}
                       </p>
 
-                      {item.status ? (
-                        <span
-                          className={
-                            item.status === "seen"
-                              ? "status status-seen"
-                              : "status status-unseen"
-                          }
-                        >
-                          <span className="status-dot" aria-hidden="true" />
-                          {item.status}
-                        </span>
+                      {!item.isGroupChat &&
+                      item.latestMessage &&
+                      item.latestMessage.sender &&
+                      String(item.latestMessage.sender._id) ===
+                        String(loggedUser._id) ? (
+                        (() => {
+                          const otherUserId = getOtherUser(
+                            loggedUser,
+                            item.users
+                          )?._id;
+                          const isRead = (
+                            item.latestMessage.readBy || []
+                          ).some((id) => String(id) === String(otherUserId));
+                          return (
+                            <span
+                              className={
+                                isRead
+                                  ? "status status-seen"
+                                  : "status status-unseen"
+                              }
+                            >
+                              <span
+                                className="status-dot"
+                                aria-hidden="true"
+                              />
+                              {isRead ? "seen" : "sent"}
+                            </span>
+                          );
+                        })()
                       ) : null}
                     </div>
                   </div>
