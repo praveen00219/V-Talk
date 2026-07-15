@@ -3,7 +3,6 @@ import styled from "styled-components";
 import { NavLink } from "react-router-dom";
 import { CgProfile } from "react-icons/cg";
 import { AiOutlineSetting, AiOutlineStar } from "react-icons/ai";
-import { RiContactsLine } from "react-icons/ri";
 import { BsChatSquareDots } from "react-icons/bs";
 import { CgClose, CgMenu } from "react-icons/cg";
 import Toggler from "./Toggler";
@@ -24,29 +23,26 @@ const SideMenu = () => {
     dispatch(toggleTab(index));
   };
 
+  // Contacts tab removed: people search + invite now live in the Chat tab's
+  // search bar. tabId maps to the ChatMenu tab panes (Setting stays 5).
   const sideIconsList = [
     {
-      id: 1,
+      tabId: 1,
       icon: CgProfile,
       title: "Profile",
     },
     {
-      id: 2,
+      tabId: 2,
       icon: AiOutlineStar,
       title: "Favourite",
     },
     {
-      id: 3,
+      tabId: 3,
       icon: BsChatSquareDots,
       title: "Chats",
     },
     {
-      id: 4,
-      icon: RiContactsLine,
-      title: "Contacts",
-    },
-    {
-      id: 5,
+      tabId: 5,
       icon: AiOutlineSetting,
       title: "Setting",
     },
@@ -98,11 +94,12 @@ const SideMenu = () => {
           </div>
           <div className="side-menu-list">
             <ul className="flex flex-col justify-between gap-4">
-              {sideIconsList.map((items, index) => {
+              {sideIconsList.map((items) => {
                 const isActive =
-                  (index === 2 && tabIndex === 0) || tabIndex === index + 1;
+                  (items.tabId === 3 && tabIndex === 0) ||
+                  tabIndex === items.tabId;
                 return (
-                  <li key={index} className="side-menu-item">
+                  <li key={items.tabId} className="side-menu-item">
                     <button
                       type="button"
                       aria-label={items.title}
@@ -110,7 +107,7 @@ const SideMenu = () => {
                       title={items.title}
                       className={isActive ? "nav-link active" : "nav-link"}
                       onClick={() => {
-                        activeTab(index + 1);
+                        activeTab(items.tabId);
                         setMenuIcon(false);
                       }}
                     >

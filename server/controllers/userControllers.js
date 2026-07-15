@@ -1,4 +1,5 @@
 const fs = require("fs/promises");
+const mongoose = require("mongoose");
 const asyncHandler = require("express-async-handler");
 const User = require("../models/userModel.js");
 const generateToken = require("../config/generateToken.js");
@@ -450,6 +451,47 @@ const updatePublicKey = asyncHandler(async (req, res) => {
   }
 });
 
+// block/unblock another user (personal block list, distinct from admin isBlocked)
+const toggleBlockUser = asyncHandler(async (req, res) => {
+  try {
+    const { userId } = req.params;
+    if (!mongoose.isValidObjectId(userId)) {
+      return res.status(400).json({ message: "Invalid user id", success: false });
+    }
+    if (String(userId) === String(req.user._id)) {
+      return res
+        .status(400)
+        .json({ message: "You cannot block yourself", success: false });
+    }
+    const target = await User.findById(userId).select("_id");
+    if (!target) {
+      return res.status(404).json({ message: "User not found", success: false });
+    }
+
+    const isBlocked = (req.user.blockedUsers || []).some(
+      (id) => String(id) === String(userId)
+    );
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      isBlocked
+        ? { $pull: { blockedUsers: userId } }
+        : { $addToSet: { blockedUsers: userId } },
+      { new: true }
+    ).select("-password");
+
+    return res.status(200).json({
+      user,
+      blocked: !isBlocked,
+      message: isBlocked ? "User unblocked" : "User blocked",
+      success: true,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: error.message,
+    });
+  }
+});
+
 /**
  *  Inviting User
  */
@@ -552,5 +594,6 @@ module.exports = {
   updateProfile,
   updateSettings,
   updatePublicKey,
+  toggleBlockUser,
   invitingUser,
 };

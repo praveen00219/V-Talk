@@ -1,6 +1,8 @@
 const asyncHandler = require("express-async-handler");
+const mongoose = require("mongoose");
 const Chat = require("../models/chatModel.js");
 const User = require("../models/userModel.js");
+const Message = require("../models/messageModel.js");
 const { isMember, isGroupAdmin } = require("../utils/chatAuth.js");
 
 //@description     Create or fetch One to One Chat
@@ -29,6 +31,11 @@ const accessChat = asyncHandler(async (req, res) => {
   });
 
   if (isChat.length > 0) {
+    // re-opening a chat un-hides it if this user had deleted it for themselves
+    await Chat.updateOne(
+      { _id: isChat[0]._id },
+      { $pull: { hiddenFor: req.user._id } }
+    );
     res.send(isChat[0]);
   } else {
     var chatData = {
@@ -56,7 +63,10 @@ const accessChat = asyncHandler(async (req, res) => {
 //@access          Protected
 const fetchChats = asyncHandler(async (req, res) => {
   try {
-    Chat.find({ users: { $elemMatch: { $eq: req.user._id } } })
+    Chat.find({
+      users: { $elemMatch: { $eq: req.user._id } },
+      hiddenFor: { $ne: req.user._id },
+    })
       .populate("users", "-password")
       .populate("groupAdmin", "-password")
       .populate("latestMessage")
@@ -214,6 +224,73 @@ const removeFromGroup = asyncHandler(async (req, res) => {
     res.json(removed);
   }
 });
+//@description     Toggle a chat in the logged-in user's favourites
+//@route           PUT /api/chat/favourite/:chatId
+//@access          Protected
+const toggleFavourite = asyncHandler(async (req, res) => {
+  const { chatId } = req.params;
+  if (!mongoose.isValidObjectId(chatId)) {
+    return res.status(400).json({ message: "Invalid chat id", success: false });
+  }
+  const chat = await Chat.findById(chatId);
+  if (!chat) {
+    return res.status(404).json({ message: "Chat not found", success: false });
+  }
+  if (!isMember(chat, req.user._id)) {
+    return res
+      .status(403)
+      .json({ message: "Not a member of this chat", success: false });
+  }
+
+  const isFavourite = (req.user.favourites || []).some(
+    (id) => String(id) === String(chatId)
+  );
+  const user = await User.findByIdAndUpdate(
+    req.user._id,
+    isFavourite
+      ? { $pull: { favourites: chatId } }
+      : { $addToSet: { favourites: chatId } },
+    { new: true }
+  ).select("-password");
+
+  return res.status(200).json({
+    user,
+    message: isFavourite ? "Removed from favourites" : "Added to favourites",
+    success: true,
+  });
+});
+
+//@description     Delete a chat for the current user only (hide + clear history)
+//@route           DELETE /api/chat/:chatId
+//@access          Protected
+const deleteChatForMe = asyncHandler(async (req, res) => {
+  const { chatId } = req.params;
+  if (!mongoose.isValidObjectId(chatId)) {
+    return res.status(400).json({ message: "Invalid chat id", success: false });
+  }
+  const chat = await Chat.findById(chatId);
+  if (!chat) {
+    return res.status(404).json({ message: "Chat not found", success: false });
+  }
+  if (!isMember(chat, req.user._id)) {
+    return res
+      .status(403)
+      .json({ message: "Not a member of this chat", success: false });
+  }
+
+  // hide the conversation and clear its history for THIS user only;
+  // a new message in the chat un-hides it for everyone (fresh thread)
+  await Promise.all([
+    Chat.updateOne({ _id: chatId }, { $addToSet: { hiddenFor: req.user._id } }),
+    Message.updateMany(
+      { chat: chatId },
+      { $addToSet: { deletedFor: req.user._id } }
+    ),
+  ]);
+
+  return res.status(200).json({ message: "Chat deleted for you", success: true });
+});
+
 module.exports = {
   accessChat,
   fetchChats,
@@ -221,4 +298,6 @@ module.exports = {
   renameGroup,
   addToGroup,
   removeFromGroup,
+  toggleFavourite,
+  deleteChatForMe,
 };

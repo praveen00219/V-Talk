@@ -40,6 +40,10 @@ const userSchema = mongoose.Schema(
       messagesSent: { type: Number, default: 0 },
       filesShared: { type: Number, default: 0 },
     },
+    // chats this user has starred (Favourites tab)
+    favourites: [{ type: mongoose.Schema.Types.ObjectId, ref: "Chat" }],
+    // personal block list (distinct from the admin-level isBlocked flag)
+    blockedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   },
   { timestamps: true }
 );

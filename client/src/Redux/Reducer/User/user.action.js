@@ -48,6 +48,45 @@ export const updateUserSettings = (settings) => async (dispatch) => {
   }
 };
 
+// star/unstar a chat for the Favourites tab
+export const toggleFavouriteChat = (chatId) => async (dispatch) => {
+  try {
+    const res = await axios({
+      method: "PUT",
+      url: `${SERVER_ACCESS_BASE_URL}/api/chat/favourite/${chatId}`,
+    });
+    // endpoint returns the updated user; refresh userDetails in place
+    return dispatch({ type: SELF, payload: { userDetails: res.data.user } });
+  } catch (error) {
+    const payload = error?.response?.data || {
+      message: error.message || "Network error",
+    };
+    return dispatch({ type: "ERROR", payload: payload });
+  }
+};
+
+// block/unblock another user (personal block list)
+export const toggleBlockUser = (userId) => async (dispatch) => {
+  try {
+    const res = await axios({
+      method: "PUT",
+      url: `${SERVER_ACCESS_BASE_URL}/api/user/block/${userId}`,
+    });
+    dispatch({ type: SELF, payload: { userDetails: res.data.user } });
+    return {
+      success: true,
+      message: res.data.message,
+      blocked: res.data.blocked,
+    };
+  } catch (error) {
+    const payload = error?.response?.data || {
+      message: error.message || "Network error",
+    };
+    dispatch({ type: "ERROR", payload });
+    return { error: true, data: payload };
+  }
+};
+
 // Inviting User
 export const inviteNewUser = (email) => async (dispatch) => {
   try {

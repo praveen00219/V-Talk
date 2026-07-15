@@ -112,6 +112,23 @@ export const removeUserFromGroup = (data) => async (dispatch) => {
   }
 };
 
+// delete (hide + clear history of) a chat for the current user only
+export const deleteChatForMe = (chatId) => async (dispatch) => {
+  try {
+    const res = await axios({
+      method: "DELETE",
+      url: `${SERVER_ACCESS_BASE_URL}/api/chat/${chatId}`,
+    });
+    return { success: true, data: res.data };
+  } catch (error) {
+    const payload = error?.response?.data || {
+      message: error.message || "Network error",
+    };
+    dispatch({ type: "ERROR", payload });
+    return { error: true, data: payload };
+  }
+};
+
 // selected chat
 
 export const selectChatAction = (item) => async (dispatch) => {

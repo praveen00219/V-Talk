@@ -59,6 +59,39 @@ const sendMessage = asyncHandler(async (req, res) => {
       .json({ message: "Not authorized to post in this chat" });
   }
 
+  // personal block list (1-on-1 chats): neither side can send while blocked
+  if (!chat.isGroupChat) {
+    const otherId = chat.users.find(
+      (id) => String(id) !== String(req.user._id)
+    );
+    if (
+      (req.user.blockedUsers || []).some((id) => String(id) === String(otherId))
+    ) {
+      await removeTempFiles(files);
+      return res.status(403).json({
+        message: "You have blocked this user. Unblock them to send messages.",
+        code: "YOU_BLOCKED_USER",
+        success: false,
+      });
+    }
+    const otherUser = otherId
+      ? await User.findById(otherId).select("blockedUsers")
+      : null;
+    if (
+      otherUser &&
+      (otherUser.blockedUsers || []).some(
+        (id) => String(id) === String(req.user._id)
+      )
+    ) {
+      await removeTempFiles(files);
+      return res.status(403).json({
+        message: "You can't send messages to this user.",
+        code: "BLOCKED_BY_USER",
+        success: false,
+      });
+    }
+  }
+
   // daily file-share quota (message quota already gated pre-multer);
   // reject before any Cloudinary spend and clean up multer temp files
   if (files.length > 0) {
@@ -120,6 +153,7 @@ const sendMessage = asyncHandler(async (req, res) => {
 
     await Chat.findByIdAndUpdate(chatId, {
       latestMessage: message,
+      hiddenFor: [], // a new message revives the chat for anyone who deleted it
     });
 
     // count usage only for successful sends; a counter failure must not fail the send

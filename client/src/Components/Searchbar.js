@@ -27,7 +27,7 @@ const Searchbar = ({ searchOpen, setSearchOpen, setQuary }) => {
             <input
               className="w-3/4 pl-9 px-5 py-5 focus:outline-none"
               id="searchInput"
-              placeholder="Search..."
+              placeholder="Search, or type an email to invite…"
               onChange={(e) => searchUser(e)}
             />
             <div className="flex items-center p-2 cursor-pointer ">

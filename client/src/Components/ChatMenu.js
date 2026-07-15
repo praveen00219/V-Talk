@@ -1,126 +1,43 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import styled from "styled-components";
 import Profile from "./Profile";
 import Favourite from "./Favourite";
-import Contacts from "./Contacts";
 import Setting from "./Setting";
 import Default from "./Default";
 
-import { toggleTab } from "../Redux/Reducer/Tab/tabAction";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  createChat,
-  fetchChats,
-  fetchUser,
-  fetchUserClear,
-} from "../Redux/Reducer/Chat/chat.action";
-import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
 
+// Tab panes for the sidebar. The old Contacts tab (4) was merged into the
+// Chat tab's search bar (people search + invite live in Default/UserList now).
 const ChatMenu = () => {
-  const [search, setSearch] = useState("");
-  const [searchResult, setSearchResult] = useState([]);
-
   const tabIndex = useSelector((state) => state.tabReducer);
-  const result = useSelector((globalState) => globalState.chat.newUser);
   const user = useSelector((globalState) => globalState.user.userDetails);
-  const UserLoading = useSelector((globalState)=> globalState.chat.isUserLoading);
-  const [showResult, setShowResult] = useState(false)
-  const chat = useSelector((globalState) => globalState.chat.chats);
-
-  const dispatch = useDispatch();
-
-  const handleChange = (e) => {
-    setSearch(e.target.value);
-
-  };
-
-  useEffect(() => {
-    setSearchResult(result);
-  }, [result]);
-
-  const handleClick = () => {
-    if (!search) {
-      toast.warning("Please Enter valid Email or Name", {
-        autoClose: 1000,
-      });
-      return;
-    }
-    setShowResult(true)
-    dispatch(fetchUser(search));
-  };
-
-  const createNewChat = async (item) => {
-
-    const UserExist = chat.some((elem)=> elem.users[1]._id === item._id)
-  
-    if(UserExist){
-      toast.error("contact already exist", {
-        autoClose: 1000,
-      });
-      return
-    }
-    else{
-      toast.success("contact successfully added", {
-        autoClose: 1000,
-      });
-    }
-    
-    await dispatch(createChat(item._id));
-    await dispatch(fetchChats());
-    await dispatch(toggleTab(3));
-  };
-
-  useEffect(() => {
-   if(tabIndex !== 4 || !search){
-    setSearch("")
-    dispatch(fetchUserClear())
-   }
-   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tabIndex, search])
-  
 
   return (
     <>
       <Wrapper className="chat-menu-section ">
         <div className="tab-content">
-          <div className={tabIndex === 1 ? "tab-pane active" : "tab-pane "}>
-            <Profile 
-             pic={
-                   user.pic
-                  }
-                  name = {
-                    user.name
-                  }
-                  email = {
-                  user.email
-                  }
-                  about ={
-                  user.about
-                  }
-                  contact ={
-                  user.contact
-                  }
-             />
-          </div>
-          <div className={tabIndex === 2 ? "tab-pane active" : "tab-pane "}>
-            <Favourite />
-          </div>
+         
+
           <div
             className={
-              tabIndex === 3 || tabIndex === 0 ? "tab-pane active" : "tab-pane"
+              tabIndex === 3 || tabIndex === 0 || tabIndex === 4
+                ? "tab-pane active"
+                : "tab-pane"
             }
           >
             <Default />
           </div>
-          <div className={tabIndex === 4 ? "tab-pane active" : "tab-pane "}>
-            <Contacts
-              search={search}
-              handleChange={handleChange}
-              handleClick={handleClick}
-              searchResult={searchResult}
-              createNewChat={createNewChat}
-              UserLoading = {UserLoading}
-              showResult={showResult}
+                    <div className={tabIndex === 2 ? "tab-pane active" : "tab-pane "}>
+            <Favourite />
+          </div>
+           <div className={tabIndex === 1 ? "tab-pane active" : "tab-pane "}>
+            <Profile
+              pic={user.pic}
+              name={user.name}
+              email={user.email}
+              about={user.about}
+              contact={user.contact}
             />
           </div>
           <div className={tabIndex === 5 ? "tab-pane active" : "tab-pane "}>

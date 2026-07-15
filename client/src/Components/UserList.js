@@ -1,6 +1,8 @@
 import React from "react";
 import styled from "styled-components";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { AiFillStar, AiOutlineStar } from "react-icons/ai";
+import { toggleFavouriteChat } from "../Redux/Reducer/User/user.action";
 import {
   getSender,
   getSenderPic,
@@ -10,13 +12,29 @@ import {
 import moment from "moment";
 import Highlighter from "react-highlight-words";
 
-const UserList = ({ searchOpen, query , chatList, chat, loggedUser, result, setSelectedChat }) => {
+const UserList = ({
+  searchOpen,
+  query,
+  chatList,
+  chat,
+  loggedUser,
+  result,
+  setSelectedChat,
+  people = [],
+  peopleLoading = false,
+  onStartChat,
+  inviteEmail,
+  onInvite,
+  inviting,
+}) => {
 
+  const dispatch = useDispatch();
   const onlineUserIds = useSelector(
     (globalState) => globalState.presence.onlineUserIds
   );
   // reciprocity: hide everyone's presence when my own toggle is off
   const presenceVisible = loggedUser?.showOnlineStatus !== false;
+  const favouriteIds = new Set((loggedUser?.favourites || []).map(String));
 
   const userChatShow = () => {
     document
@@ -104,7 +122,11 @@ const UserList = ({ searchOpen, query , chatList, chat, loggedUser, result, setS
                           {item.latestMessage != null
                             ? item.latestMessage.encrypted
                               ? "🔒 Message"
-                              : item.latestMessage.content
+                              : item.latestMessage.content ||
+                                (item.latestMessage.attachments &&
+                                item.latestMessage.attachments.length > 0
+                                  ? "📎 Attachment"
+                                  : "")
                             : ""}
                         </span>
                       </p>
@@ -129,6 +151,29 @@ const UserList = ({ searchOpen, query , chatList, chat, loggedUser, result, setS
                         </div>
                       ) : null}
 
+                      <button
+                        type="button"
+                        className={
+                          favouriteIds.has(String(item._id))
+                            ? "fav-btn active"
+                            : "fav-btn"
+                        }
+                        title={
+                          favouriteIds.has(String(item._id))
+                            ? "Remove from favourites"
+                            : "Add to favourites"
+                        }
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          dispatch(toggleFavouriteChat(item._id));
+                        }}
+                      >
+                        {favouriteIds.has(String(item._id)) ? (
+                          <AiFillStar />
+                        ) : (
+                          <AiOutlineStar />
+                        )}
+                      </button>
                       <p>
                         {item.latestMessage
                           ? moment(item.latestMessage.createdAt).format(
@@ -162,6 +207,58 @@ const UserList = ({ searchOpen, query , chatList, chat, loggedUser, result, setS
             </p>
           </div>
         )}
+
+        {/* unified search: people you haven't chatted with yet */}
+        {peopleLoading ? (
+          <p className="people-hint text-xs px-5 py-2 m-0">Searching people…</p>
+        ) : people.length > 0 ? (
+          <div className="people-section">
+            <p className="people-hint text-xs px-5 pt-2 m-0">New contacts</p>
+            {people.map((item) => (
+              <li
+                key={item._id}
+                className="chat-box-wrapper px-5 py-2"
+                onClick={() => onStartChat && onStartChat(item)}
+              >
+                <div className="chat-box flex items-center cursor-pointer">
+                  <div className="profile">
+                    <img
+                      className="w-12 h-12 rounded-full"
+                      src={item.pic}
+                      alt="user_logo"
+                    />
+                  </div>
+                  <div className="details">
+                    <span className="inline-block m-0 truncate text-base">
+                      {item.name}
+                    </span>
+                    <p className="text-xs truncate">{item.email}</p>
+                  </div>
+                  <div className="data-status">
+                    <span className="start-chat-hint text-xs">Start chat</span>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </div>
+        ) : null}
+
+        {/* unified search: inline invite when an email matches nobody */}
+        {inviteEmail ? (
+          <div className="invite-card mx-4 my-3 p-4 text-center">
+            <p className="m-0 mb-1 font-medium">No user with this email yet</p>
+            <p className="invite-hint text-xs m-0 mb-3">
+              Invite them to join you on V-Talk
+            </p>
+            <button
+              className="invite-btn w-full py-2"
+              onClick={onInvite}
+              disabled={inviting}
+            >
+              {inviting ? "Inviting…" : `Invite ${inviteEmail}`}
+            </button>
+          </div>
+        ) : null}
       </ul>
     </Wrapper>
   );
@@ -280,6 +377,53 @@ const Wrapper = styled.section`
       }
     }
   }
+  .people-hint {
+    color: ${({ theme }) => theme.colors.text.muted};
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+  }
+  .fav-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 1.05rem;
+    padding: 2px;
+    color: ${({ theme }) => theme.colors.text.muted};
+    transition: color 0.15s ease, transform 0.15s ease;
+    &:hover {
+      color: ${({ theme }) => theme.colors.warning};
+      transform: scale(1.15);
+    }
+    &.active {
+      color: ${({ theme }) => theme.colors.warning};
+    }
+  }
+  .start-chat-hint {
+    color: ${({ theme }) => theme.colors.accent.solid};
+    font-weight: 600;
+  }
+  .invite-card {
+    background: ${({ theme }) => theme.colors.accent.softer};
+    border: 1px dashed rgba(${({ theme }) => theme.colors.border}, 1);
+    border-radius: ${({ theme }) => theme.radius.lg};
+    color: ${({ theme }) => theme.colors.heading};
+    .invite-hint {
+      color: ${({ theme }) => theme.colors.text.secondary};
+    }
+    .invite-btn {
+      background: ${({ theme }) => theme.colors.accent.solid};
+      color: #fff;
+      border-radius: ${({ theme }) => theme.radius.md};
+      font-weight: 600;
+      font-size: 0.85rem;
+      word-break: break-all;
+      &:disabled {
+        opacity: 0.6;
+      }
+    }
+  }
+
   @media (max-width: ${({ theme }) => theme.media.mobile}) {
     position: relative;
     max-width: 100vw;

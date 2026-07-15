@@ -165,6 +165,46 @@ const ChatWindow = () => {
     attachment: null,
   });
 
+  // shared attachment thumbnails — used by BOTH own (right) and received (left)
+  // message bubbles; clicking opens the attachment preview modal
+  const renderAttachments = (item) =>
+    item.attachments && item.attachments.length > 0 ? (
+      <div className="mt-2 flex flex-wrap gap-2">
+        {item.attachments.map((attachment, idx) => (
+          <div
+            key={idx}
+            className="cursor-pointer border rounded-lg bg-white/70 backdrop-blur p-2 hover:bg-white/90 transition-colors"
+            onClick={() => setAttachmentModal({ open: true, attachment })}
+          >
+            {attachment.resourceType === "image" ? (
+              <img
+                src={attachment.url}
+                alt={attachment.originalFilename}
+                className="w-20 h-20 object-cover rounded"
+              />
+            ) : attachment.resourceType === "video" ? (
+              <video
+                src={attachment.url}
+                className="w-20 h-20 object-cover rounded"
+                muted
+                playsInline
+              />
+            ) : (
+              <div className="w-20 h-20 flex flex-col items-center justify-center bg-slate-100 rounded text-xs text-slate-600">
+                <div className="font-medium">FILE</div>
+                <div
+                  className="truncate w-full text-center px-1"
+                  title={attachment.originalFilename}
+                >
+                  {attachment.originalFilename}
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    ) : null;
+
   const [count, setCount] = useState(0);
   const [typing, setTyping] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
@@ -209,6 +249,11 @@ const ChatWindow = () => {
       ? otherUser.lastSeen
       : null
     : null;
+  const otherIsBlockedByMe = otherUser
+    ? (loggedUser?.blockedUsers || [])
+        .map(String)
+        .includes(String(otherUser._id))
+    : false;
 
   function closeModal() {
     setIsOpen(false);
@@ -555,7 +600,11 @@ const ChatWindow = () => {
                                   </>
                                 ))
                               ) : presenceVisible && otherUser ? (
-                                otherOnline ? (
+                                otherIsBlockedByMe ? (
+                                  <span className="presence-label blocked">
+                                    Blocked
+                                  </span>
+                                ) : otherOnline ? (
                                   <span className="presence-label online">
                                     Online
                                   </span>
@@ -623,39 +672,7 @@ const ChatWindow = () => {
                                         </span>
                                         
                                         {/* Attachments Display */}
-                                        {item.attachments && item.attachments.length > 0 && (
-                                          <div className="mt-2 flex flex-wrap gap-2">
-                                            {item.attachments.map((attachment, idx) => (
-                                              <div
-                                                key={idx}
-                                                className="cursor-pointer border rounded-lg bg-white/70 backdrop-blur p-2 hover:bg-white/90 transition-colors"
-                                                onClick={() => setAttachmentModal({ open: true, attachment })}
-                                              >
-                                                {attachment.resourceType === 'image' ? (
-                                                  <img
-                                                    src={attachment.url}
-                                                    alt={attachment.originalFilename}
-                                                    className="w-20 h-20 object-cover rounded"
-                                                  />
-                                                ) : attachment.resourceType === 'video' ? (
-                                                  <video
-                                                    src={attachment.url}
-                                                    className="w-20 h-20 object-cover rounded"
-                                                    muted
-                                                    playsInline
-                                                  />
-                                                ) : (
-                                                  <div className="w-20 h-20 flex flex-col items-center justify-center bg-slate-100 rounded text-xs text-slate-600">
-                                                    <div className="font-medium">FILE</div>
-                                                    <div className="truncate w-full text-center px-1" title={attachment.originalFilename}>
-                                                      {attachment.originalFilename}
-                                                    </div>
-                                                  </div>
-                                                )}
-                                              </div>
-                                            ))}
-                                          </div>
-                                        )}
+                                        {renderAttachments(item)}
                                         {item.reactions &&
                                           item.reactions.length > 0 && (
                                             <Menu as="div" className="">
@@ -945,6 +962,8 @@ const ChatWindow = () => {
                                             />
                                           )}
                                         </span>
+                                        {/* Attachments Display (received) */}
+                                        {renderAttachments(item)}
                                         {item.reactions &&
                                           item.reactions.length > 0 && (
                                             <Menu as="div" className="">
@@ -1506,6 +1525,10 @@ const Wrapper = styled.section`
         color: ${({ theme }) => theme.colors.text.secondary};
         &.online {
           color: ${({ theme }) => theme.colors.success};
+          font-weight: 600;
+        }
+        &.blocked {
+          color: ${({ theme }) => theme.colors.danger};
           font-weight: 600;
         }
       }

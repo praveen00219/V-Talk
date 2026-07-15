@@ -11,6 +11,7 @@ const {
   updateProfile,
   updateSettings,
   updatePublicKey,
+  toggleBlockUser,
   resetPassword,
   invitingUser,
 } = require("../controllers/userControllers.js");
@@ -35,6 +36,7 @@ router.route("/resetpassword").post(authLimiter, resetPassword);
 router.route("/updateprofile").put(protect, updateProfile);
 router.route("/settings").put(protect, updateSettings);
 router.route("/publickey").put(protect, updatePublicKey);
+router.route("/block/:userId").put(protect, toggleBlockUser);
 router.route("/invitefriends").post(protect, emailLimiter, invitingUser);
 router
   .route("/profilepic")
